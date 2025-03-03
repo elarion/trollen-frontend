@@ -1,5 +1,9 @@
 import { StyleSheet, Text, View, Image, TouchableOpacity, SafeAreaView, Modal, Pressable, TextInput } from "react-native"
 import { useState } from "react";
+import { useDispatch, useSelector } from 'react-redux';
+import { login, logout } from '../store/user';
+import Checkbox from 'expo-checkbox';
+
 
 export default function SignInScreen({ navigation }) {
 
@@ -8,33 +12,71 @@ export default function SignInScreen({ navigation }) {
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [isChecked, setChecked] = useState(false);
+    const dispatch = useDispatch();
+
     const guestMode = () => {
         navigation.navigate('CharacterCreation')
         // OU
         //navigation.navigate('TabNavigator')
     };
 
-    const signUp = () => {
-        setModalSignUpVisible(!modalSignUpVisible);
-        navigation.navigate('CharacterCreation')
-        // OU
-        //navigation.navigate('TabNavigator')
+    const signUp = async () => {
+        if (isChecked) {
+            try {
+                const response = await fetch('http://192.168.100.185:3000/users/signup', { // A MODIFIER
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: username, email: email, password: password, confirmPassword: confirmPassword, has_consent: isChecked}),
+                });
+    
+                const data = await response.json();
+                if (data) {
+                    dispatch(login({ username: data.username, email: data.email, token: data.token }));
+                    setUsername('');
+                    setEmail('');
+                    setPassword('');
+                    setConfirmPassword('');
+                    setModalSignUpVisible(!modalSignUpVisible);
+                    navigation.navigate('CharacterCreation');
+                }
+            } catch (error) {
+                console.error("Erreur lors de l'inscription :", error);
+            }
+        }
     };
 
-    const signInWithId = () => {
-        setModalSignInVisible(!modalSignInVisible)
-        navigation.navigate('TabNavigator')
-        //modale username + password
+
+    const signInWithId = async () => {
+        try {
+            const response = await fetch('http://192.168.100.185:3000/users/signin', { // A MODIFIER
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: username, password: password}),
+            });
+
+            const data = await response.json();
+            //console.log(data)
+            if (data) {
+                dispatch(login({ username: data.username, email: data.email, token: data.token }));
+                setUsername('');
+                setPassword('');
+                setModalSignInVisible(!modalSignInVisible);
+                navigation.navigate('TabNavigator')
+            }
+        } catch (error) {
+            console.error("Erreur lors de l'inscription :", error);
+        }
     };
 
     const signInWithDiscord = () => {
-        //modale Discord
+        //MODALE DISCORD
         navigation.navigate('TabNavigator')
     };
 
     const forgetPassword = () => {
-        //Lien
+        //LIEN
     };
 
     return (
@@ -73,11 +115,22 @@ export default function SignInScreen({ navigation }) {
                             <View style={styles.modalView}>
                                 <View style={styles.inputSection}>
                                     <Text>Entrer username</Text>
-                                    <TextInput style={styles.nickname} placeholder="Username" onChange={setUsername} value={username}/>
+                                    <TextInput style={styles.nickname} placeholder="Username" onChangeText={value => setUsername(value)} value={username} />
                                     <Text>Entrer email</Text>
-                                    <TextInput style={styles.email} placeholder="Email" onChange={setEmail} value={email}/>
+                                    <TextInput style={styles.email} placeholder="Email" onChangeText={value => setEmail(value)} value={email} />
                                     <Text>Entrer password</Text>
-                                    <TextInput style={styles.password} placeholder="Password" onChange={setPassword} value={password}/>
+                                    <TextInput style={styles.password} placeholder="Password" onChangeText={value => setPassword(value)} value={password} secureTextEntry={true} />
+                                    <Text>Confirmer password</Text>
+                                    <TextInput style={styles.confirmPassword} placeholder="Confirm" onChangeText={value => setConfirmPassword(value)} value={confirmPassword} secureTextEntry={true}/>
+                                </View>
+                                <View style={styles.section}>
+                                    <Checkbox
+                                        style={styles.checkbox}
+                                        value={isChecked}
+                                        onValueChange={setChecked}
+                                        color={isChecked ? '#4630EB' : undefined}
+                                    />
+                                    <Text style={styles.paragraph}>Consent to Troll</Text>
                                 </View>
                                 <View style={styles.btnModal}>
                                     <Pressable
@@ -117,9 +170,9 @@ export default function SignInScreen({ navigation }) {
                             <View style={styles.modalView}>
                                 <View style={styles.inputSection}>
                                     <Text>Entrer username</Text>
-                                    <TextInput style={styles.nickname} placeholder="Username" />
+                                    <TextInput style={styles.nickname} placeholder="Username" onChangeText={value => setUsername(value)} value={username}/>
                                     <Text>Entrer password</Text>
-                                    <TextInput style={styles.password} placeholder="Password" />
+                                    <TextInput style={styles.password} placeholder="Password" onChangeText={value => setPassword(value)} value={password} secureTextEntry={true}/>
                                 </View>
                                 <View style={styles.btnModal}>
                                     <Pressable
@@ -168,7 +221,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
 
-     /* SECTION LOGO */
+    /* SECTION LOGO */
     logoSection: {
         alignItems: 'center',
         marginTop: '2%'
@@ -254,11 +307,11 @@ const styles = StyleSheet.create({
 
     /* SECTION FORGET PASSWORD */
     forgetPassword: {
-        marginTop:'30%',
+        marginTop: '30%',
     },
     textForgetPassword: {
-        color:'red',
-        fontSize:30
+        color: 'red',
+        fontSize: 30
     },
 
     /* SECTION MODAL */
@@ -290,19 +343,19 @@ const styles = StyleSheet.create({
         elevation: 2,
     },
     btnModal: {
-        flexDirection:'row',
-        justifyContent:'space-between',
-        marginTop:'30%',
-        width:'100%'
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: '30%',
+        width: '100%'
     },
     buttonClose: {
         backgroundColor: 'red',
-        width:'45%',
+        width: '45%',
         alignItems: 'center',
     },
     buttonValidation: {
         backgroundColor: 'green',
-        width:'45%',
+        width: '45%',
         alignItems: 'center',
     },
     modalText: {
@@ -332,6 +385,14 @@ const styles = StyleSheet.create({
         paddingLeft: 15,
     },
     password: {
+        width: '80%',
+        height: 40,
+        borderWidth: 1,
+        borderColor: 'gray',
+        borderRadius: 20,
+        paddingLeft: 15,
+    },
+    confirmPassword: {
         width: '80%',
         height: 40,
         borderWidth: 1,
