@@ -2,15 +2,14 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import SignInScreen from './screens/SignInScreen';
-import SignUpScreen from './screens/SignUpScreen';
-import CharactereCreationScreen from './screens/CharacterCreationScreen';
-import LobbyScreen from './screens/LobbyScreen';
-import PortalScreen from './screens/PortalScreen';
-import RoomScreen from './screens/RoomScreen';
-import SettingsScreen from './screens/SettingsScreen';
-import ProfileScreen from './screens/ProfileScreen';
-import FriendsScreen from './screens/FriendsScreen';
+import SignInScreen from './src/screens/SignInScreen';
+import CharactereCreationScreen from './src/screens/CharacterCreationScreen';
+import LobbyScreen from './src/screens/LobbyScreen';
+import PortalScreen from './src/screens/PortalScreen';
+import RoomScreen from './src/screens/RoomScreen';
+import SettingsScreen from './src/screens/SettingsScreen';
+import ProfileScreen from './src/screens/ProfileScreen';
+import FriendsScreen from './src/screens/FriendsScreen';
 import * as Linking from 'expo-linking';
 
 
@@ -37,7 +36,6 @@ export default function App() {
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="SignIn" component={SignInScreen} />
-        <Stack.Screen name="SignUp" component={SignUpScreen} />
         <Stack.Screen name="CharacterCreation" component={CharactereCreationScreen} />
         <Stack.Screen name="TabNavigator" component={TabNavigator} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
