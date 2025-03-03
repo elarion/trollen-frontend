@@ -15,6 +15,7 @@
     "@react-navigation/stack": "^7.1.2",
     "@reduxjs/toolkit": "^2.6.0",
     "axios": "^1.8.1",
+    "dotenv": "^16.4.7",
     "expo": "~52.0.37",
     "expo-notifications": "~0.29.13",
     "expo-permissions": "^14.4.0",
