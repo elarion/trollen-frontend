@@ -1,30 +1,44 @@
 import { StyleSheet, Text, View, Image, TouchableOpacity, SafeAreaView } from "react-native"
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import { useState } from "react";
 
 
 
-export default function CharactereCreationScreen({navigation}) {
+export default function CharactereCreationScreen({ navigation }) {
 
+    const avatars = [
+        require('../../assets/avatars/avatar-1.png'),
+        require('../../assets/avatars/avatar-2.png'),
+        require('../../assets/avatars/avatar-3.png'),
+        require('../../assets/avatars/avatar-4.png'),
+        require('../../assets/avatars/avatar-5.png'),
+        require('../../assets/avatars/avatar-6.png'),
+        require('../../assets/avatars/avatar-7.png'),
+        require('../../assets/avatars/avatar-8.png'),
+        require('../../assets/avatars/avatar-9.png'),
+    ];
+
+    const [count, setCount] = useState(1);
+    console.log(count)
     const goLeftRace = () => {
 
     }
-    
+
     const goRightRace = () => {
-    
+
     }
-    
+
     const genreChoiceBtn = () => {
-    
+
     }
-    
     const goLeftAvatar = () => {
-    
+        setCount(prev => prev > 1 ? prev - 1 : 9);
     }
-    
+
     const goRightAvatar = () => {
-    
+        setCount(prev => prev < 9 ? prev + 1 : 1);
     }
-    
+
     const goToLobby = () => {
         navigation.navigate('TabNavigator')
     }
@@ -101,8 +115,8 @@ export default function CharactereCreationScreen({navigation}) {
                     <TouchableOpacity style={styles.leftBtn} onPress={() => goLeftAvatar()}>
                         <FontAwesome name='chevron-left' size={30} color='rgb(239, 233, 225)' />
                     </TouchableOpacity>
-                    <Image style={styles.avatarImg} source={require('../../assets/favicon.png')} />
-                    <TouchableOpacity style={styles.rightBtn} onPress={() => goRightAvatar()}>
+                    <Image style={styles.avatarImg} source={avatars[count]} />
+                    <TouchableOpacity style={styles.rightBtn} onPress={() => goRightAvatar()} >
                         <FontAwesome name='chevron-right' size={30} color='rgb(239, 233, 225)' />
                     </TouchableOpacity>
                 </View>
@@ -140,7 +154,7 @@ const styles = StyleSheet.create({
     },
     logo: {
         width: 50,
-        height:50
+        height: 50
     },
 
     /* CHARACTER CHOICE */
@@ -176,7 +190,7 @@ const styles = StyleSheet.create({
         height: '20%',
         width: '95%',
         //backgroundColor: 'rgb(189, 159, 138)',
-        padding:'5%'
+        padding: '5%'
     },
 
     /* BIG SPELL BOX*/
@@ -208,7 +222,7 @@ const styles = StyleSheet.create({
     /* SPELL IMAGE */
     spellImg: {
         width: 35,
-        height:35
+        height: 35
     },
 
     /* ACTIF SPELL TEXT*/
@@ -230,7 +244,7 @@ const styles = StyleSheet.create({
     spell: {
         flexDirection: 'row',
         width: '50%',
-        height:'45%',
+        height: '45%',
         justifyContent: 'space-around',
         alignItems: 'center',
         backgroundColor: 'rgb(189, 159, 138)',
@@ -241,7 +255,7 @@ const styles = StyleSheet.create({
     /* GENRE CHOICE BOX*/
     genreChoise: {
         marginTop: '5%',
-        height:'5%',
+        height: '5%',
         width: '60%',
         justifyContent: 'center',
         alignItems: 'center',
@@ -267,5 +281,9 @@ const styles = StyleSheet.create({
         borderRadius: 40,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    avatarImg: {
+        height: 50,
+        width: 50
     }
 })
