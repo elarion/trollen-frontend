@@ -1,30 +1,33 @@
 import { StyleSheet, Text, View, Image, TouchableOpacity, SafeAreaView } from "react-native"
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
-const goLeftRace = () => {
 
-}
 
-const goRightRace = () => {
+export default function CharactereCreationScreen({navigation}) {
 
-}
+    const goLeftRace = () => {
 
-const genreChoiceBtn = () => {
-
-}
-
-const goLeftAvatar = () => {
-
-}
-
-const goRightAvatar = () => {
-
-}
-
-const goToLobby = () => {
-
-}
-
-export default function CharactereCreationScreen() {
+    }
+    
+    const goRightRace = () => {
+    
+    }
+    
+    const genreChoiceBtn = () => {
+    
+    }
+    
+    const goLeftAvatar = () => {
+    
+    }
+    
+    const goRightAvatar = () => {
+    
+    }
+    
+    const goToLobby = () => {
+        navigation.navigate('TabNavigator')
+    }
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.characterBox}>
@@ -33,7 +36,7 @@ export default function CharactereCreationScreen() {
 
                 <View style={styles.logoSection}>
                     <Text style={styles.title}>TROLLEN</Text>
-                    <Image style={styles.img} source={require('../../assets/favicon.png')} />
+                    <Image style={styles.logo} source={require('../../assets/favicon.png')} />
                 </View>
 
                 {/* SECTION DESCRIPTION */}
@@ -41,18 +44,18 @@ export default function CharactereCreationScreen() {
                 <View style={styles.characterChoice}>
                     <View style={styles.raceAndClasseChoice}>
                         <TouchableOpacity style={styles.leftBtn} onPress={() => goLeftRace()}>
-                            <Text style={styles.leftTextBtn}>LEFT</Text>
+                            <FontAwesome name='chevron-left' size={30} color='rgb(239, 233, 225)' />
                         </TouchableOpacity>
                         <View style={styles.middle}>
-                            <Text style={styles.textRaces}>Nina</Text>
+                            <Text style={styles.textRaces}>Tohbibs</Text>
                             <Text style={styles.textClasses}>Dénicheur de Secret</Text>
                         </View>
                         <TouchableOpacity style={styles.rightBtn} onPress={() => goRightRace()}>
-                            <Text style={styles.rightTextBtn}>RIGHT</Text>
+                            <FontAwesome name='chevron-right' size={30} color='rgb(239, 233, 225)' />
                         </TouchableOpacity>
                     </View>
                     <View style={styles.raceDescription}>
-                        <Text>Description</Text>
+                        <Text>hobbits avec des malettes de medcein + stetoscope avec le truc de lumiere/ampoule sur la tete comme les dentistes</Text>
                     </View>
 
                     {/* SECTION SPELLS */}
@@ -60,7 +63,7 @@ export default function CharactereCreationScreen() {
                         <View style={styles.passifSpellBox}>
                             <Text>Sort Passif</Text>
                             <View style={styles.passifSpellDescription}>
-                                <Image source={require('../../assets/favicon.png')} />
+                                <Image style={styles.spellImg} source={require('../../assets/favicon.png')} />
                                 <Text>Description du Sort Passif</Text>
                             </View>
                         </View>
@@ -68,15 +71,15 @@ export default function CharactereCreationScreen() {
                             <Text style={styles.actifSpellText}>Sorts Actifs</Text>
                             <View style={styles.actifSpell}>
                                 <View style={styles.spell}>
-                                    <Image source={require('../../assets/favicon.png')} />
+                                    <Image style={styles.spellImg} source={require('../../assets/favicon.png')} />
                                     <Text>Boule de Feu</Text>
                                 </View>
                                 <View style={styles.spell}>
-                                    <Image source={require('../../assets/favicon.png')} />
+                                    <Image style={styles.spellImg} source={require('../../assets/favicon.png')} />
                                     <Text>Boule de Glace</Text>
                                 </View>
                                 <View style={styles.spell}>
-                                    <Image source={require('../../assets/favicon.png')} />
+                                    <Image style={styles.spellImg} source={require('../../assets/favicon.png')} />
                                     <Text>Boule de Troll</Text>
                                 </View>
                             </View>
@@ -96,11 +99,11 @@ export default function CharactereCreationScreen() {
 
                 <View style={styles.avatarChoise}>
                     <TouchableOpacity style={styles.leftBtn} onPress={() => goLeftAvatar()}>
-                        <Text style={styles.leftTextBtn}>LEFT</Text>
+                        <FontAwesome name='chevron-left' size={30} color='rgb(239, 233, 225)' />
                     </TouchableOpacity>
-                    <Image source={require('../../assets/favicon.png')} />
+                    <Image style={styles.avatarImg} source={require('../../assets/favicon.png')} />
                     <TouchableOpacity style={styles.rightBtn} onPress={() => goRightAvatar()}>
-                        <Text style={styles.rightTextBtn}>Right</Text>
+                        <FontAwesome name='chevron-right' size={30} color='rgb(239, 233, 225)' />
                     </TouchableOpacity>
                 </View>
 
@@ -131,19 +134,20 @@ const styles = StyleSheet.create({
         marginTop: '2%'
     },
     title: {
-        color: 'brown',
+        color: 'rgb(121, 102, 91)',
         fontSize: 30,
         fontWeight: 800,
     },
-    img: {
-
+    logo: {
+        width: 50,
+        height:50
     },
 
     /* CHARACTER CHOICE */
     characterChoice: {
         marginTop: '5%',
-        backgroundColor: 'brown',
-        width: '90%',
+        backgroundColor: 'rgb(189, 159, 138)',
+        width: '97%',
         height: '60%',
         borderRadius: 35,
         alignItems: 'center',
@@ -171,12 +175,13 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         height: '20%',
         width: '95%',
-        backgroundColor: 'green',
+        //backgroundColor: 'rgb(189, 159, 138)',
+        padding:'5%'
     },
 
     /* BIG SPELL BOX*/
     spells: {
-        backgroundColor: 'blue',
+        backgroundColor: 'rgb(121, 102, 91)',
         alignItems: 'center',
         //justifyContent: 'center',
         width: '95%',
@@ -186,7 +191,7 @@ const styles = StyleSheet.create({
 
     /* PASSIF SPELL BOX*/
     passifSpellBox: {
-        backgroundColor: 'green',
+        backgroundColor: 'rgb(189, 159, 138)',
         borderRadius: 40,
         height: '40%',
         width: '90%',
@@ -196,8 +201,14 @@ const styles = StyleSheet.create({
     },
     passifSpellDescription: {
         alignItems: 'center',
-        justifyContent: 'center',
+        width: '80%',
+        justifyContent: 'space-around',
         flexDirection: 'row',
+    },
+    /* SPELL IMAGE */
+    spellImg: {
+        width: 35,
+        height:35
     },
 
     /* ACTIF SPELL TEXT*/
@@ -218,20 +229,24 @@ const styles = StyleSheet.create({
     },
     spell: {
         flexDirection: 'row',
-        width: '48%',
+        width: '50%',
+        height:'45%',
         justifyContent: 'space-around',
         alignItems: 'center',
-        backgroundColor: 'green',
+        backgroundColor: 'rgb(189, 159, 138)',
         borderRadius: 40,
-        marginTop: '5%'
+        marginTop: '5%',
     },
 
     /* GENRE CHOICE BOX*/
     genreChoise: {
         marginTop: '5%',
-        width: '100%',
+        height:'5%',
+        width: '60%',
         justifyContent: 'center',
         alignItems: 'center',
+        backgroundColor: 'rgb(121, 144, 197)',
+        borderRadius: 40,
     },
 
     /* AVATAR CHOICE BOX*/
@@ -248,7 +263,7 @@ const styles = StyleSheet.create({
         marginTop: '5%',
         width: '45%',
         height: '5%',
-        backgroundColor: 'green',
+        backgroundColor: 'rgb(83, 70, 64)',
         borderRadius: 40,
         justifyContent: 'center',
         alignItems: 'center',

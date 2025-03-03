@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View, Image, TouchableOpacity, SafeAreaView, Modal, Pressable, TextInput } from "react-native"
 import { useState } from "react";
 import { useDispatch, useSelector } from 'react-redux';
-import { login, logout } from '../store/user';
+import { login } from '../store/user';
 import Checkbox from 'expo-checkbox';
 
 
@@ -25,7 +25,7 @@ export default function SignInScreen({ navigation }) {
     const signUp = async () => {
         if (isChecked) {
             try {
-                const response = await fetch('http://192.168.100.185:3000/users/pre-signup', { // A MODIFIER
+                const response = await fetch('http://192.168.1.147:3000/users/pre-signup', { // A MODIFIER
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username: username, email: email, password: password, confirmPassword: confirmPassword, has_consent: isChecked}),
@@ -50,7 +50,7 @@ export default function SignInScreen({ navigation }) {
 
     const signInWithId = async () => {
         try {
-            const response = await fetch('http://192.168.100.185:3000/users/signin', { // A MODIFIER
+            const response = await fetch('http://192.168.1.147:3000/users/signin', { // A MODIFIER
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username: username, password: password}),
@@ -87,7 +87,7 @@ export default function SignInScreen({ navigation }) {
 
                 <View style={styles.logoSection}>
                     <Text style={styles.title}>TROLLEN</Text>
-                    <Image style={styles.img} source={require('../../assets/favicon.png')} />
+                    <Image style={styles.logo} source={require('../../assets/favicon.png')} />
                 </View>
 
                 {/* SECTION GUEST MODE */}
@@ -227,12 +227,13 @@ const styles = StyleSheet.create({
         marginTop: '2%'
     },
     title: {
-        color: 'brown',
+        color: 'rgb(121, 102, 91)',
         fontSize: 30,
         fontWeight: 800,
     },
-    img: {
-
+    logo: {
+        width: 50,
+        height:50
     },
 
     /* TEXT DESCRIPTIF */
@@ -255,15 +256,15 @@ const styles = StyleSheet.create({
     guestBtn: {
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: 'green',
+        backgroundColor: 'rgb(147, 151, 111)',
         borderRadius: 40,
         height: 80,
-        width: '60%'
+        width: '75%'
     },
     textBtn: {
         fontSize: 18,
         fontWeight: 800,
-        color: 'white'
+        color: 'white',
     },
 
     /* SECTION SIGNUP */
@@ -275,10 +276,10 @@ const styles = StyleSheet.create({
     signUpBtn: {
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: 'lightblue',
+        backgroundColor: 'rgb(121, 144, 197)',
         borderRadius: 25,
-        height: 50,
-        width: '60%',
+        height: 55,
+        width: '75%',
     },
 
     /* SECTION SIGNIN */
@@ -290,28 +291,28 @@ const styles = StyleSheet.create({
     signInWithIdBtn: {
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: 'brown',
+        backgroundColor: 'rgb(189, 159, 138)',
         borderRadius: 25,
-        height: 50,
-        width: '60%',
+        height: 55,
+        width: '75%',
     },
     signInWithDiscordBtn: {
         marginTop: '2%',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: 'blue',
+        backgroundColor: 'rgb(89, 101, 233)',
         borderRadius: 25,
-        height: 50,
-        width: '60%',
+        height: 55,
+        width: '75%',
     },
 
     /* SECTION FORGET PASSWORD */
     forgetPassword: {
-        marginTop: '30%',
+        marginTop: '20%',
     },
     textForgetPassword: {
         color: 'red',
-        fontSize: 30
+        fontSize: 15
     },
 
     /* SECTION MODAL */
