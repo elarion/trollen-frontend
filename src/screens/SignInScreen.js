@@ -5,6 +5,9 @@ export default function SignInScreen({ navigation }) {
 
     const [modalSignUpVisible, setModalSignUpVisible] = useState(false);
     const [modalSignInVisible, setModalSignInVisible] = useState(false);
+    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     
     const guestMode = () => {
         navigation.navigate('CharacterCreation')
@@ -13,12 +16,14 @@ export default function SignInScreen({ navigation }) {
     };
 
     const signUp = () => {
+        setModalSignUpVisible(!modalSignUpVisible);
         navigation.navigate('CharacterCreation')
         // OU
         //navigation.navigate('TabNavigator')
     };
 
     const signInWithId = () => {
+        setModalSignInVisible(!modalSignInVisible)
         navigation.navigate('TabNavigator')
         //modale username + password
     };
@@ -26,6 +31,10 @@ export default function SignInScreen({ navigation }) {
     const signInWithDiscord = () => {
         //modale Discord
         navigation.navigate('TabNavigator')
+    };
+
+    const forgetPassword = () => {
+        //Lien
     };
 
     return (
@@ -64,13 +73,11 @@ export default function SignInScreen({ navigation }) {
                             <View style={styles.modalView}>
                                 <View style={styles.inputSection}>
                                     <Text>Entrer username</Text>
-                                    <TextInput style={styles.nickname} placeholder="Username" />
+                                    <TextInput style={styles.nickname} placeholder="Username" onChange={setUsername} value={username}/>
                                     <Text>Entrer email</Text>
-                                    <TextInput style={styles.email} placeholder="Email" />
+                                    <TextInput style={styles.email} placeholder="Email" onChange={setEmail} value={email}/>
                                     <Text>Entrer password</Text>
-                                    <TextInput style={styles.password} placeholder="Password" />
-                                    <Text>Confirmer password</Text>
-                                    <TextInput style={styles.confirmPassword} placeholder="Confirm password" />
+                                    <TextInput style={styles.password} placeholder="Password" onChange={setPassword} value={password}/>
                                 </View>
                                 <View style={styles.btnModal}>
                                     <Pressable
@@ -80,7 +87,7 @@ export default function SignInScreen({ navigation }) {
                                     </Pressable>
                                     <Pressable
                                         style={[styles.button, styles.buttonValidation]}
-                                        onPress={() => setModalSignUpVisible(!modalSignUpVisible)}>
+                                        onPress={() => signUp()}>
                                         <Text style={styles.textStyle}>Valider</Text>
                                     </Pressable>
                                 </View>
@@ -122,7 +129,7 @@ export default function SignInScreen({ navigation }) {
                                     </Pressable>
                                     <Pressable
                                         style={[styles.button, styles.buttonValidation]}
-                                        onPress={() => setModalSignInVisible(!modalSignInVisible)}>
+                                        onPress={() => signInWithId()}>
                                         <Text style={styles.textStyle}>Valider</Text>
                                     </Pressable>
                                 </View>
@@ -134,11 +141,15 @@ export default function SignInScreen({ navigation }) {
                         onPress={() => setModalSignInVisible(true)}>
                         <Text style={styles.textBtn}>Se connecter avec vos identifiants</Text>
                     </Pressable>
+
                     {/* SECTION SIGNUP/SIGNIN WITH DISCORD */}
+
                     <TouchableOpacity style={styles.signInWithDiscordBtn} onPress={() => signInWithDiscord()}>
                         <Text style={styles.textBtn}>Se connecter avec Discord</Text>
                     </TouchableOpacity>
+
                     {/* SECTION FORGET PASSWORD */}
+
                     <TouchableOpacity style={styles.forgetPassword} onPress={() => forgetPassword()}>
                         <Text style={styles.textForgetPassword}>Mot de pass oublié ?</Text>
                     </TouchableOpacity>
@@ -300,7 +311,6 @@ const styles = StyleSheet.create({
     },
     inputSection: {
         height: '60%',
-        justifyContent: 'space-between',
         marginTop: '10%',
         alignItems: 'center',
         width: '100%',
@@ -322,14 +332,6 @@ const styles = StyleSheet.create({
         paddingLeft: 15,
     },
     password: {
-        width: '80%',
-        height: 40,
-        borderWidth: 1,
-        borderColor: 'gray',
-        borderRadius: 20,
-        paddingLeft: 15,
-    },
-    confirmPassword: {
         width: '80%',
         height: 40,
         borderWidth: 1,
