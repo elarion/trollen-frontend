@@ -18,8 +18,8 @@ export default function CharactereCreationScreen({ navigation }) {
         require('../../assets/avatars/avatar-9.png'),
     ];
 
-    const [count, setCount] = useState(1);
-    console.log(count)
+    const [count, setCount] = useState(0);
+    
     const goLeftRace = () => {
 
     }
@@ -32,11 +32,11 @@ export default function CharactereCreationScreen({ navigation }) {
 
     }
     const goLeftAvatar = () => {
-        setCount(prev => prev > 1 ? prev - 1 : 9);
+        setCount(prev => prev > 0 ? prev - 1 : avatars.length - 1);
     }
-
+    
     const goRightAvatar = () => {
-        setCount(prev => prev < 9 ? prev + 1 : 1);
+        setCount(prev => prev < avatars.length - 1 ? prev + 1 : 0);
     }
 
     const goToLobby = () => {
