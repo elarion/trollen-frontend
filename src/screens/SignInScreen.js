@@ -25,7 +25,7 @@ export default function SignInScreen({ navigation }) {
     const signUp = async () => {
         if (isChecked) {
             try {
-                const response = await fetch('http://192.168.100.185:3000/users/signup', { // A MODIFIER
+                const response = await fetch('http://192.168.100.185:3000/users/pre-signup', { // A MODIFIER
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username: username, email: email, password: password, confirmPassword: confirmPassword, has_consent: isChecked}),
@@ -33,7 +33,7 @@ export default function SignInScreen({ navigation }) {
     
                 const data = await response.json();
                 if (data) {
-                    dispatch(login({ username: data.username, email: data.email, token: data.token }));
+                    dispatch(login({ username: username, email: email }));
                     setUsername('');
                     setEmail('');
                     setPassword('');
