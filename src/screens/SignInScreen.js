@@ -1,12 +1,13 @@
-import { StyleSheet, Text, View, Image, TouchableOpacity, SafeAreaView, Modal, Pressable, TextInput } from "react-native"
+import Config from "react-native-config"; // A CORRIGER
+import { StyleSheet, Text, View, Image, TouchableOpacity, Modal, Pressable, TextInput, ImageBackground } from "react-native"
+import {SafeAreaView, SafeAreaProvider} from 'react-native-safe-area-context';
 import { useState } from "react";
 import { useDispatch, useSelector } from 'react-redux';
-import { login } from '../store/user';
+import { loginData } from '../store/user';
 import Checkbox from 'expo-checkbox';
 
 
 export default function SignInScreen({ navigation }) {
-
     const [modalSignUpVisible, setModalSignUpVisible] = useState(false);
     const [modalSignInVisible, setModalSignInVisible] = useState(false);
     const [username, setUsername] = useState('');
@@ -15,25 +16,26 @@ export default function SignInScreen({ navigation }) {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [isChecked, setChecked] = useState(false);
     const dispatch = useDispatch();
-
+    //console.log(Config.API_URL)
     const guestMode = () => {
         navigation.navigate('CharacterCreation')
         // OU
         //navigation.navigate('TabNavigator')
     };
 
-    const signUp = async () => {
+    const preSignUp = async () => {
         if (isChecked) {
             try {
-                const response = await fetch('http://192.168.1.147:3000/users/pre-signup', { // A MODIFIER
+                const response = await fetch(`http://192.168.100.185:3000/users/pre-signup`, { // A MODIFIER
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username: username, email: email, password: password, confirmPassword: confirmPassword, has_consent: isChecked}),
+                    body: JSON.stringify({ username: username, email: email, password: password, confirmPassword: confirmPassword, has_consent: isChecked }),
                 });
-    
+
                 const data = await response.json();
+                console.log(data);
                 if (data) {
-                    dispatch(login({ username: username, email: email }));
+                    dispatch(loginData({ username: username, email: email, password: password, confirmPassword: confirmPassword, has_consent: isChecked }));
                     setUsername('');
                     setEmail('');
                     setPassword('');
@@ -50,16 +52,16 @@ export default function SignInScreen({ navigation }) {
 
     const signInWithId = async () => {
         try {
-            const response = await fetch('http://192.168.1.147:3000/users/signin', { // A MODIFIER
+            const response = await fetch(`http://192.168.100.185:3000/users/signin`, { // A MODIFIER
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: username, password: password}),
+                body: JSON.stringify({ username: username, password: password }),
             });
 
             const data = await response.json();
             //console.log(data)
             if (data) {
-                dispatch(login({ username: data.username, email: data.email, token: data.token }));
+                dispatch(loginData({ username: data.username, email: data.email, token: data.token }));
                 setUsername('');
                 setPassword('');
                 setModalSignInVisible(!modalSignInVisible);
@@ -80,141 +82,151 @@ export default function SignInScreen({ navigation }) {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
-            <View style={styles.signInBox}>
+        <SafeAreaProvider>
+            <SafeAreaView style={styles.container} edges={['left', 'right']}>
+                <ImageBackground source={require('../../assets/background/background.png')} style={styles.backgroundImage}>
+                    <View style={styles.signInBox}>
 
-                {/* SECTION LOGO */}
+                        {/* SECTION LOGO */}
 
-                <View style={styles.logoSection}>
-                    <Text style={styles.title}>TROLLEN</Text>
-                    <Image style={styles.logo} source={require('../../assets/favicon.png')} />
-                </View>
-
-                {/* SECTION GUEST MODE */}
-
-                <View style={styles.invitedSection}>
-                    <Text style={styles.text}>Tu débarque et t'as pas le temps ?</Text>
-                    <TouchableOpacity style={styles.guestBtn} onPress={() => guestMode()}>
-                        <Text style={styles.textGuestBtn}>Mode invité</Text>
-                    </TouchableOpacity>
-                </View>
-
-                {/* SECTION SIGNUP => MODAL */}
-
-                <View style={styles.signUpSection}>
-                    <Text style={styles.text}>Pas encore de compte ?</Text>
-                    <Modal
-                        animationType="slide"
-                        transparent={true}
-                        visible={modalSignUpVisible}
-                        onRequestClose={() => {
-                            Alert.alert('Modal has been closed.');
-                            setModalSignUpVisible(!modalSignUpVisible);
-                        }}>
-                        <View style={styles.centeredView}>
-                            <View style={styles.modalView}>
-                                <View style={styles.inputSection}>
-                                    <Text>Entrer username</Text>
-                                    <TextInput style={styles.nickname} placeholder="Username" onChangeText={value => setUsername(value)} value={username} />
-                                    <Text>Entrer email</Text>
-                                    <TextInput style={styles.email} placeholder="Email" onChangeText={value => setEmail(value)} value={email} />
-                                    <Text>Entrer password</Text>
-                                    <TextInput style={styles.password} placeholder="Password" onChangeText={value => setPassword(value)} value={password} secureTextEntry={true} />
-                                    <Text>Confirmer password</Text>
-                                    <TextInput style={styles.confirmPassword} placeholder="Confirm" onChangeText={value => setConfirmPassword(value)} value={confirmPassword} secureTextEntry={true}/>
-                                </View>
-                                <View style={styles.section}>
-                                    <Checkbox
-                                        style={styles.checkbox}
-                                        value={isChecked}
-                                        onValueChange={setChecked}
-                                        color={isChecked ? '#4630EB' : undefined}
-                                    />
-                                    <Text style={styles.paragraph}>Consent to Troll</Text>
-                                </View>
-                                <View style={styles.btnModal}>
-                                    <Pressable
-                                        style={[styles.button, styles.buttonClose]}
-                                        onPress={() => setModalSignUpVisible(!modalSignUpVisible)}>
-                                        <Text style={styles.textStyle}>Retour</Text>
-                                    </Pressable>
-                                    <Pressable
-                                        style={[styles.button, styles.buttonValidation]}
-                                        onPress={() => signUp()}>
-                                        <Text style={styles.textStyle}>Valider</Text>
-                                    </Pressable>
-                                </View>
-                            </View>
+                        <View style={styles.logoSection}>
+                            <Text style={styles.title}>TROLLEN</Text>
+                            <Image style={styles.logo} source={require('../../assets/favicon.png')} />
                         </View>
-                    </Modal>
-                    <Pressable
-                        style={[styles.signUpBtn, styles.buttonOpen]}
-                        onPress={() => setModalSignUpVisible(true)}>
-                        <Text style={styles.textBtn}>S'inscrire</Text>
-                    </Pressable>
-                </View>
 
-                {/* SECTION SIGNIN WITH ID => MODAL */}
+                        {/* SECTION GUEST MODE */}
 
-                <View style={styles.signInSection}>
-                    <Text style={styles.text}>Vous avez déja un compte ?</Text>
-                    <Modal
-                        animationType="slide"
-                        transparent={true}
-                        visible={modalSignInVisible}
-                        onRequestClose={() => {
-                            Alert.alert('Modal has been closed.');
-                            setModalSignInVisible(!modalSignInVisible);
-                        }}>
-                        <View style={styles.centeredView}>
-                            <View style={styles.modalView}>
-                                <View style={styles.inputSection}>
-                                    <Text>Entrer username</Text>
-                                    <TextInput style={styles.nickname} placeholder="Username" onChangeText={value => setUsername(value)} value={username}/>
-                                    <Text>Entrer password</Text>
-                                    <TextInput style={styles.password} placeholder="Password" onChangeText={value => setPassword(value)} value={password} secureTextEntry={true}/>
-                                </View>
-                                <View style={styles.btnModal}>
-                                    <Pressable
-                                        style={[styles.button, styles.buttonClose]}
-                                        onPress={() => setModalSignInVisible(!modalSignInVisible)}>
-                                        <Text style={styles.textStyle}>Retour</Text>
-                                    </Pressable>
-                                    <Pressable
-                                        style={[styles.button, styles.buttonValidation]}
-                                        onPress={() => signInWithId()}>
-                                        <Text style={styles.textStyle}>Valider</Text>
-                                    </Pressable>
-                                </View>
-                            </View>
+                        <View style={styles.invitedSection}>
+                            <Text style={styles.text}>Tu débarque et t'as pas le temps ?</Text>
+                            <TouchableOpacity style={styles.guestBtn} onPress={() => guestMode()}>
+                                <Text style={styles.textGuestBtn}>Mode invité</Text>
+                            </TouchableOpacity>
                         </View>
-                    </Modal>
-                    <Pressable
-                        style={[styles.signInWithIdBtn, styles.buttonOpen]}
-                        onPress={() => setModalSignInVisible(true)}>
-                        <Text style={styles.textBtn}>Se connecter avec vos identifiants</Text>
-                    </Pressable>
 
-                    {/* SECTION SIGNUP/SIGNIN WITH DISCORD */}
+                        {/* SECTION SIGNUP => MODAL */}
 
-                    <TouchableOpacity style={styles.signInWithDiscordBtn} onPress={() => signInWithDiscord()}>
-                        <Text style={styles.textBtn}>Se connecter avec Discord</Text>
-                    </TouchableOpacity>
+                        <View style={styles.signUpSection}>
+                            <Text style={styles.text}>Pas encore de compte ?</Text>
+                            <Modal
+                                animationType="slide"
+                                transparent={true}
+                                visible={modalSignUpVisible}
+                                onRequestClose={() => {
+                                    Alert.alert('Modal has been closed.');
+                                    setModalSignUpVisible(!modalSignUpVisible);
+                                }}>
+                                <View style={styles.centeredView}>
+                                    <View style={styles.modalView}>
+                                        <View style={styles.inputSection}>
+                                            <Text>Entrer username</Text>
+                                            <TextInput style={styles.nickname} placeholder="Username" onChangeText={value => setUsername(value)} value={username} />
+                                            <Text>Entrer email</Text>
+                                            <TextInput style={styles.email} placeholder="Email" onChangeText={value => setEmail(value)} value={email} />
+                                            <Text>Entrer password</Text>
+                                            <TextInput style={styles.password} placeholder="Password" onChangeText={value => setPassword(value)} value={password} secureTextEntry={true} />
+                                            <Text>Confirmer password</Text>
+                                            <TextInput style={styles.confirmPassword} placeholder="Confirm" onChangeText={value => setConfirmPassword(value)} value={confirmPassword} secureTextEntry={true} />
+                                        </View>
+                                        <View style={styles.section}>
+                                            <Checkbox
+                                                style={styles.checkbox}
+                                                value={isChecked}
+                                                onValueChange={setChecked}
+                                                color={isChecked ? '#4630EB' : undefined}
+                                            />
+                                            <Text style={styles.paragraph}>Consent to Troll</Text>
+                                        </View>
+                                        <View style={styles.btnModal}>
+                                            <Pressable
+                                                style={[styles.button, styles.buttonClose]}
+                                                onPress={() => setModalSignUpVisible(!modalSignUpVisible)}>
+                                                <Text style={styles.textStyle}>Retour</Text>
+                                            </Pressable>
+                                            <Pressable
+                                                style={[styles.button, styles.buttonValidation]}
+                                                onPress={() => preSignUp()}>
+                                                <Text style={styles.textStyle}>Valider</Text>
+                                            </Pressable>
+                                        </View>
+                                    </View>
+                                </View>
+                            </Modal>
+                            <Pressable
+                                style={[styles.signUpBtn, styles.buttonOpen]}
+                                onPress={() => setModalSignUpVisible(true)}>
+                                <Text style={styles.textBtn}>S'inscrire</Text>
+                            </Pressable>
+                        </View>
 
-                    {/* SECTION FORGET PASSWORD */}
+                        {/* SECTION SIGNIN WITH ID => MODAL */}
 
-                    <TouchableOpacity style={styles.forgetPassword} onPress={() => forgetPassword()}>
-                        <Text style={styles.textForgetPassword}>Mot de pass oublié ?</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
-        </SafeAreaView>
+                        <View style={styles.signInSection}>
+                            <Text style={styles.text}>Vous avez déja un compte ?</Text>
+                            <Modal
+                                animationType="slide"
+                                transparent={true}
+                                visible={modalSignInVisible}
+                                onRequestClose={() => {
+                                    Alert.alert('Modal has been closed.');
+                                    setModalSignInVisible(!modalSignInVisible);
+                                }}>
+                                <View style={styles.centeredView}>
+                                    <View style={styles.modalView}>
+                                        <View style={styles.inputSection}>
+                                            <Text>Entrer username</Text>
+                                            <TextInput style={styles.nickname} placeholder="Username" onChangeText={value => setUsername(value)} value={username} />
+                                            <Text>Entrer password</Text>
+                                            <TextInput style={styles.password} placeholder="Password" onChangeText={value => setPassword(value)} value={password} secureTextEntry={true} />
+                                        </View>
+                                        <View style={styles.btnModal}>
+                                            <Pressable
+                                                style={[styles.button, styles.buttonClose]}
+                                                onPress={() => setModalSignInVisible(!modalSignInVisible)}>
+                                                <Text style={styles.textStyle}>Retour</Text>
+                                            </Pressable>
+                                            <Pressable
+                                                style={[styles.button, styles.buttonValidation]}
+                                                onPress={() => signInWithId()}>
+                                                <Text style={styles.textStyle}>Valider</Text>
+                                            </Pressable>
+                                        </View>
+                                    </View>
+                                </View>
+                            </Modal>
+                            <Pressable
+                                style={[styles.signInWithIdBtn, styles.buttonOpen]}
+                                onPress={() => setModalSignInVisible(true)}>
+                                <Text style={styles.textBtn}>Se connecter avec vos identifiants</Text>
+                            </Pressable>
+
+                            {/* SECTION SIGNUP/SIGNIN WITH DISCORD */}
+
+                            <TouchableOpacity style={styles.signInWithDiscordBtn} onPress={() => signInWithDiscord()}>
+                                <Text style={styles.textBtn}>Se connecter avec Discord</Text>
+                            </TouchableOpacity>
+
+                            {/* SECTION FORGET PASSWORD */}
+
+                            <TouchableOpacity style={styles.forgetPassword} onPress={() => forgetPassword()}>
+                                <Text style={styles.textForgetPassword}>Mot de pass oublié ?</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </ImageBackground>
+            </SafeAreaView>
+        </SafeAreaProvider>
     )
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+    },
+    backgroundImage: {
+        flex: 1,
+        width: '100%',
+        height: '100%',
+        resizeMode: 'cover',
     },
     signInBox: {
         flex: 1,
@@ -233,7 +245,7 @@ const styles = StyleSheet.create({
     },
     logo: {
         width: 50,
-        height:50
+        height: 50
     },
 
     /* TEXT DESCRIPTIF */

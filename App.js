@@ -2,6 +2,7 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import * as Linking from 'expo-linking';
 
 import SignInScreen from './src/screens/SignInScreen';
@@ -29,7 +30,24 @@ const Tab = createBottomTabNavigator();
 
 const TabNavigator = () => {
   return (
-    <Tab.Navigator screenOptions={{ headerShown: true }}>
+      <Tab.Navigator screenOptions={({ route }) => ({
+        tabBarIcon: ({ color, size }) => {
+          let iconName = '';
+  
+          if (route.name === 'Lobby') {
+            iconName = 'shield';
+          } else if (route.name === 'Portal') {
+            iconName = 'connectdevelop';
+          } else if (route.name === 'Friends') {
+            iconName = 'handshake-o';
+          }
+  
+          return <FontAwesome name={iconName} size={size} color={color} />;
+        },
+        tabBarActiveTintColor: '#e8be4b',
+        tabBarInactiveTintColor: '#b2b2b2',
+        headerShown: false,
+      })}>
       <Tab.Screen name="Lobby" component={LobbyScreen} />
       <Tab.Screen name="Portal" component={PortalScreen} />
       <Tab.Screen name="Friends" component={FriendsScreen} />
@@ -38,9 +56,9 @@ const TabNavigator = () => {
 };
 
 export default function App() {
-  const redirectUrl = Linking.createURL('/');
+  /* const redirectUrl = Linking.createURL('/');
   console.log(redirectUrl);
-
+ */
   return (
     <Provider store={store}>
       <NavigationContainer>
