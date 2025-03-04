@@ -48,7 +48,7 @@ export default function SettingsScreen({ navigation }) {
                             </View>
                         }
                     />
-                    <View style={styles.friendsBox}>
+                    <View style={styles.settingsBox}>
                         {/* LES SETTINGS */}
                         <Text>LES SETTINGS</Text>
                     </View>
@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
         fontSize: 30,
         fontWeight: 800,
     },
-    friendsBox: {
+    settingsBox: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',

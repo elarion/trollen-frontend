@@ -29,7 +29,7 @@ const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 const LobbyStack = () => (
-  <Stack.Navigator screenOptions={{ headerShown: false }}>
+  <Stack.Navigator screenOptions={{ headerShown: false }} >
     <Stack.Screen name="LobbyMain" component={LobbyScreen} />
     <Stack.Screen name="Settings" component={SettingsScreen} />
     <Stack.Screen name="Profile" component={ProfileScreen} />
@@ -43,8 +43,8 @@ const PortalStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="PortalMain" component={PortalScreen} />
     <Stack.Screen name="Settings" component={SettingsScreen} />
-    <Stack.Screen name="Profile" component={ProfileScreen} />
     <Stack.Screen name="News" component={NewsScreen} />
+    <Stack.Screen name="Profile" component={ProfileScreen} />
     <Stack.Screen name="Grimoire" component={GrimoireScreen} />
   </Stack.Navigator>
 );
@@ -53,8 +53,8 @@ const FriendsStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="FriendsMain" component={FriendsScreen} />
     <Stack.Screen name="Settings" component={SettingsScreen} />
-    <Stack.Screen name="Profile" component={ProfileScreen} />
     <Stack.Screen name="News" component={NewsScreen} />
+    <Stack.Screen name="Profile" component={ProfileScreen} />
     <Stack.Screen name="Grimoire" component={GrimoireScreen} />
   </Stack.Navigator>
 );

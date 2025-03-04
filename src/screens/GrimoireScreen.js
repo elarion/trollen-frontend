@@ -49,7 +49,7 @@ export default function GrimoireScreen({ navigation }) {
                         }
                     />
                     <View style={styles.friendsBox}>
-                        {/* LISTE DES COPAINS */}
+                        {/* GRIMOIRE */}
                         <Text>GRIMOIRE</Text>
                     </View>
                 </ImageBackground>

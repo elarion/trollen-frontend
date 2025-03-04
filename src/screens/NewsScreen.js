@@ -50,7 +50,7 @@ export default function NewsScreen({ navigation }) {
                     />
                     <View style={styles.friendsBox}>
                         {/* LISTE DES NEWS */}
-                        <Text>Liste des news</Text>
+                        <Text>LISTES DES NEWS</Text>
                     </View>
                 </ImageBackground>
             </SafeAreaView>

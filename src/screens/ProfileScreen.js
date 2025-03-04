@@ -48,9 +48,9 @@ export default function ProfileScreen({ navigation }) {
                             </View>
                         }
                     />
-                    <View style={styles.friendsBox}>
-                        {/* LISTE DES COPAINS */}
-                        <Text>Liste des copains</Text>
+                    <View style={styles.profileBox}>
+                        {/* PROFILE */}
+                        <Text>PROFILE</Text>
                     </View>
                 </ImageBackground>
             </SafeAreaView>
@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
         fontSize: 30,
         fontWeight: 800,
     },
-    friendsBox: {
+    profileBox: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
