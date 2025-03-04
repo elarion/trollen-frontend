@@ -8,10 +8,14 @@ import { loginData } from '../store/user';
 export default function CharactereCreationScreen({ navigation }) {
 
     const user = useSelector((state) => state.user.value);
-    console.log(user);
+    //console.log(user);
 
     const [races, setRaces] = useState([]);
     const [raceCount, setRaceCount] = useState(0);
+    const [spell1, setSpell1] = useState([]);
+    const [spell2, setSpell2] = useState([]);
+    const [spell3, setSpell3] = useState([]);
+    console.log(spell2);
     //console.log(races[raceCount]?.name)
     //console.log(races[raceCount]?.avatar)
 
@@ -39,23 +43,52 @@ export default function CharactereCreationScreen({ navigation }) {
             }
         };
         fetchData();
-        /* const fetchSpell1 = async () => {
+        const fetchSpell1 = async () => {
             try {
-                const response = await fetch(`http://192.168.100.185:3000/spells`, { // A MODIFIER
+                const response = await fetch(`http://192.168.100.185:3000/spells/67c6f3d337c666e9c7754125`, { // A MODIFIER
                 });
     
                 const data = await response.json();
                 if (data) {
-                    setRaces(data.races)
-                    console.log(data.races[0]);
+                    setSpell1(data);
+                    console.log(data);
                 }
             } catch (error) {
                 console.error("Erreur lors du get :", error);
             }
         };
-        fetchSpell1() */
+        fetchSpell1()
+        const fetchSpell2 = async () => {
+            try {
+                const response = await fetch(`http://192.168.100.185:3000/spells/67c7049375266cda5a3c15f0`, { // A MODIFIER
+                });
+    
+                const data = await response.json();
+                if (data) {
+                    setSpell2(data);
+                    console.log(data);
+                }
+            } catch (error) {
+                console.error("Erreur lors du get :", error);
+            }
+        };
+        fetchSpell2()
+        const fetchSpell3 = async () => {
+            try {
+                const response = await fetch(`http://192.168.100.185:3000/spells/67c7067a75266cda5a3c15f6`, { // A MODIFIER
+                });
+    
+                const data = await response.json();
+                if (data) {
+                    setSpell3(data);
+                    console.log(data);
+                }
+            } catch (error) {
+                console.error("Erreur lors du get :", error);
+            }
+        };
+        fetchSpell3()
     }, []);
-
 
     const goLeftRace = () => {
         setRaceCount(prev => prev > 0 ? prev - 1 : races.length - 1);
@@ -147,16 +180,16 @@ export default function CharactereCreationScreen({ navigation }) {
                                     <Text style={styles.actifSpellText}>Sorts Actifs</Text>
                                     <View style={styles.actifSpell}>
                                         <View style={styles.spell}>
-                                            <Image style={styles.spellImg} source={require('../../assets/favicon.png')} />
-                                            <Text style={styles.spellText}>{races[raceCount]?.spells[0]?.name}</Text>
+                                            <Image style={styles.spellImg} source={spell1.spell?.image} />
+                                            <Text style={styles.spellText}>{spell1.spell?.name}</Text>
                                         </View>
                                         <View style={styles.spell}>
-                                            <Image style={styles.spellImg} source={require('../../assets/favicon.png')} />
-                                            <Text style={styles.spellText}></Text>
+                                            <Image style={styles.spellImg} source={spell2.spell?.image} />
+                                            <Text style={styles.spellText}>{spell2.spell?.name}</Text>
                                         </View>
                                         <View style={styles.spell}>
-                                            <Image style={styles.spellImg} source={require('../../assets/favicon.png')} />
-                                            <Text style={styles.spellText}>Boule de Troll</Text>
+                                            <Image style={styles.spellImg} source={spell3.spell?.image} />
+                                            <Text style={styles.spellText}>{spell3.spell?.name}</Text>
                                         </View>
                                     </View>
                                 </View>

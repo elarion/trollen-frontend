@@ -1,11 +1,17 @@
 import { StyleSheet, Text, View, Image, TouchableOpacity } from "react-native"
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
+import { Header } from 'react-native-elements';
 
 export default function LobbyScreen() {
     return (
         <SafeAreaProvider>
             <SafeAreaView style={styles.container} >
-                <View styles={styles.portalBox}>
+                <Header 
+                    leftComponent={{ icon: 'menu', color: '#fff' }}
+                    centerComponent={{ text: 'Trollen', style: { color: '#fff' } }}
+                    rightComponent={{ icon: 'home', color: '#fff' }}
+                />
+                <View style={styles.portalBox}>
                     <TouchableOpacity style={styles.roomCreationBtn} onPress={() => goToCreationRoom()}>
                         <Text style={styles.textRoomCreationBtn}>ROOM CREATION</Text>
                     </TouchableOpacity>
@@ -24,15 +30,13 @@ export default function LobbyScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        height: '100%',
-        width: '100%',
-        alignItems: 'center',
-        justifyContent: 'center',
+        //justifyContent: 'center',
     },
     portalBox: {
+        marginTop: '20%',
         alignItems: 'center',
-        justifyContent: 'center',
-        gap: 20, // Added gap between buttons
+        justifyContent: 'space-between',
+        height: '50%',
     },
     roomCreationBtn: {
         backgroundColor: '#e8be4b',
