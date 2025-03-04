@@ -36,7 +36,7 @@ export default function CharactereCreationScreen({ navigation }) {
                 const data = await response.json();
                 if (data) {
                     setRaces(data.races)
-                    //console.log(data.races[0]);
+                    console.log(data.races[0]);
                 }
             } catch (error) {
                 console.error("Erreur lors du get :", error);
@@ -119,7 +119,7 @@ export default function CharactereCreationScreen({ navigation }) {
                     has_consent: user.has_consent,
                     gender: genres[genreCount],
                     avatar: races[raceCount]?.avatar,
-                    race: races[raceCount]?.name }),
+                    race: races[raceCount]?._id }),
             });
 
 
