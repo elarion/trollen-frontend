@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Image, TouchableOpacity, ImageBackground } from "react-native"
+import { StyleSheet, Text, View, Image, TouchableOpacity, ImageBackground, Dimensions } from "react-native"
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { useState, useEffect } from "react";
@@ -136,7 +136,7 @@ export default function CharactereCreationScreen({ navigation }) {
 
     return (
         <SafeAreaProvider>
-            <SafeAreaView style={styles.container}>
+            <SafeAreaView style={styles.container} edges={['left', 'right']}>
                 <ImageBackground source={require('../../assets/background/background.png')} style={styles.backgroundImage}>
                     <View style={styles.characterBox}>
 
@@ -234,8 +234,8 @@ const styles = StyleSheet.create({
     },
     backgroundImage: {
         flex: 1,
-        width: '100%',
-        height: '100%',
+        width: Dimensions.get('window').width,
+        height: Dimensions.get('window').height,
         resizeMode: 'cover',
     },
     characterBox: {
@@ -246,7 +246,7 @@ const styles = StyleSheet.create({
     /* SECTION LOGO */
     logoSection: {
         alignItems: 'center',
-        marginTop: '2%'
+        marginTop: '9%'
     },
     title: {
         color: 'rgb(121, 102, 91)',
@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
         marginTop: '5%',
         backgroundColor: 'rgb(189, 159, 138)',
         width: '97%',
-        height: '60%',
+        height: '55%',
         borderRadius: 35,
         alignItems: 'center',
         justifyContent: 'center'

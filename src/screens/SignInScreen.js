@@ -18,9 +18,9 @@ export default function SignInScreen({ navigation }) {
     const dispatch = useDispatch();
     //console.log(Config.API_URL)
     const guestMode = () => {
-        navigation.navigate('CharacterCreation')
+        //navigation.navigate('CharacterCreation')
         // OU
-        //navigation.navigate('TabNavigator')
+        navigation.navigate('TabNavigator')
     };
 
     const preSignUp = async () => {
@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
     /* SECTION LOGO */
     logoSection: {
         alignItems: 'center',
-        marginTop: '2%'
+        marginTop: '9%'
     },
     title: {
         color: 'rgb(121, 102, 91)',
