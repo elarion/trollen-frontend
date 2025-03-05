@@ -10,7 +10,7 @@ import {jwtDecode} from 'jwt-decode';
 
 
 export default function SignInScreen({ navigation }) {
-    const expo = process.env.EXPO_PUBLIC_BACKEND_URL
+    const EXPO = process.env.EXPO_PUBLIC_BACKEND_URL
     const [modalSignUpVisible, setModalSignUpVisible] = useState(false);
     const [modalSignInVisible, setModalSignInVisible] = useState(false);
     const [username, setUsername] = useState('');
@@ -26,13 +26,11 @@ export default function SignInScreen({ navigation }) {
         navigation.navigate('TabNavigator')
     };
 
-    const EXPO = process.env.EXPO_PUBLIC_BACKEND_URL
-
 
     const preSignUp = async () => {
         if (isChecked) {
             try {
-                const response = await fetch(`${expo}/users/pre-signup`, { // A MODIFIER
+                const response = await fetch(`${EXPO}/users/pre-signup`, { // A MODIFIER
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username: username, email: email, password: password, confirmPassword: confirmPassword, has_consent: isChecked }),
@@ -58,7 +56,7 @@ export default function SignInScreen({ navigation }) {
 
     const signInWithId = async () => {
         try {
-            const response = await fetch(`${expo}/users/signin`, { // A MODIFIER
+            const response = await fetch(`${EXPO}/users/signin`, { // A MODIFIER
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username: username, password: password }),

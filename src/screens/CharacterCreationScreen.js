@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { loginData } from '../store/user';
 
 export default function CharactereCreationScreen({ navigation }) {
-    const expo = process.env.EXPO_PUBLIC_BACKEND_URL
+    const EXPO = process.env.EXPO_PUBLIC_BACKEND_URL
     const user = useSelector((state) => state.user.value);
     //console.log(user);
 
@@ -30,7 +30,7 @@ export default function CharactereCreationScreen({ navigation }) {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch(`${expo}/races`, { // A MODIFIER
+                const response = await fetch(`${EXPO}/races`, { // A MODIFIER
                 });
 
                 const data = await response.json();
@@ -45,7 +45,7 @@ export default function CharactereCreationScreen({ navigation }) {
         fetchData();
         const fetchSpell1 = async () => {
             try {
-                const response = await fetch(`${expo}/spells/67c6f3d337c666e9c7754125`, { // A MODIFIER
+                const response = await fetch(`${EXPO}/spells/67c6f3d337c666e9c7754125`, { // A MODIFIER
                 });
     
                 const data = await response.json();
@@ -60,7 +60,7 @@ export default function CharactereCreationScreen({ navigation }) {
         fetchSpell1()
         const fetchSpell2 = async () => {
             try {
-                const response = await fetch(`${expo}/spells/67c7049375266cda5a3c15f0`, { // A MODIFIER
+                const response = await fetch(`${EXPO}/spells/67c7049375266cda5a3c15f0`, { // A MODIFIER
                 });
     
                 const data = await response.json();
@@ -75,7 +75,7 @@ export default function CharactereCreationScreen({ navigation }) {
         fetchSpell2()
         const fetchSpell3 = async () => {
             try {
-                const response = await fetch(`${expo}/spells/67c7067a75266cda5a3c15f6`, { // A MODIFIER
+                const response = await fetch(`${EXPO}/spells/67c7067a75266cda5a3c15f6`, { // A MODIFIER
                 });
     
                 const data = await response.json();
@@ -108,7 +108,7 @@ export default function CharactereCreationScreen({ navigation }) {
 
     const goToLobby = async () => {
         try {
-            const response = await fetch(`${expo}/users/signup`, { // A MODIFIER
+            const response = await fetch(`${EXPO}/users/signup`, { // A MODIFIER
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

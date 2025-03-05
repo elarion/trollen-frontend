@@ -11,10 +11,11 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 export default function LobbyScreen({ navigation }) {
 
     //MODAL CREATION DE ROOM INPUT DATA
+    const EXPO = process.env.EXPO_PUBLIC_BACKEND_URL
     const [modalRoomCreationVisible, setModalRoomCreationVisible] = useState(false);
     const [modalJoinPrivateRoomVisible, setModalJoinPrivateRoomVisible] = useState(false);
     const user = useSelector(state => state.user.value);
-    console.log(user.tokenDecoded.id);
+
 
     const [roomname, setRoomname] = useState('');
     const [tag, setTag] = useState('');
@@ -48,6 +49,8 @@ export default function LobbyScreen({ navigation }) {
         { label: '19', value: '19' },
         { label: '20', value: '20' },
     ];
+    //console.log('user', user.tokenDecoded.id, 'room_socket_id', 'bojafo', 'name', roomname, 'tags', tag, 'settings', { max: capacityValue, is_safe: isSafe, is_private: isPrivate, password: password });
+
     //REDIRECTION
     const goToSettings = () => {
         navigation.navigate('Settings');
@@ -62,28 +65,31 @@ export default function LobbyScreen({ navigation }) {
         navigation.navigate('Grimoire');
     }
     const goToCreateRoom = async () => {
+        //console.log(`${EXPO}/rooms/create`)
         try {
-            const response = await fetch(`${expo}/rooms/create`, { // A MODIFIER
+            const response = await fetch(`${EXPO}/rooms/create`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: roomname, }),
+                body: JSON.stringify({ user: user.tokenDecoded.id, room_socket_id: 'qheah'/* A MODIFIER */, name: roomname , tags: tag, settings: { max: capacityValue, is_safe: isSafe, is_private: isPrivate, password: password } })
             });
 
             const data = await response.json();
             console.log(data);
             if (data) {
-                dispatch(loginData({ user: user.tokenDecoded.id, room_socket_id: 'bojafo', name: roomname , tags: tag, settings: { max: capacityValue, is_safe: isSafe, is_private: isPrivate, password: password } }));
-                setUsername('');
-                setEmail('');
+                console.log(data);
+                //dispatch(loginData({ user: user.tokenDecoded.id, room_socket_id: 'bojafo', name: roomname , tags: tag, settings: { max: capacityValue, is_safe: isSafe, is_private: isPrivate, password: password } }));
+                setRoomname('');
                 setPassword('');
-                setConfirmPassword('');
-                setModalSignUpVisible(!modalSignUpVisible);
-                navigation.navigate('CharacterCreation');
+                setTag('');
+                setCapacityValue(null);
+                setSafe(false);
+                setPrivate(false);
+                setModalRoomCreationVisible(!modalRoomCreationVisible);
+                navigation.navigate('Room');
             }
         } catch (error) {
-            console.error("Erreur lors de l'inscription :", error);
+            console.error("Erreur lors de la création :", error);
         }
-        console.log('Go to Create Room');
     }
     const goToPrivateRoom = () => {
         console.log('Join existing room by name and password');
