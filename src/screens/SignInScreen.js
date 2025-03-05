@@ -5,9 +5,12 @@ import { useState } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import { loginData } from '../store/user';
 import Checkbox from 'expo-checkbox';
+import {jwtDecode} from 'jwt-decode';
+
 
 
 export default function SignInScreen({ navigation }) {
+    const EXPO = process.env.EXPO_PUBLIC_BACKEND_URL
     const [modalSignUpVisible, setModalSignUpVisible] = useState(false);
     const [modalSignInVisible, setModalSignInVisible] = useState(false);
     const [username, setUsername] = useState('');
@@ -23,8 +26,6 @@ export default function SignInScreen({ navigation }) {
         navigation.navigate('TabNavigator')
     };
 
-    const EXPO = process.env.EXPO_PUBLIC_BACKEND_URL
-
 
     const preSignUp = async () => {
         if (isChecked) {
@@ -36,7 +37,7 @@ export default function SignInScreen({ navigation }) {
                 });
 
                 const data = await response.json();
-                console.log(data);
+                
                 if (data) {
                     dispatch(loginData({ username: username, email: email, password: password, confirmPassword: confirmPassword, has_consent: isChecked }));
                     setUsername('');
@@ -55,16 +56,16 @@ export default function SignInScreen({ navigation }) {
 
     const signInWithId = async () => {
         try {
-            const response = await fetch(`${EXPO}/users/pre-signup`, { // A MODIFIER
+            const response = await fetch(`${EXPO}/users/signin`, { // A MODIFIER
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username: username, password: password }),
             });
 
             const data = await response.json();
-            //console.log(data)
+            console.log(jwtDecode(data.token))
             if (data) {
-                dispatch(loginData({ username: data.username, email: data.email, token: data.token }));
+                dispatch(loginData({ username: data.username, email: data.email, token: data.token, tokenDecoded: jwtDecode(data.token) })); // AJOUTER USER_ID REDUX
                 setUsername('');
                 setPassword('');
                 setModalSignInVisible(!modalSignInVisible);

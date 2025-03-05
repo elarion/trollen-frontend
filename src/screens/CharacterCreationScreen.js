@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { loginData } from '../store/user';
 
 export default function CharactereCreationScreen({ navigation }) {
-
+    const EXPO = process.env.EXPO_PUBLIC_BACKEND_URL
     const user = useSelector((state) => state.user.value);
     //console.log(user);
 
@@ -15,7 +15,7 @@ export default function CharactereCreationScreen({ navigation }) {
     const [spell1, setSpell1] = useState([]);
     const [spell2, setSpell2] = useState([]);
     const [spell3, setSpell3] = useState([]);
-    console.log(spell2);
+    //console.log(spell2);
     //console.log(races[raceCount]?.name)
     //console.log(races[raceCount]?.avatar)
 
@@ -30,13 +30,13 @@ export default function CharactereCreationScreen({ navigation }) {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch(`http://192.168.100.185:3000/races`, { // A MODIFIER
+                const response = await fetch(`${EXPO}/races`, { // A MODIFIER
                 });
 
                 const data = await response.json();
                 if (data) {
                     setRaces(data.races)
-                    console.log(data.races[0]);
+                    //console.log(data.races[0]);
                 }
             } catch (error) {
                 console.error("Erreur lors du get :", error);
@@ -45,13 +45,13 @@ export default function CharactereCreationScreen({ navigation }) {
         fetchData();
         const fetchSpell1 = async () => {
             try {
-                const response = await fetch(`http://192.168.100.185:3000/spells/67c6f3d337c666e9c7754125`, { // A MODIFIER
+                const response = await fetch(`${EXPO}/spells/67c6f3d337c666e9c7754125`, { // A MODIFIER
                 });
     
                 const data = await response.json();
                 if (data) {
                     setSpell1(data);
-                    console.log(data);
+                    //console.log(data);
                 }
             } catch (error) {
                 console.error("Erreur lors du get :", error);
@@ -60,13 +60,13 @@ export default function CharactereCreationScreen({ navigation }) {
         fetchSpell1()
         const fetchSpell2 = async () => {
             try {
-                const response = await fetch(`http://192.168.100.185:3000/spells/67c7049375266cda5a3c15f0`, { // A MODIFIER
+                const response = await fetch(`${EXPO}/spells/67c7049375266cda5a3c15f0`, { // A MODIFIER
                 });
     
                 const data = await response.json();
                 if (data) {
                     setSpell2(data);
-                    console.log(data);
+                    //console.log(data);
                 }
             } catch (error) {
                 console.error("Erreur lors du get :", error);
@@ -75,13 +75,13 @@ export default function CharactereCreationScreen({ navigation }) {
         fetchSpell2()
         const fetchSpell3 = async () => {
             try {
-                const response = await fetch(`http://192.168.100.185:3000/spells/67c7067a75266cda5a3c15f6`, { // A MODIFIER
+                const response = await fetch(`${EXPO}/spells/67c7067a75266cda5a3c15f6`, { // A MODIFIER
                 });
     
                 const data = await response.json();
                 if (data) {
                     setSpell3(data);
-                    console.log(data);
+                    //console.log(data);
                 }
             } catch (error) {
                 console.error("Erreur lors du get :", error);
@@ -108,7 +108,7 @@ export default function CharactereCreationScreen({ navigation }) {
 
     const goToLobby = async () => {
         try {
-            const response = await fetch(`http://192.168.100.185:3000/users/signup`, { // A MODIFIER
+            const response = await fetch(`${EXPO}/users/signup`, { // A MODIFIER
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -124,7 +124,7 @@ export default function CharactereCreationScreen({ navigation }) {
 
 
             const data = await response.json();
-            console.log(data);
+            //console.log(data);
             if (data) {
                 //dispatch(loginData({ username: username, email: email }));
                 navigation.navigate('TabNavigator')

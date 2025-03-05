@@ -2,6 +2,7 @@ import { StyleSheet, Text, View, Image, TouchableOpacity, ImageBackground, Modal
 import Checkbox from 'expo-checkbox';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Header } from 'react-native-elements';
 import { Dropdown } from 'react-native-element-dropdown';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
@@ -10,11 +11,16 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 export default function LobbyScreen({ navigation }) {
 
     //MODAL CREATION DE ROOM INPUT DATA
+    const EXPO = process.env.EXPO_PUBLIC_BACKEND_URL
     const [modalRoomCreationVisible, setModalRoomCreationVisible] = useState(false);
+    const [modalJoinPrivateRoomVisible, setModalJoinPrivateRoomVisible] = useState(false);
+    const user = useSelector(state => state.user.value);
+
+
     const [roomname, setRoomname] = useState('');
     const [tag, setTag] = useState('');
-    const [password, setPassword] = useState('');
 
+    const [password, setPassword] = useState('');
     const [isSafe, setSafe] = useState(false);
     const [isPrivate, setPrivate] = useState(false);
 
@@ -43,6 +49,7 @@ export default function LobbyScreen({ navigation }) {
         { label: '19', value: '19' },
         { label: '20', value: '20' },
     ];
+    //console.log('user', user.tokenDecoded.id, 'room_socket_id', 'bojafo', 'name', roomname, 'tags', tag, 'settings', { max: capacityValue, is_safe: isSafe, is_private: isPrivate, password: password });
 
     //REDIRECTION
     const goToSettings = () => {
@@ -57,7 +64,32 @@ export default function LobbyScreen({ navigation }) {
     const goToGrimoire = () => {
         navigation.navigate('Grimoire');
     }
-    const goToCreateRoom = () => {
+    const goToCreateRoom = async () => {
+        //console.log(`${EXPO}/rooms/create`)
+        try {
+            const response = await fetch(`${EXPO}/rooms/create`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user: user.tokenDecoded.id, room_socket_id: 'ghkdghfdfghxsdfsg'/* A MODIFIER */, name: roomname , tags: tag, settings: { max: capacityValue, is_safe: isSafe, is_private: isPrivate, password: password } })
+            });
+
+            const data = await response.json();
+            console.log(data);
+            if (data) {
+                console.log(data);
+                //dispatch(loginData({ user: user.tokenDecoded.id, room_socket_id: 'bojafo', name: roomname , tags: tag, settings: { max: capacityValue, is_safe: isSafe, is_private: isPrivate, password: password } }));
+                setRoomname('');
+                setPassword('');
+                setTag('');
+                setCapacityValue(null);
+                setSafe(false);
+                setPrivate(false);
+                setModalRoomCreationVisible(!modalRoomCreationVisible);
+                navigation.navigate('Room');
+            }
+        } catch (error) {
+            console.error("Erreur lors de la création :", error);
+        }
         console.log('Go to Create Room');
     }
     const goToPrivateRoom = () => {
@@ -112,7 +144,7 @@ export default function LobbyScreen({ navigation }) {
                                 setModalRoomCreationVisible(!modalRoomCreationVisible);
                             }}>
                             <View style={styles.centeredView}>
-                                <View style={styles.modalView}>
+                                <View style={styles.modalViewCreationRoom}>
                                     <Text style={styles.modalTitle}>Create a room</Text>
                                     <View style={styles.inputSection}>
                                         <Text>Room name</Text>
@@ -189,9 +221,43 @@ export default function LobbyScreen({ navigation }) {
                         </Pressable>
 
                         {/* MODALE JOIN PRIVATE ROOM */}
-                        <TouchableOpacity style={styles.joinPrivateRoomBtn} onPress={() => goToPrivateRoom()}>
+                        <Modal
+                            animationType="slide"
+                            transparent={true}
+                            visible={modalJoinPrivateRoomVisible}
+                            onRequestClose={() => {
+                                Alert.alert('Modal has been closed.');
+                                setModalJoinPrivateRoomVisible(!modalJoinPrivateRoomVisible);
+                            }}>
+                            <View style={styles.centeredView}>
+                                <View style={styles.modalViewJoinPrivateRoom}>
+                                    <Text style={styles.modalTitle}>Join Private room</Text>
+                                    <View style={styles.inputSection}>
+                                        <Text>Room name</Text>
+                                        <TextInput style={styles.roomname} placeholder="Room name" onChangeText={value => setRoomname(value)} value={roomname} />
+                                        <Text>Password</Text>
+                                        <TextInput style={styles.password} placeholder="Password" onChangeText={value => setPassword(value)} value={password} secureTextEntry={true} />
+                                    </View>
+                                    <View style={styles.btnModalJoinPrivateRoom}>
+                                        <Pressable
+                                            style={[styles.button, styles.buttonClose]}
+                                            onPress={() => setModalJoinPrivateRoomVisible(!modalJoinPrivateRoomVisible)}>
+                                            <Text style={styles.textStyle}>Retour</Text>
+                                        </Pressable>
+                                        <Pressable
+                                            style={[styles.button, styles.buttonValidation]}
+                                            onPress={() => goToPrivateRoom()}>
+                                            <Text style={styles.textStyle}>Valider</Text>
+                                        </Pressable>
+                                    </View>
+                                </View>
+                            </View>
+                        </Modal>
+                        <Pressable
+                            style={[styles.joinPrivateRoomBtn, styles.buttonOpen]}
+                            onPress={() => setModalJoinPrivateRoomVisible(true)}>
                             <Text style={styles.textJoinPrivateRoomBtn}>JOIN PRIVATE ROOM</Text>
-                        </TouchableOpacity>
+                        </Pressable>
                         {/* REJOINDRE HAZARD ROOM */}
                         <TouchableOpacity style={styles.joinHazardRoomBtn} onPress={() => goToHazardRoom()}>
                             <Text style={styles.textJoinHazardRoomBtn}>HAZARD ROOM</Text>
@@ -280,7 +346,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    modalView: {
+    modalViewCreationRoom: {
         margin: 20,
         backgroundColor: 'white',
         borderRadius: 20,
@@ -297,6 +363,23 @@ const styles = StyleSheet.create({
         width: '90%',
         height: '70%'
     },
+    modalViewJoinPrivateRoom: {
+        margin: 20,
+        backgroundColor: 'white',
+        borderRadius: 20,
+        padding: 35,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+        width: '90%',
+        height: '40%'
+    },
     button: {
         borderRadius: 20,
         padding: 10,
@@ -305,7 +388,13 @@ const styles = StyleSheet.create({
     btnModal: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginTop: '30%',
+        marginTop: '20%',
+        width: '100%'
+    },
+    btnModalJoinPrivateRoom: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: '10%',
         width: '100%'
     },
     buttonClose: {
@@ -331,6 +420,7 @@ const styles = StyleSheet.create({
         marginTop: '10%',
         alignItems: 'center',
         width: '100%',
+        gap: 10
     },
 
     //INPUT STYLE CREATION ROOM MODAL
@@ -380,11 +470,14 @@ const styles = StyleSheet.create({
     },
     //CHECKBOX
     sectionBox: {
+        gap: 10,
         height: '5%',
         flexDirection: 'row',
         justifyContent: 'flex-start',
         alignItems: 'space-between',
         width: '100%',
+        marginTop: '1%',
+        marginLeft: '30%',
     },
     checkboxText: {
         fontSize: 15,
