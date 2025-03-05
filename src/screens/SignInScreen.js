@@ -23,11 +23,13 @@ export default function SignInScreen({ navigation }) {
         navigation.navigate('TabNavigator')
     };
 
+    const EXPO = process.env.EXPO_PUBLIC_BACKEND_URL
+
 
     const preSignUp = async () => {
         if (isChecked) {
             try {
-                const response = await fetch(`http://192.168.100.219:3000/users/pre-signup`, { // A MODIFIER
+                const response = await fetch(`${EXPO}/users/pre-signup`, { // A MODIFIER
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username: username, email: email, password: password, confirmPassword: confirmPassword, has_consent: isChecked }),
@@ -53,7 +55,7 @@ export default function SignInScreen({ navigation }) {
 
     const signInWithId = async () => {
         try {
-            const response = await fetch(`http://192.168.100.219:3000/users/signin`, { // A MODIFIER
+            const response = await fetch(`${EXPO}/users/pre-signup`, { // A MODIFIER
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username: username, password: password }),

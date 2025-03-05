@@ -46,6 +46,7 @@ const PortalStack = () => (
     <Stack.Screen name="News" component={NewsScreen} />
     <Stack.Screen name="Profile" component={ProfileScreen} />
     <Stack.Screen name="Grimoire" component={GrimoireScreen} />
+    <Stack.Screen name="Room" component={RoomScreen}/>
   </Stack.Navigator>
 );
 

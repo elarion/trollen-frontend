@@ -17,6 +17,9 @@ export default function PortalScreen({ navigation }) {
     const goToGrimoire = () => {
         navigation.navigate('Grimoire');
     }
+    const goToRoom = () => {
+        navigation.navigate('Room');
+    }
 
     const [roomListFromData, setRoomListFromData] = useState([])
     console.log(roomListFromData)
@@ -75,30 +78,6 @@ export default function PortalScreen({ navigation }) {
                         </View>
                         <View style={styles.roomBox}>
                             <View style={styles.room}>
-
-                                <View style={styles.inRoomLeft}>
-                                    <Text style={styles.roomName}>Bond, Bond, Bond</Text>
-                                    <Text style={styles.roomTag}>#Idriss</Text>
-                                    <Text style={styles.roomNumberOfParticipants}>100 Participants</Text>
-                                </View> 
-
-                                <View style={styles.inRoomRight}>
-
-                                    <View style={styles.leftFavButtonContainer}></View>
-
-                                    <View style={styles.rightUsernameAndJoin}>
-                                        
-                                        <Text style={styles.username}>zozo@4352</Text>
-                                        
-                                        <TouchableOpacity style={styles.join}>
-                                            <Text>Join</Text>
-                                        </TouchableOpacity>
-                                    </View>
-
-                                </View>
-                                
-                            </View>
-                            <View style={styles.room}>
                                 <View style={styles.inRoomLeft}>
                                     <Text style={styles.roomName}>Bond, Bond, Bond</Text>
                                     <Text style={styles.roomTag}>#Idriss</Text>
@@ -108,8 +87,8 @@ export default function PortalScreen({ navigation }) {
                                     <View style={styles.leftFavButtonContainer}></View>
                                     <View style={styles.rightUsernameAndJoin}>
                                         <Text style={styles.username}>zozo@4352</Text>
-                                        <TouchableOpacity style={styles.join}>
-                                            <Text>Join</Text>
+                                        <TouchableOpacity style={styles.join} onPress={goToRoom}>
+                                            <Text  style={styles.textButton}>Join</Text>
                                         </TouchableOpacity>
                                     </View>
                                 </View>
@@ -177,31 +156,27 @@ const styles = StyleSheet.create({
         width: '90%',
         height: 120,
         borderRadius: 10,
-        backgroundColor: "violet"
+        backgroundColor: "white"
     },
     inRoomLeft : {
         flexDirection: 'column',
         justifyContent: "space-around",
         marginLeft: '2%',
-        backgroundColor: 'blue',
+        //backgroundColor: 'blue',
         width: '50%',
     },
     roomName: {
-       
 
     },
     roomTag: {
-        
 
     },
     roomNumberOfParticipants: {
-        
-
+    
     },
     inRoomRight: {
-        flexDirection: 'row',
-        
-        backgroundColor: 'orange',
+        flexDirection: 'row',  
+        //backgroundColor: 'orange',
         width:'46%',
         height:'100%',
         marginRight:'2%',
@@ -209,29 +184,30 @@ const styles = StyleSheet.create({
     leftFavButtonContainer: {
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'red',
+        //backgroundColor: 'red',
         width: '20%',
     },
     rightUsernameAndJoin: {
         flexDirection: 'column',
-        backgroundColor: 'green',
+        //backgroundColor: 'green',
         width:'80%',
-        justifyContent: 'center',
         alignItems: 'center',
     },
     username: {
-        
-
-        flexDirection: 'row',
-        justifyContent: 'center',
-        backgroundColor:'orange',
-        
+        //backgroundColor:'orange',
+        margin:10,
     },
     join: {
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'pink',
+        backgroundColor: 'brown',
         height: '30%',
+        width: '70%',
+        borderRadius:30,
     },
+    textButton:{
+        color: 'white'
+        
+    }
 
 })
