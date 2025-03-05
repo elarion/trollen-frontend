@@ -23,10 +23,11 @@ export default function SignInScreen({ navigation }) {
         navigation.navigate('TabNavigator')
     };
 
+
     const preSignUp = async () => {
         if (isChecked) {
             try {
-                const response = await fetch(`http://192.168.100.185:3000/users/pre-signup`, { // A MODIFIER
+                const response = await fetch(`http://192.168.100.219:3000/users/pre-signup`, { // A MODIFIER
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username: username, email: email, password: password, confirmPassword: confirmPassword, has_consent: isChecked }),
@@ -52,7 +53,7 @@ export default function SignInScreen({ navigation }) {
 
     const signInWithId = async () => {
         try {
-            const response = await fetch(`http://192.168.100.185:3000/users/signin`, { // A MODIFIER
+            const response = await fetch(`http://192.168.100.219:3000/users/signin`, { // A MODIFIER
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username: username, password: password }),
@@ -208,7 +209,7 @@ export default function SignInScreen({ navigation }) {
                             {/* SECTION FORGET PASSWORD */}
 
                             <TouchableOpacity style={styles.forgetPassword} onPress={() => forgetPassword()}>
-                                <Text style={styles.textForgetPassword}>Mot de pass oublié ?</Text>
+                                <Text style={styles.textForgetPassword}>Mot de passe oublié ?</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
