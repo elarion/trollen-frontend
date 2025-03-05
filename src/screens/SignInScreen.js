@@ -413,4 +413,9 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         paddingLeft: 15,
     },
+    section: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: '5%'
+    },
 })
