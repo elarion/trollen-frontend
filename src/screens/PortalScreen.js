@@ -1,75 +1,80 @@
-import { StyleSheet, Text, View, Image, TouchableOpacity, ImageBackground, TextInput } from "react-native"
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, ImageBackground, FlatList, ActivityIndicator } from "react-native";
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import axiosInstance from '../utils/axiosInstance';
 import { Header } from 'react-native-elements';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import { useState, useEffect } from "react";
-import { useSelector } from "react-native"
+import { useState, useEffect, useCallback } from "react";
+
+const limit = 10;
 export default function PortalScreen({ navigation }) {
+    const [rooms, setRooms] = useState([]); // Stocke la liste des rooms
+    const [page, setPage] = useState(1); // Suivi de la pagination
+    const [loading, setLoading] = useState(false); // État de chargement
+    const [hasMore, setHasMore] = useState(true); // Savoir s'il y a encore des données
+    const [tag, setTag] = useState(''); // Recherche par tag
+    // Charger les rooms par page
+    // Utilisation de usecallback pour éviter les appels en boucle
+    // Car par défaut, la fonction est recréée à chaque rendu
+    // Et avec useCallback, elle est mémorisée donc pas recréée au rendu suivant
+    // elle est utilisé par useEffect et FlatList
+    const fetchRooms = useCallback(async () => {
+        if (loading || !hasMore) return;
 
-    const EXPO = process.env.EXPO_PUBLIC_BACKEND_URL
-    const [roomListFromData, setRoomListFromData] = useState([]);
-    //console.log(roomListFromData);
-    const [roomListFromTag, setRoomListFromTag] = useState([]);
-    const [tag, setTag] = useState('');
+        setLoading(true);
 
-    const goToSettings = () => {
-        navigation.navigate('Settings');
-    }
-    const goToNews = () => {
-        navigation.navigate('News');
-    }
-    const goToProfile = () => {
-        navigation.navigate('Profile');
-    }
-    const goToGrimoire = () => {
-        navigation.navigate('Grimoire');
-    }
-    const goToRoom = (room_id) => {
-        navigation.navigate('Room', {
-            room_id: room_id,
-        });
-    }
+        try {
+            const response = await axiosInstance.get(`/rooms/by-limit?page=${page}&limit=${limit}`);
 
+            if (response.data.success === false) return;
 
+            // Mise à jour de la liste des rooms
+            const newRooms = response.data.rooms;
+            setRooms(prevRooms => [...prevRooms, ...newRooms]);
 
+            // Vérifier s'il y a encore des rooms à charger
+            // Si le nombre de rooms chargées est inférieur à 25, il n'y a plus de rooms, logi
+            if (newRooms.length < limit) {
+                setHasMore(false);
+            }
 
+            setPage(prevPage => prevPage + 1);
+        } catch (error) {
+            console.error("Erreur de récupération des rooms :", error);
+        } finally {
+            setLoading(false);
+        }
+    }, [loading, page, hasMore]); // Dépendances de la fonction pour éviter les appels en boucle
+
+    // Charger la première page au montage
     useEffect(() => {
-        (async () => {
-            const response = await axiosInstance.get(`/rooms`)
-            setRoomListFromData(response.data.rooms)
+        fetchRooms();
+    }, []);
 
-        })()
+    // Fonction pour aller vers une room spécifique
+    const goToRoom = (room_id) => {
+        navigation.navigate('Room', { room_id });
+    };
 
-    }, [])
-    const roomListToShow = roomListFromData.map((data) => {
-        //console.log(data._id)
-        return (
-            <View style={styles.room} key={data._id}>
-                <View style={styles.inRoomLeft}>
-                    <Text style={styles.roomName}>{data.name}</Text>
-                    <Text style={styles.roomTag}>{data.tags?.map((data, i) => {
-                        if (i === data.tags?.length - 1) {
-                            return `#${data.name}`
-                        } else {
-                            return `#${data.name}` + ' '
-                        }
-                    })}</Text>
-                    <Text style={styles.roomNumberOfParticipants}>{data.participants.length}</Text>
-                </View>
-                <View style={styles.inRoomRight}>
-                    <View style={styles.leftFavButtonContainer}></View>
-                    <View style={styles.rightUsernameAndJoin}>
-                        <Text style={styles.username}>{data.admin.username}</Text>
-                        <TouchableOpacity style={styles.join} onPress={() => goToRoom(data._id)}>
-                            <Text style={styles.textButton}>Join</Text>
-                        </TouchableOpacity>
-                    </View>
+    // Fonction de rendu de chaque item dans FlatList
+    const renderRoom = ({ item }) => (
+        <View style={styles.room} key={item._id}>
+            <View style={styles.inRoomLeft}>
+                <Text style={styles.roomName}>{item.name}</Text>
+                <Text style={styles.roomTag}>
+                    {item.tags?.map((tag, i) => `#${tag.name}`).join(" ")}
+                </Text>
+                <Text style={styles.roomNumberOfParticipants}>{item.participants.length} participants</Text>
+            </View>
+            <View style={styles.inRoomRight}>
+                <View style={styles.rightUsernameAndJoin}>
+                    <Text style={styles.username}>{item.admin.username}</Text>
+                    <TouchableOpacity style={styles.join} onPress={() => goToRoom(item._id)}>
+                        <Text style={styles.textButton}>Join</Text>
+                    </TouchableOpacity>
                 </View>
             </View>
-        )
-    });
-
+        </View>
+    );
 
     return (
         <SafeAreaProvider>
@@ -77,50 +82,36 @@ export default function PortalScreen({ navigation }) {
                 <ImageBackground source={require('../../assets/background/background.png')} style={styles.backgroundImage}>
                     <Header
                         containerStyle={styles.header}
-                        leftComponent={
-                            <View style={styles.headerButtons}>
-                                <TouchableOpacity onPress={goToSettings}>
-                                    <FontAwesome name='cog' size={30} color='rgb(239, 233, 225)' />
-                                </TouchableOpacity>
-                                <TouchableOpacity onPress={goToNews}>
-                                    <FontAwesome name='newspaper-o' size={30} color='rgb(239, 233, 225)' />
-                                </TouchableOpacity>
-                            </View>
-                        }
-                        centerComponent={
-                            <View>
-                                <Text style={styles.title}>Trollen</Text>
-                            </View>
-                        }
-                        rightComponent={
-                            <View style={styles.headerButtons}>
-                                <TouchableOpacity onPress={goToProfile}>
-                                    <FontAwesome name='user' size={30} color='rgb(239, 233, 225)' />
-                                </TouchableOpacity>
-                                <TouchableOpacity onPress={goToGrimoire}>
-                                    <FontAwesome name='book' size={30} color='rgb(239, 233, 225)' />
-                                </TouchableOpacity>
-                            </View>
-                        }
+                        centerComponent={<Text style={styles.title}>Trollen</Text>}
                     />
+
                     <View style={styles.placeholder}>
                         <TextInput
                             placeholder="Enter a tag here..."
                             placeholderTextColor="gray"
                             style={styles.place}
-                            onChangeText={value => setTag(value)} value={tag}>
-                        </TextInput>
-                        <TouchableOpacity style={styles.bouton} onPress={() => filteredRoomList()}>
-                            <Text>Troll</Text>
+                            onChangeText={setTag}
+                            value={tag}
+                        />
+                        <TouchableOpacity style={styles.bouton} onPress={() => console.log("Recherche par tag:", tag)}>
+                            <Text>Search</Text>
                         </TouchableOpacity>
                     </View>
+
                     <View style={styles.roomBox}>
-                        {roomListToShow}
+                        <FlatList
+                            data={rooms}
+                            renderItem={renderRoom}
+                            keyExtractor={(item) => item._id}
+                            onEndReached={fetchRooms} // Charge plus de rooms quand on atteint la fin
+                            onEndReachedThreshold={0.5} // Déclenche le chargement quand on est à 50% du bas
+                            ListFooterComponent={loading && <ActivityIndicator size="small" color="white" />} // Affiche un loader en bas de la liste
+                        />
                     </View>
                 </ImageBackground>
             </SafeAreaView>
         </SafeAreaProvider>
-    )
+    );
 }
 
 const styles = StyleSheet.create({
@@ -165,26 +156,29 @@ const styles = StyleSheet.create({
     roomBox: {
         flex: 1,
         //backgroundColor: 'blue',
+        paddingHorizontal: 20,
+        paddingBottom: 50,
         justifyContent: 'top',
         alignItems: 'center',
-        gap: '2%'
+        gap: '2%',
     },
 
     //STYLE DES CARTES ROOMS
     room: {
+        alignSelf: 'center',
         flexDirection: 'row',
         justifyContent: "space-between",
-
-        width: '90%',
+        marginBottom: 10,
+        width: '100%',
         height: 120,
         borderRadius: 10,
-        backgroundColor: "white"
+        backgroundColor: "white",
     },
     inRoomLeft: {
         flexDirection: 'column',
         justifyContent: "space-around",
         marginLeft: '2%',
-        //backgroundColor: 'blue',
+        //backgroundColor: 'blue'
         width: '50%',
     },
     roomName: {
@@ -202,6 +196,7 @@ const styles = StyleSheet.create({
         width: '46%',
         height: '100%',
         marginRight: '2%',
+        justifyContent: 'flex-end',
     },
     leftFavButtonContainer: {
         justifyContent: 'center',
@@ -213,7 +208,8 @@ const styles = StyleSheet.create({
         flexDirection: 'column',
         //backgroundColor: 'green',
         width: '80%',
-        alignItems: 'center',
+        alignItems: 'flex-end',
+        justifyContent: 'space-around',
     },
     username: {
         //backgroundColor:'orange',

@@ -32,7 +32,7 @@ export default function RoomScreen({ navigation, route }) {
 
     useEffect(() => {
         (async () => {
-            const response = await axiosInstance.get(`/rooms/${room_id}`)
+            const response = await axiosInstance.get(`/rooms/by-id/${room_id}`)
             setRoomInfo(response.data.room)
 
         })()
@@ -83,7 +83,7 @@ export default function RoomScreen({ navigation, route }) {
                             <View style={styles.roomInfos}>
                                 <Text style={styles.creatorRoomName}>{roomInfo.admin?.username}</Text>
                                 <Text style={styles.roomName}>{roomInfo.name}</Text>
-                                <Text style={styles.numberOfParticipants}>{roomInfo.participants?.length}</Text>
+                                <Text style={styles.numberOfParticipants}>{roomInfo.participants?.length} participant{roomInfo.participants?.length > 1 && `s`}</Text>
                             </View>
                             <TouchableOpacity style={styles.playerList}>
                                 <FontAwesome name='users' size={30} color='rgb(195, 157, 136)'/* 'rgb(85,69,63)'*/ />
