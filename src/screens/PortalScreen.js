@@ -8,6 +8,11 @@ import { useSelector } from "react-native"
 export default function PortalScreen({ navigation }) {
 
     const EXPO = process.env.EXPO_PUBLIC_BACKEND_URL
+    const [roomListFromData, setRoomListFromData] = useState([]);
+    //console.log(roomListFromData);
+    const [roomListFromTag, setRoomListFromTag] = useState([]);
+    const [tag, setTag] = useState('');
+
     const goToSettings = () => {
         navigation.navigate('Settings');
     }
@@ -20,51 +25,50 @@ export default function PortalScreen({ navigation }) {
     const goToGrimoire = () => {
         navigation.navigate('Grimoire');
     }
-    const goToRoom = () => {
+    const goToRoom = (room_id) => {
         navigation.navigate('Room', {
-            itemId: 86,
-            otherParam: 'anything you want here',
-          });
+            room_id: room_id,
+        });
     }
 
-    const [roomListFromData, setRoomListFromData] = useState([]);
-    const [roomListFromTag, setRoomListFromTag] = useState([]);
-    const [tag, setTag] = useState('');
-    //console.log(roomListFromData);
+
+
 
     useEffect(() => {
         (async () => {
             const response = await axiosInstance.get(`/rooms`)
             setRoomListFromData(response.data.rooms)
+
         })()
 
     }, [])
-        const roomListToShow = roomListFromData.map((data) => {
-            return (
-                <View style={styles.room} key={data._id}>
-                    <View style={styles.inRoomLeft}>
-                        <Text style={styles.roomName}>{data.name}</Text>
-                        <Text style={styles.roomTag}>{data.tags?.map((data, i) => {
-                            if (i === data.tags?.length - 1) {
-                                return `#${data.name}`
-                            } else {
-                                return `#${data.name}` + ' '
-                            }
-                        })}</Text>
-                        <Text style={styles.roomNumberOfParticipants}>{data.participants.length}</Text>
-                    </View>
-                    <View style={styles.inRoomRight}>
-                        <View style={styles.leftFavButtonContainer}></View>
-                        <View style={styles.rightUsernameAndJoin}>
-                            <Text style={styles.username}>{data.admin.username}</Text>
-                            <TouchableOpacity style={styles.join} onPress={goToRoom}>
-                                <Text style={styles.textButton}>Join</Text>
-                            </TouchableOpacity>
-                        </View>
+    const roomListToShow = roomListFromData.map((data) => {
+        //console.log(data._id)
+        return (
+            <View style={styles.room} key={data._id}>
+                <View style={styles.inRoomLeft}>
+                    <Text style={styles.roomName}>{data.name}</Text>
+                    <Text style={styles.roomTag}>{data.tags?.map((data, i) => {
+                        if (i === data.tags?.length - 1) {
+                            return `#${data.name}`
+                        } else {
+                            return `#${data.name}` + ' '
+                        }
+                    })}</Text>
+                    <Text style={styles.roomNumberOfParticipants}>{data.participants.length}</Text>
+                </View>
+                <View style={styles.inRoomRight}>
+                    <View style={styles.leftFavButtonContainer}></View>
+                    <View style={styles.rightUsernameAndJoin}>
+                        <Text style={styles.username}>{data.admin.username}</Text>
+                        <TouchableOpacity style={styles.join} onPress={() => goToRoom(data._id)}>
+                            <Text style={styles.textButton}>Join</Text>
+                        </TouchableOpacity>
                     </View>
                 </View>
-            )
-        });
+            </View>
+        )
+    });
 
 
     return (
