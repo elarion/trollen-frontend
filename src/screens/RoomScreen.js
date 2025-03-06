@@ -1,5 +1,6 @@
-import { StyleSheet, Text, View, Image, Modal, TouchableOpacity, ImageBackground, TextInput, Pressable } from "react-native"
-//import {Modal} from 'react-native-modal'
+import { StyleSheet, Text, View, Image, TouchableOpacity, ImageBackground, TextInput, Pressable } from "react-native"
+//import { Modal } from 'react-native-modal'
+import { Modal } from 'react-native'
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { Header } from 'react-native-elements';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
@@ -18,9 +19,7 @@ export default function RoomScreen({ navigation }) {
     const goToGrimoire = () => {
         navigation.navigate('Grimoire');
     }
-    /*const goToRoom = () => {
-        navigation.navigate('Room');
-    }*/
+   
 
 
     //MODALSPELL
@@ -99,7 +98,7 @@ export default function RoomScreen({ navigation }) {
                             {/*MODAL SPELL <Pressable style={styles.spellModal} onPress={setModalSpellVisible(!modalSpellVisible)} >
                             </Pressable>*/ }
                             <Modal 
-                               /* animationIn="slideInRight"
+                                /*animationIn="slideInRight"
                                 animationOut="slideOutLeft"*/
                                 animationType="slide"
                                 transparent={true}

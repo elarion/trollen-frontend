@@ -70,7 +70,7 @@ export default function LobbyScreen({ navigation }) {
             const response = await fetch(`${EXPO}/rooms/create`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user: user.tokenDecoded.id, room_socket_id: 'ghkdghfdfghxsdfsg'/* A MODIFIER */, name: roomname , tags: tag, settings: { max: capacityValue, is_safe: isSafe, is_private: isPrivate, password: password } })
+                body: JSON.stringify({ user: user.tokenDecoded.id, room_socket_id: 'gaqmdfhjswgdfjqghfgqkhxcsdghfdfghxsdfsg'/* A MODIFIER */, name: roomname , tags: tag, settings: { max: capacityValue, is_safe: isSafe, is_private: isPrivate, password: password } })
             });
 
             const data = await response.json();

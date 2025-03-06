@@ -167,7 +167,7 @@ export default function SignInScreen({ navigation }) {
                         <View style={styles.signInSection}>
                             <Text style={styles.text}>Vous avez déja un compte ?</Text>
                             <Modal
-                                animationType="slide"
+                                aniationType="slide"
                                 transparent={true}
                                 visible={modalSignInVisible}
                                 onRequestClose={() => {
