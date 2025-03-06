@@ -31,11 +31,17 @@ const Tab = createBottomTabNavigator();
 const LobbyStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }} >
     <Stack.Screen name="LobbyMain" component={LobbyScreen} />
-    <Stack.Screen name="Settings" component={SettingsScreen} />
+    <Stack.Screen name="Settings" component={SettingsScreen} /* options={{
+      animation: 'fade',
+      transitionSpec: {
+        open: { animation: 'timing', config: { duration: 0 } },
+        close: { animation: 'timing', config: { duration: 0 } }
+      }
+    }} */ />
     <Stack.Screen name="Profile" component={ProfileScreen} />
     <Stack.Screen name="News" component={NewsScreen} />
     <Stack.Screen name="Grimoire" component={GrimoireScreen} />
-    <Stack.Screen name="Room" component={RoomScreen}/>
+    <Stack.Screen name="Room" component={RoomScreen} />
   </Stack.Navigator>
 );
 
@@ -46,7 +52,7 @@ const PortalStack = () => (
     <Stack.Screen name="News" component={NewsScreen} />
     <Stack.Screen name="Profile" component={ProfileScreen} />
     <Stack.Screen name="Grimoire" component={GrimoireScreen} />
-    <Stack.Screen name="Room" component={RoomScreen}/>
+    <Stack.Screen name="Room" component={RoomScreen} />
   </Stack.Navigator>
 );
 
@@ -95,20 +101,20 @@ const TabNavigator = () => {
       },
     })}>
       <Tab.Screen name="Lobby" component=/* {LobbyScreen} */ {LobbyStack} listeners={({ navigation }) => ({
-    tabPress: (e) => {
-      navigation.navigate('Lobby');
-    },
-  })}/>
+        tabPress: (e) => {
+          navigation.navigate('Lobby');
+        },
+      })} />
       <Tab.Screen name="Portal" component=/* {PortalStack} */ {PortalStack} listeners={({ navigation }) => ({
-    tabPress: (e) => {
-      navigation.navigate('Portal');
-    },
-  })}/>
+        tabPress: (e) => {
+          navigation.navigate('Portal');
+        },
+      })} />
       <Tab.Screen name="Friends" component=/* {FriendsStack} */{FriendsStack} listeners={({ navigation }) => ({
-    tabPress: (e) => {
-      navigation.navigate('Friends');
-    },
-  })}/>
+        tabPress: (e) => {
+          navigation.navigate('Friends');
+        },
+      })} />
     </Tab.Navigator>
   );
 };
