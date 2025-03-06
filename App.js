@@ -94,10 +94,21 @@ const TabNavigator = () => {
         marginBottom: 5,
       },
     })}>
-      <Tab.Screen name="Lobby" component=/* {LobbyScreen} */ {LobbyStack} />
-      <Tab.Screen name="Portal" component=/* {PortalStack} */ {PortalStack} />
-      <Tab.Screen name="Friends" component=/* {FriendsStack} */{FriendsStack} />
-      {/* <Stack.Screen name="TopTabs" component={TopTabNavigator} /> */}
+      <Tab.Screen name="Lobby" component=/* {LobbyScreen} */ {LobbyStack} listeners={({ navigation }) => ({
+    tabPress: (e) => {
+      navigation.navigate('Lobby');
+    },
+  })}/>
+      <Tab.Screen name="Portal" component=/* {PortalStack} */ {PortalStack} listeners={({ navigation }) => ({
+    tabPress: (e) => {
+      navigation.navigate('Portal');
+    },
+  })}/>
+      <Tab.Screen name="Friends" component=/* {FriendsStack} */{FriendsStack} listeners={({ navigation }) => ({
+    tabPress: (e) => {
+      navigation.navigate('Friends');
+    },
+  })}/>
     </Tab.Navigator>
   );
 };
