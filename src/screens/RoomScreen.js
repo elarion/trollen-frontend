@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, Image, TouchableOpacity, ImageBackground, TextInput, Pressable } from "react-native"
-import { Modal, ModalContent } from 'react-native-modals'
+import { Modal, SlideAnimation } from 'react-native-modals'
 import axiosInstance from '../utils/axiosInstance';
 //import { Modal } from 'react-native'
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
@@ -41,7 +41,8 @@ export default function RoomScreen({ navigation, route }) {
 
     //MODALSPELL
     const [modalSpellVisible, setModalSpellVisible] = useState(false);
-
+    
+    
 
     return (
         <SafeAreaProvider>
@@ -115,37 +116,49 @@ export default function RoomScreen({ navigation, route }) {
                             </TouchableOpacity>
                         </View>
                         <Modal
-                            animationIn="slideInRight"
-                            animationOut="slideOutLeft"
+                            height={0.2}
+                            width={1}
+                            margin={0}
+                            padding={0}
+                            style={styles.modal}
+                           
+                            modalAnimation={new SlideAnimation({
+                                intialValue:0,
+                                slideFrom: 'left',
+                                useNativeDriver: true,
+                            })}
                             //animationType="slide"
                             transparent={true}
                             visible={modalSpellVisible}
-                            onToucheOutside={() => setModalSpellVisible(!modalSpellVisible)}
+                            //onToucheOutside={() => setModalSpellVisible(visible=false)}
                             onRequestClose={() => {
-                                //Alert.alert('Modal has been closed.');
-                                setModalSpellVisible(!modalSpellVisible);
+                                setModalSpellVisible(visible=false);
                             }}>
-                            <ModalContent>
-                                <View style={styles.centeredView}>
-                                    <View style={styles.modalView}>
-                                        <ImageBackground
+                            <View style={styles.buttonContainer}>
+                                        {/*<ImageBackground
                                             source={require('../../assets/background/background.png')}
-                                            style={styles.backgroundImageModal}>
+                                            style={styles.backgroundImageModal}>*/}
+                                    <View style={styles.spellContainer}>
+                                        <View style={styles.spellContainerThreeMax}>
                                             <TouchableOpacity style={styles.spell} ></TouchableOpacity>
                                             <TouchableOpacity style={styles.spell} ></TouchableOpacity>
                                             <TouchableOpacity style={styles.spell} ></TouchableOpacity>
+                                        </View>
+                                        <View style={styles.spellContainerTwoMax}>    
                                             <TouchableOpacity style={styles.spell} ></TouchableOpacity>
-                                            <View style={styles.btnModal}>
-                                                <Pressable
+                                            <TouchableOpacity style={styles.spell} ></TouchableOpacity>
+                                        </View>
+                                    </View>
+                                    <View style={styles.btnModal}>
+                                                <TouchableOpacity
                                                     style={[styles.button, styles.buttonClose]}
                                                     onPress={() => setModalSpellVisible(!modalSpellVisible)}>
                                                     <Text style={styles.textStyle}>Retour</Text>
-                                                </Pressable>
-                                            </View>
-                                        </ImageBackground>
+                                                </TouchableOpacity>
                                     </View>
-                                </View>
-                            </ModalContent>
+                                    
+                                        {/*</ImageBackground>*/}
+                            </View>
                         </Modal>
                         {/*MODAL SPELL <Pressable style={styles.spellModal} onPress={setModalSpellVisible(!modalSpellVisible)} >
                             </Pressable>*/ }
@@ -371,60 +384,81 @@ const styles = StyleSheet.create({
 */
 
     //Modal NativeModal
-    centeredView: {
-        height: '35%',
-        flexDirection: 'row',
-        justifyContent: 'left',
-        alignItems: 'flex-end',
-        borderRadius: 15,
+    modal:{
+         justifyContent:'flex-end',
+         borderRadius: 20,
     },
-    modalView: {
-        margin: 0,
-        //marginTop: '55%',
-        //backgroundColor: 'white',
-        borderRadius: 20,
-        padding: 15,
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-        elevation: 5,
-        width: '70%',
-        height: '60%'
-    },
-    backgroundImageModal: {
+    /*backgroundImageModal: {
         //flex: 1,
         width: '100%',
         height: '100%',
         resizeMode: 'cover',
         borderRadius: 20,
-    },
-    button: {
-        borderRadius: 20,
-        padding: 10,
-        elevation: 2,
+        backgroundColor:'green'
+    },*/
+    buttonContainer: {
+        
+        height:'100%',
+        width: "100%",
+        justifyContent:'left',
+        flexDirection: 'row',
+        backgroundColor:'rgb(180, 157, 136)',
+        borderRadius: 7,
+        borderColor:'rgb(85,69,63)',
+        borderWidth:5,
     },
     btnModal: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginTop: '30%',
-        width: '100%'
+        //backgroundColor:'yellow',
+        justifyContent: 'center',
+        alignItems: 'center',
+        width:'30%',
+        borderRadius:20,
     },
     buttonClose: {
-        backgroundColor: 'red',
-        width: '45%',
-        height: 50,//'50%',
+        
+        height: 57,//'30%',//65px
+        width: 57,//'18%',//65px
+        borderRadius: 57 / 2,
+        backgroundColor: 'rgb(246, 89, 89)',
+        //marginBottom: '8.5%', //30px
+        justifyContent: 'center',
         alignItems: 'center',
+        //marginTop: '2%'
+        borderWidth:3,
     },
-    openedModal: {
-
+    spellContainer:{
+        height: "100%",
+        width: '70%',
+        justifyContent:'center',
+        //backgroundColor:'orange',
+        borderRadius:20,
+    },
+    spellContainerThreeMax: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        //backgroundColor:'purple',
+        
+        
+    },
+    spellContainerTwoMax: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        //backgroundColor:'blue',
+        
+        
     },
     spell: {
-
+        alignItems: 'center',
+        height: 57,//'30%',//65px
+        width: 57,//'18%',//65px
+        borderRadius: 57 / 2,
+        backgroundColor: 'rgb(246, 89, 89)',
+        //marginBottom: '8.5%', //30px
+        justifyContent: 'center',
+        alignItems: 'center',
+        //marginTop: '2%'
+        marginInline:'4%',
+        borderWidth:3,
     }
 
 }) 
