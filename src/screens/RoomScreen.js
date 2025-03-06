@@ -19,7 +19,7 @@ export default function RoomScreen({ navigation }) {
     const goToGrimoire = () => {
         navigation.navigate('Grimoire');
     }
-   
+
 
 
     //MODALSPELL
@@ -61,15 +61,15 @@ export default function RoomScreen({ navigation }) {
                     <View style={styles.underheaderContainer}>
                         <View style={styles.upperMessageBox}>
                             <TouchableOpacity style={styles.roomSettings}>
-                                <FontAwesome name='cog' size={40} color= 'rgb(195, 157, 136)'/*'rgb(85,69,63)'*/ />
-                           </TouchableOpacity> 
-                           <View style={styles.roomInfos}>
+                                <FontAwesome name='cog' size={40} color='rgb(195, 157, 136)'/*'rgb(85,69,63)'*/ />
+                            </TouchableOpacity>
+                            <View style={styles.roomInfos}>
                                 <Text style={styles.creatorRoomName}>zozo@2432</Text>
                                 <Text style={styles.roomName}>Bond, Troll Bond</Text>
                                 <Text style={styles.numberOfParticipants}>101 Participants</Text>
                             </View>
                             <TouchableOpacity style={styles.playerList}>
-                                <FontAwesome name='users' size={30} color= 'rgb(195, 157, 136)'/* 'rgb(85,69,63)'*//>
+                                <FontAwesome name='users' size={30} color='rgb(195, 157, 136)'/* 'rgb(85,69,63)'*/ />
                             </TouchableOpacity>
                         </View>
 
@@ -78,57 +78,53 @@ export default function RoomScreen({ navigation }) {
                         </View>
 
                         <View style={styles.underMessageBox}>
-
                             <View style={styles.placeholder}>
                                 <View style={styles.backgroundPlaceholder}>
                                     <TextInput
                                         placeholder="Tape ton message ici !"
                                         placeholderTextColor="gray"
                                         style={styles.placeholderText}>
-
                                     </TextInput>
                                 </View>
-                                <TouchableOpacity style={styles.placeholderButton}>
-                                    <Text >Envoyer message</Text>
-                                </TouchableOpacity>
                             </View>
-                            <Pressable style={styles.spellModal} onPress={() => setModalSpellVisible(true)} >
-                            </Pressable>
-
-                            {/*MODAL SPELL <Pressable style={styles.spellModal} onPress={setModalSpellVisible(!modalSpellVisible)} >
-                            </Pressable>*/ }
-                            <Modal 
-                                /*animationIn="slideInRight"
-                                animationOut="slideOutLeft"*/
-                                animationType="slide"
-                                transparent={true}
-                                visible={modalSpellVisible}
-                                onRequestClose={() => {
-                                    Alert.alert('Modal has been closed.');
-                                    setModalSpellVisible(!modalSpellVisible);
-                                }}>
-                                <View style={styles.centeredView}>
-                                    <View style={styles.modalView}>
-                                        <TouchableOpacity style={styles.spell} ><Text>taha</Text></TouchableOpacity>
-                                        <TouchableOpacity style={styles.spell} ></TouchableOpacity>
-                                        <TouchableOpacity style={styles.spell} ></TouchableOpacity>
-                                        <TouchableOpacity style={styles.spell} ></TouchableOpacity>
-                                        <View style={styles.btnModal}>
+                        </View>
+                        <View style={styles.buttons}>
+                                <TouchableOpacity style={styles.placeholderButton}>
+                                    <Text style={styles.placeholderButtonText}>Envoyer message</Text>
+                                    <FontAwesome name='send-o' size={15} color='rgb(239, 233, 225)' marginHorizontal={'13%'} />
+                                </TouchableOpacity>
+                                <TouchableOpacity style={styles.spellModal} onPress={() => setModalSpellVisible(true)} >
+                                    <FontAwesome name='fire' size={30} color='rgb(239, 233, 225)' />
+                                </TouchableOpacity>
+                        </View>
+                        <Modal
+                            /*animationIn="slideInRight"
+                            animationOut="slideOutLeft"*/
+                            animationType="slide"
+                            transparent={true}
+                            visible={modalSpellVisible}
+                            onRequestClose={() => {
+                                //Alert.alert('Modal has been closed.');
+                                setModalSpellVisible(!modalSpellVisible);
+                            }}>
+                            <View style={styles.centeredView}>
+                                <View style={styles.modalView}>
+                                    <TouchableOpacity style={styles.spell} ><Text>taha</Text></TouchableOpacity>
+                                    <TouchableOpacity style={styles.spell} ></TouchableOpacity>
+                                    <TouchableOpacity style={styles.spell} ></TouchableOpacity>
+                                    <TouchableOpacity style={styles.spell} ></TouchableOpacity>
+                                    <View style={styles.btnModal}>
                                         <Pressable
                                             style={[styles.button, styles.buttonClose]}
                                             onPress={() => setModalSpellVisible(!modalSpellVisible)}>
                                             <Text style={styles.textStyle}>Retour</Text>
                                         </Pressable>
                                     </View>
-                                    </View>
-                                    
                                 </View>
-
-
-                            </Modal>
-
-
-                        </View>
+                            </View>
+                        </Modal>
+                        {/*MODAL SPELL <Pressable style={styles.spellModal} onPress={setModalSpellVisible(!modalSpellVisible)} >
+                            </Pressable>*/ }
 
                     </View>
                 </ImageBackground>
@@ -167,16 +163,17 @@ const styles = StyleSheet.create({
     underheaderContainer: {
         //backgroundColor: "blue",
         marginTop: 0,
+        //heigth:'100%',
         flex: 1,
         width: '96%',
-        flexDirection: "column",
+        
         alignItems: 'center',
-        justifyContent: 'center',
+        //justifyContent: 'center',
         margin: '2%',
     },
     upperMessageBox: {
         //backgroundColor: 'grey',
-        height: '20%',
+        height: '17%',
         width: '100%',
         flexDirection: 'row',
         justifyContent: 'space-evenly',
@@ -184,7 +181,7 @@ const styles = StyleSheet.create({
     },
     roomSettings: {
         //backgroundColor: 'green',
-        height: '30%',
+        height: 45,//'30%',
         width: '20%',
         justifyContent: 'center',
         alignItems: 'center',
@@ -210,14 +207,14 @@ const styles = StyleSheet.create({
     },
     playerList: {
         //backgroundColor: 'yellow',
-        justifyContent:'center',
+        justifyContent: 'center',
         alignItems: 'center',
-        height: '30%',
+        height: 45,//'30%',
         width: '20%',
     },
     messageBox: {
         //backgroundColor: 'orange',
-        height: '50%',
+        height:  '54%', //358 , //'50%',
         width: '100%',
         borderRadius: 10,
         borderColor: 'maroon',
@@ -226,52 +223,67 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     underMessageBox: {
-        //backgroundColor: 'green',
-        height: '28%',
+        //backgroundColor: 'green', 
         width: '100%',
-        flexDirection: 'row',
-        alignItems: 'flex-end',
-        justifyContent: 'space-around',
-        marginBottom: 15,
+        flexDirection: 'column',
+        //alignItems: 'flex-end',
+        //justifyContent: 'space-around',
+        //marginBottom: 15,
+        marginTop:'2%'
     },
     placeholder: {
-        height: 80,
+        height: 88,
         //backgroundColor: 'purple',
-        marginBottom: 85,
-        width: '70%',
+        width: '100%',
         borderRadius: 10,
         borderColor: 'grey',
         borderWidth: 2,
-        //backgroundColor:'grey',
         color: 'black',
         //opacity:0.1,
     },
     placeholderText: {
-        height: 84,
-
+        height: '100%',//84px
+        marginBottom: '1%',
+        //backgroundColor: 'yellow'
         //opacity:0.1,
     },
-    /*backgroundPlaceholder:{
-         backgroundColor: 'grey',
-         borderRadius: 10 ,
-         borderBottom: 2,
-         opacity: 0.1,   
-     },*/
-    placeholderButton: {
-        borderRadius: 30,
+    /*backgroundPlaceholder: {
+        backgroundColor: 'grey',
+        borderRadius: 10,
+        //borderBottom: 2,
+        opacity: 0.1,
+    },*/
+    buttons: {
+        //backgroundColor: 'blue',
+        flexDirection: 'row',
         width: '100%',
-        height: 50,
+        justifyContent: 'space-evenly',
+        
+        
+    },
+    placeholderButton: {
+        flexDirection: 'row',
+        borderRadius: 30,
+        width: '75%',
+        height: 57,//'65%',//50px
         backgroundColor: 'rgb(195, 157, 136)',
-        justifyContent: 'center',
+        justifyContent: 'flex-end',
         alignItems: 'center',
         fontweight: 'bold',
+        marginTop: '2%'
+    },
+    placeholderButtonText: {
+        color: 'rgb(239, 233, 225)',
     },
     spellModal: {
-        height: 66,
-        width: 66,
+        height: 57,//'30%',//65px
+        width: 57,//'18%',//65px
         backgroundColor: 'rgb(246, 89, 89)',
-        marginBottom: 30,
-        borderRadius: 20,
+        marginBottom: '8.5%', //30px
+        borderRadius: 57 / 2,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: '2%'
     },
 
 
