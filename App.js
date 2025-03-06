@@ -21,6 +21,8 @@ import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import user from './src/store/user';
 
+import { ModalPortal } from 'react-native-modals';
+
 const store = configureStore({
   reducer: { user },
 });
@@ -129,6 +131,7 @@ export default function App() {
           <Stack.Screen name="TabNavigator" component={TabNavigator} />
         </Stack.Navigator>
       </NavigationContainer>
+      <ModalPortal />
     </Provider>
   );
 }

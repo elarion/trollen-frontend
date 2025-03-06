@@ -1,11 +1,15 @@
 import { StyleSheet, Text, View, Image, TouchableOpacity, ImageBackground, TextInput, Pressable } from "react-native"
-//import { Modal } from 'react-native-modal'
-import { Modal } from 'react-native'
+import { Modal, ModalContent } from 'react-native-modals'
+//import { Modal } from 'react-native'
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { Header } from 'react-native-elements';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { useState } from "react";
 import { useSelector } from "react-native"
+
+
+
+
 export default function RoomScreen({ navigation }) {
     const goToSettings = () => {
         navigation.navigate('Settings');
@@ -89,39 +93,46 @@ export default function RoomScreen({ navigation }) {
                             </View>
                         </View>
                         <View style={styles.buttons}>
-                                <TouchableOpacity style={styles.placeholderButton}>
-                                    <Text style={styles.placeholderButtonText}>Envoyer message</Text>
-                                    <FontAwesome name='send-o' size={15} color='rgb(239, 233, 225)' marginHorizontal={'13%'} />
-                                </TouchableOpacity>
-                                <TouchableOpacity style={styles.spellModal} onPress={() => setModalSpellVisible(true)} >
-                                    <FontAwesome name='fire' size={30} color='rgb(239, 233, 225)' />
-                                </TouchableOpacity>
+                            <TouchableOpacity style={styles.placeholderButton}>
+                                <Text style={styles.placeholderButtonText}>Envoyer message</Text>
+                                <FontAwesome name='send-o' size={15} color='rgb(239, 233, 225)' marginHorizontal={'13%'} />
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.spellModal} onPress={() => setModalSpellVisible(true)} >
+                                <FontAwesome name='fire' size={30} color='rgb(239, 233, 225)' />
+                            </TouchableOpacity>
                         </View>
                         <Modal
-                            /*animationIn="slideInRight"
-                            animationOut="slideOutLeft"*/
-                            animationType="slide"
+                            animationIn="slideInRight"
+                            animationOut="slideOutLeft"
+                            //animationType="slide"
                             transparent={true}
                             visible={modalSpellVisible}
+                            onToucheOutside={()=> setModalSpellVisible(!modalSpellVisible)}
                             onRequestClose={() => {
                                 //Alert.alert('Modal has been closed.');
                                 setModalSpellVisible(!modalSpellVisible);
                             }}>
-                            <View style={styles.centeredView}>
-                                <View style={styles.modalView}>
-                                    <TouchableOpacity style={styles.spell} ><Text>taha</Text></TouchableOpacity>
-                                    <TouchableOpacity style={styles.spell} ></TouchableOpacity>
-                                    <TouchableOpacity style={styles.spell} ></TouchableOpacity>
-                                    <TouchableOpacity style={styles.spell} ></TouchableOpacity>
-                                    <View style={styles.btnModal}>
-                                        <Pressable
-                                            style={[styles.button, styles.buttonClose]}
-                                            onPress={() => setModalSpellVisible(!modalSpellVisible)}>
-                                            <Text style={styles.textStyle}>Retour</Text>
-                                        </Pressable>
+                            <ModalContent>
+                                <View style={styles.centeredView}>
+                                    <View style={styles.modalView}>
+                                        <ImageBackground
+                                            source={require('../../assets/background/background.png')}
+                                            style={styles.backgroundImageModal}>
+                                            <TouchableOpacity style={styles.spell} ></TouchableOpacity>
+                                            <TouchableOpacity style={styles.spell} ></TouchableOpacity>
+                                            <TouchableOpacity style={styles.spell} ></TouchableOpacity>
+                                            <TouchableOpacity style={styles.spell} ></TouchableOpacity>
+                                            <View style={styles.btnModal}>
+                                                <Pressable
+                                                    style={[styles.button, styles.buttonClose]}
+                                                    onPress={() => setModalSpellVisible(!modalSpellVisible)}>
+                                                    <Text style={styles.textStyle}>Retour</Text>
+                                                </Pressable>
+                                            </View>
+                                        </ImageBackground>
                                     </View>
                                 </View>
-                            </View>
+                            </ModalContent>
                         </Modal>
                         {/*MODAL SPELL <Pressable style={styles.spellModal} onPress={setModalSpellVisible(!modalSpellVisible)} >
                             </Pressable>*/ }
@@ -166,7 +177,7 @@ const styles = StyleSheet.create({
         //heigth:'100%',
         flex: 1,
         width: '96%',
-        
+
         alignItems: 'center',
         //justifyContent: 'center',
         margin: '2%',
@@ -214,7 +225,7 @@ const styles = StyleSheet.create({
     },
     messageBox: {
         //backgroundColor: 'orange',
-        height:  '54%', //358 , //'50%',
+        height: '54%', //358 , //'50%',
         width: '100%',
         borderRadius: 10,
         borderColor: 'maroon',
@@ -229,7 +240,7 @@ const styles = StyleSheet.create({
         //alignItems: 'flex-end',
         //justifyContent: 'space-around',
         //marginBottom: 15,
-        marginTop:'2%'
+        marginTop: '2%'
     },
     placeholder: {
         height: 88,
@@ -258,8 +269,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         width: '100%',
         justifyContent: 'space-evenly',
-        
-        
+
+
     },
     placeholderButton: {
         flexDirection: 'row',
@@ -288,17 +299,20 @@ const styles = StyleSheet.create({
 
 
     //MODAL
-
-    centeredView: {
-        height: '120%',
-        justifyContent: 'center',
-        alignItems: 'center',
+    //Modal classico
+    /*centeredView: {
+        height: '35%',
+        flexDirection: 'row',
+        justifyContent: 'left',
+        alignItems:'flex-end',
+        borderRadius: 15,
     },
     modalView: {
-        margin: 20,
-        backgroundColor: 'white',
+        margin: 0,
+        //marginTop: '55%',
+        //backgroundColor: 'white',
         borderRadius: 20,
-        padding: 35,
+        padding: 15,
         alignItems: 'center',
         shadowColor: '#000',
         shadowOffset: {
@@ -308,8 +322,15 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 4,
         elevation: 5,
-        width: '90%',
+        width: '70%',
         height: '60%'
+    },
+    backgroundImageModal: {
+        //flex: 1,
+        width: '100%',
+        height: '100%',
+        resizeMode: 'cover',
+        borderRadius:20,
     },
     button: {
         borderRadius: 20,
@@ -325,6 +346,65 @@ const styles = StyleSheet.create({
     buttonClose: {
         backgroundColor: 'red',
         width: '45%',
+        height: 50,//'50%',
+        alignItems: 'center',
+    },
+    openedModal: {
+
+    },
+    spell: {
+
+    }
+*/
+
+    //Modal NativeModal
+    centeredView: {
+        height: '35%',
+        flexDirection: 'row',
+        justifyContent: 'left',
+        alignItems: 'flex-end',
+        borderRadius: 15,
+    },
+    modalView: {
+        margin: 0,
+        //marginTop: '55%',
+        //backgroundColor: 'white',
+        borderRadius: 20,
+        padding: 15,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+        width: '70%',
+        height: '60%'
+    },
+    backgroundImageModal: {
+        //flex: 1,
+        width: '100%',
+        height: '100%',
+        resizeMode: 'cover',
+        borderRadius: 20,
+    },
+    button: {
+        borderRadius: 20,
+        padding: 10,
+        elevation: 2,
+    },
+    btnModal: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: '30%',
+        width: '100%'
+    },
+    buttonClose: {
+        backgroundColor: 'red',
+        width: '45%',
+        height: 50,//'50%',
         alignItems: 'center',
     },
     openedModal: {
@@ -334,4 +414,4 @@ const styles = StyleSheet.create({
 
     }
 
-})
+}) 
