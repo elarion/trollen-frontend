@@ -1,16 +1,17 @@
 import { StyleSheet, Text, View, Image, TouchableOpacity, ImageBackground, TextInput, Pressable } from "react-native"
 import { Modal, SlideAnimation } from 'react-native-modals'
+import axiosInstance from '../utils/axiosInstance';
 //import { Modal } from 'react-native'
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { Header } from 'react-native-elements';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSelector } from "react-native"
 
 
 
 
-export default function RoomScreen({ navigation }) {
+export default function RoomScreen({ navigation, route }) {
     const goToSettings = () => {
         navigation.navigate('Settings');
     }
@@ -24,7 +25,19 @@ export default function RoomScreen({ navigation }) {
         navigation.navigate('Grimoire');
     }
 
+    const { room_id } = route.params;
+    const [roomInfo, setRoomInfo] = useState([]);
+    console.log(room_id);
+    console.log(roomInfo)
 
+    useEffect(() => {
+        (async () => {
+            const response = await axiosInstance.get(`/rooms/${room_id}`)
+            setRoomInfo(response.data.room)
+
+        })()
+
+    }, [])
 
     //MODALSPELL
     const [modalSpellVisible, setModalSpellVisible] = useState(false);
@@ -64,14 +77,14 @@ export default function RoomScreen({ navigation }) {
                         }
                     />
                     <View style={styles.underheaderContainer}>
-                        <View style={styles.upperMessageBox}>
+                        <View style={styles.upperMessageBox} key={roomInfo._id}>
                             <TouchableOpacity style={styles.roomSettings}>
                                 <FontAwesome name='cog' size={40} color='rgb(195, 157, 136)'/*'rgb(85,69,63)'*/ />
                             </TouchableOpacity>
                             <View style={styles.roomInfos}>
-                                <Text style={styles.creatorRoomName}>zozo@2432</Text>
-                                <Text style={styles.roomName}>Bond, Troll Bond</Text>
-                                <Text style={styles.numberOfParticipants}>101 Participants</Text>
+                                <Text style={styles.creatorRoomName}>{roomInfo.admin?.username}</Text>
+                                <Text style={styles.roomName}>{roomInfo.name}</Text>
+                                <Text style={styles.numberOfParticipants}>{roomInfo.participants?.length}</Text>
                             </View>
                             <TouchableOpacity style={styles.playerList}>
                                 <FontAwesome name='users' size={30} color='rgb(195, 157, 136)'/* 'rgb(85,69,63)'*/ />
@@ -117,7 +130,7 @@ export default function RoomScreen({ navigation }) {
                             //animationType="slide"
                             transparent={true}
                             visible={modalSpellVisible}
-                            //onToucheOutside={()=> setModalSpellVisible(visible=false)}
+                            //onToucheOutside={() => setModalSpellVisible(visible=false)}
                             onRequestClose={() => {
                                 setModalSpellVisible(visible=false);
                             }}>
