@@ -35,7 +35,7 @@ const LobbyStack = () => (
     <Stack.Screen name="Profile" component={ProfileScreen} />
     <Stack.Screen name="News" component={NewsScreen} />
     <Stack.Screen name="Grimoire" component={GrimoireScreen} />
-    
+    <Stack.Screen name="Room" component={RoomScreen}/>
   </Stack.Navigator>
 );
 
@@ -46,6 +46,7 @@ const PortalStack = () => (
     <Stack.Screen name="News" component={NewsScreen} />
     <Stack.Screen name="Profile" component={ProfileScreen} />
     <Stack.Screen name="Grimoire" component={GrimoireScreen} />
+    <Stack.Screen name="Room" component={RoomScreen}/>
   </Stack.Navigator>
 );
 
@@ -93,7 +94,7 @@ const TabNavigator = () => {
         marginBottom: 5,
       },
     })}>
-      <Tab.Screen name="Lobby" component=/* {LobbyStack} */ {LobbyStack} />
+      <Tab.Screen name="Lobby" component=/* {LobbyScreen} */ {LobbyStack} />
       <Tab.Screen name="Portal" component=/* {PortalStack} */ {PortalStack} />
       <Tab.Screen name="Friends" component=/* {FriendsStack} */{FriendsStack} />
       {/* <Stack.Screen name="TopTabs" component={TopTabNavigator} /> */}
