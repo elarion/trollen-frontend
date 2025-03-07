@@ -28,7 +28,7 @@ export default function CharactereCreationScreen({ navigation }) {
     //console.log(genres[genreCount]);
 
     useEffect(() => {
-        const fetchData = async () => {
+        const getDataRaces = async () => {
             try {
                 const response = await fetch(`${EXPO}/races`, { // A MODIFIER
                 });
@@ -42,8 +42,8 @@ export default function CharactereCreationScreen({ navigation }) {
                 console.error("Erreur lors du get :", error);
             }
         };
-        fetchData();
-        const fetchSpell1 = async () => {
+        getDataRaces();
+        const getSpell1 = async () => {
             try {
                 const response = await fetch(`${EXPO}/spells/67c6f3d337c666e9c7754125`, { // A MODIFIER
                 });
@@ -57,8 +57,8 @@ export default function CharactereCreationScreen({ navigation }) {
                 console.error("Erreur lors du get :", error);
             }
         };
-        fetchSpell1()
-        const fetchSpell2 = async () => {
+        getSpell1()
+        const getSpell2 = async () => {
             try {
                 const response = await fetch(`${EXPO}/spells/67c7049375266cda5a3c15f0`, { // A MODIFIER
                 });
@@ -72,8 +72,8 @@ export default function CharactereCreationScreen({ navigation }) {
                 console.error("Erreur lors du get :", error);
             }
         };
-        fetchSpell2()
-        const fetchSpell3 = async () => {
+        getSpell2()
+        const getSpell3 = async () => {
             try {
                 const response = await fetch(`${EXPO}/spells/67c7067a75266cda5a3c15f6`, { // A MODIFIER
                 });
@@ -87,7 +87,7 @@ export default function CharactereCreationScreen({ navigation }) {
                 console.error("Erreur lors du get :", error);
             }
         };
-        fetchSpell3()
+        getSpell3()
     }, []);
 
     const goLeftRace = () => {
