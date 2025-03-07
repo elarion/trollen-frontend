@@ -27,8 +27,8 @@ export default function RoomScreen({ navigation, route }) {
 
     const { room_id } = route.params;
     const [roomInfo, setRoomInfo] = useState([]);
-    console.log(room_id);
-    console.log(roomInfo)
+    //console.log(room_id);
+    //console.log(roomInfo)
 
     useEffect(() => {
         (async () => {
@@ -41,8 +41,220 @@ export default function RoomScreen({ navigation, route }) {
 
     //MODALSPELL
     const [modalSpellVisible, setModalSpellVisible] = useState(false);
-    
-    
+
+    //SPELLS
+
+    const [mot, setMot] = useState('');
+    console.log('mot: ' + mot)
+
+    const [motMaudit, setMotMaudit] = useState('');
+    console.log('mot maudit: ' + motMaudit)
+
+    // Sort anagramme (générer + en sortir un au sort)
+    const megaraman = () => {
+        // Génére liste de tous les anagrammes
+        function genererAnagrammes() {
+            // Fonction pour générer toutes les permutations de lettres
+            function permuter(str) {
+                if (str.length === 1) return [str]; 
+                let result = [];
+                for (let i = 0; i < str.length; i++) {
+                    let lettre = str[i];
+                    let lettresRestantes = str.slice(0, i) + str.slice(i + 1);
+                    let permutationsRestantes = permuter(lettresRestantes);
+                    for (let perm of permutationsRestantes) {
+                        result.push(lettre + perm);
+                    }
+                }
+                return result;
+            }
+            // Générer toutes les permutations
+            const anagramList = permuter(mot);
+            // Filtrer les doublons en utilisant un Set pour les rendre uniques
+            return [...new Set(anagramList)];
+        }
+
+        // Tirer au sort un anagramme de la liste 
+        const anagramList = genererAnagrammes();
+        console.log('ana' + anagramList)
+
+        if (anagramList.length > 0) {
+            let hasard = Math.floor(Math.random() * anagramList.length);
+            // Afficher l'anagramme tiré au sort => Niveau facile    //  Masque = usqMae //
+            setMotMaudit(anagramList[hasard])
+
+            // Afficher l'anagramme tiré au sort => Niveau difficile  //  Masque = Usqmae //
+
+            /*
+            let modifier =(anagramList[hasard]).toLowerCase()
+            function capitalizeFirstLetter(modifier) {
+                return String(modifier).charAt(0).toUpperCase() + String(modifier).slice(1);
+            }
+            setMotMaudit(capitalizeFirstLetter(modifier))
+            */
+
+        } else {
+            alert("Y a un problème");
+        }
+        //setMot('')
+        return motMaudit
+        
+    };
+
+    //Sort Patate Chaude
+    const patateChaude = () => {
+        const pattern = /^epluche/i; //epluchemoi => validé
+        const pattern_ = /^epluche /i; //epluche_moi => validé
+        let splash = 'Splash ! La patate chaude vous a explosé à la gueule, y en a partout'
+        //Si l'utilisateur écrit epluche suivi d'un espace suivi d'un mot => renvoyer le mot sans l'espace (epluche_mot)
+        if (pattern_.test(mot)){
+            setMotMaudit(mot.slice(8,15))  //epluche_moi => moi (sans l'espace)
+            return motMaudit
+
+            //Si l'utilisateur colle epluche et le mot (epluchemot)
+         } else if(pattern.test(mot)){    
+             setMotMaudit(mot.slice(7,15))  //epluchemoi => moi
+             return motMaudit
+            } 
+        //Si l'utilisateur n'a pas écrite epluche
+            setMotMaudit(splash)
+            setMot('')
+        return motMaudit
+    };
+
+    //Nalrev
+    const nalrev = () => {
+        if (mot.length > 0)
+            setMotMaudit(mot.split('').reverse().join(''));
+        //setMot('')
+    }
+
+//FRANKLIN : ESPACE TOUTE LES 2 LETTRES 
+const franklin = () => {
+    if (mot.length > 0) {
+        // découpe le message en tab de charactere
+        const characters = mot.split('');
+        // ajout espace tous les deux lettres
+        for (let i = 2; i < characters.length; i += 3) {
+            characters.splice(i, 0, ' ');
+        }
+        // transformer le tab en string
+        setMotMaudit(characters.join(''));
+        //setMot('');
+    }
+}
+
+//BéBéGaiement
+const bebegaiement = () => {
+    if (mot.length > 1) {
+        // Découpe le message en tableau de mots
+        const words = mot.split(' ');
+        console.log(words)
+        // Transforme chaque mot pour appliquer l'effet "BéBéGaiement"
+        const begayedWords = words.map(word => {
+            if (word.length > 0) {
+                // Duplique la première lettre et insère un tiret
+                return word[0] + word[1] + '-' + word;
+            }
+            return word;
+        });
+
+        // Rejoins les mots transformés en une seule chaîne
+        const begayedMessage = begayedWords.join(' ');
+
+        // Met à jour le message transformé
+        setMotMaudit(begayedMessage);
+
+        // Réinitialise le message original
+        //setMot('');
+    }
+}
+
+// CoupéDécalé
+const coupeDecale = () => {
+    if (mot.length > 1) {
+        const splitword = mot.split('');
+        const wordlengthpart1 = (splitword.length / 2);
+        const part1 = splitword.slice(0, wordlengthpart1).join('')
+        const part2 = splitword.slice(wordlengthpart1).join('')
+        setMotMaudit(part2 + part1);
+        //setMot('')
+    }
+};
+
+//MiroirMiroir
+const miroirMiroir = () => {
+    if (mot.length > 1){
+        const part1 = mot
+        const part2 = mot.split('').reverse().join('')
+        setMotMaudit(part1 + part2);
+        //setMot('')
+    }
+};
+
+//ssooossa
+//transforme les conssone en double ss
+const ssooossa = () => {
+    if (mot.length > 1) {
+        const patternConsonnes = /[bcdfghjklmnpqrstvwxyz]/gi;
+        console.log(patternConsonnes.test(mot))
+        const messageTransform = mot.replace(patternConsonnes, 'ss')
+        setMotMaudit(messageTransform);
+        //setMot('')
+    }
+}
+
+/////////////////////////////////////////////////////////////////////
+////////////////////////////Passifs//////////////////////////////////
+/////////////////////////////////////////////////////////////////////
+
+const [passive, setPassive] = useState('')
+console.log(passive)
+const {user_id} = route.params
+
+useEffect(() => {
+    (async () => {
+        const response = await axiosInstance.get(`/users/by-id/${user_id}`) // cherche a recuperer la race de l'utilisateur
+        setPassive(response.data.races.spells)
+
+    })()
+
+}, [])
+
+const [pileDeSortsSubis, setPileDeSortsSubis] = useState([])
+
+const zeconome = () => {
+    if (pileDeSortsSubis[0] = patateChaude() ){
+        return setMotMaudit(mot)
+    }
+};
+
+const crayonDansLaBouche = () => {
+    if(pileDeSortsSubis[0] = bebegaiement() ){
+        return setMotMaudit(mot)
+    }
+};
+
+const nonTe = () => {
+    if(pileDeSortsSubis[0] = nalrev() ){
+        return setMotMaudit(mot)
+    }
+};
+
+const antiReflet = () => {
+    if(pileDeSortsSubis[0] = miroirMiroir() ){
+        return setMotMaudit(mot)
+    }
+};
+
+const langueFourchue = () => {
+    if(pileDeSortsSubis[0] = ssooossa() ){
+        return setMotMaudit(mot)
+    }
+};
+
+
+console.log(motMaudit)
 
     return (
         <SafeAreaProvider>
@@ -92,14 +304,14 @@ export default function RoomScreen({ navigation, route }) {
                         </View>
 
                         <View style={styles.messageBox}>
-                            <Text>Messages are coming</Text>
+                            <Text>{motMaudit}</Text>
                         </View>
 
                         <View style={styles.underMessageBox}>
                             <View style={styles.placeholder}>
                                 <View style={styles.backgroundPlaceholder}>
                                     <TextInput
-                                        placeholder="Tape ton message ici !"
+                                        placeholder="Tape ton message ici !" onChangeText={value => setMot(value)} value={mot}
                                         placeholderTextColor="gray"
                                         style={styles.placeholderText}>
                                     </TextInput>
@@ -121,9 +333,9 @@ export default function RoomScreen({ navigation, route }) {
                             margin={0}
                             padding={0}
                             style={styles.modal}
-                           
+
                             modalAnimation={new SlideAnimation({
-                                intialValue:0,
+                                intialValue: 0,
                                 slideFrom: 'left',
                                 useNativeDriver: true,
                             })}
@@ -132,32 +344,36 @@ export default function RoomScreen({ navigation, route }) {
                             visible={modalSpellVisible}
                             //onToucheOutside={() => setModalSpellVisible(visible=false)}
                             onRequestClose={() => {
-                                setModalSpellVisible(visible=false);
+                                setModalSpellVisible(visible = false);
                             }}>
                             <View style={styles.buttonContainer}>
-                                        {/*<ImageBackground
+                                {/*<ImageBackground
                                             source={require('../../assets/background/background.png')}
                                             style={styles.backgroundImageModal}>*/}
-                                    <View style={styles.spellContainer}>
-                                        <View style={styles.spellContainerThreeMax}>
-                                            <TouchableOpacity style={styles.spell} ></TouchableOpacity>
-                                            <TouchableOpacity style={styles.spell} ></TouchableOpacity>
-                                            <TouchableOpacity style={styles.spell} ></TouchableOpacity>
-                                        </View>
-                                        <View style={styles.spellContainerTwoMax}>    
-                                            <TouchableOpacity style={styles.spell} ></TouchableOpacity>
-                                            <TouchableOpacity style={styles.spell} ></TouchableOpacity>
-                                        </View>
+                                <View style={styles.spellContainer}>
+                                    <View style={styles.spellContainerThreeMax}>
+                                        <TouchableOpacity style={styles.spell} onPress={() => megaraman(mot)}></TouchableOpacity>{/**/}
+                                        <TouchableOpacity style={styles.spell} onPress={() => franklin(mot)}></TouchableOpacity>{/*Franklin*/}
+                                        <TouchableOpacity style={styles.spell} onPress={() => miroirMiroir(mot)}></TouchableOpacity>{/**/}
+                                        <TouchableOpacity style={styles.spell} onPress={() => coupeDecale(mot)}></TouchableOpacity>{/**/}
                                     </View>
-                                    <View style={styles.btnModal}>
-                                                <TouchableOpacity
-                                                    style={[styles.button, styles.buttonClose]}
-                                                    onPress={() => setModalSpellVisible(!modalSpellVisible)}>
-                                                    <Text style={styles.textStyle}>Retour</Text>
-                                                </TouchableOpacity>
+                                    <View style={styles.spellContainerTwoMax}>
+                                        <TouchableOpacity style={styles.spell} onPress={() => bebegaiement(mot)}></TouchableOpacity>{/*BBGaiement*/}
+                                        <TouchableOpacity style={styles.spell} onPress={() => ssooossa(mot)}></TouchableOpacity>{/*ssoooossa*/}
+                                        <TouchableOpacity style={styles.spell} onPress={() => nalrev(mot)}></TouchableOpacity>{/**/}
+                                        <TouchableOpacity style={styles.spell} onPress={() => patateChaude(mot)}></TouchableOpacity>{/**/}
                                     </View>
-                                    
-                                        {/*</ImageBackground>*/}
+                                </View>
+                                <View style={styles.btnModal}>
+                                 <TouchableOpacity style={styles.passiveSpell} onPress={() => activePassive(passive)}></TouchableOpacity>{/**/}
+                                    <TouchableOpacity
+                                        style={[styles.button, styles.buttonClose]}
+                                        onPress={() => setModalSpellVisible(!modalSpellVisible)}>
+                                        <Text style={styles.textStyle}>Retour</Text>
+                                    </TouchableOpacity>
+                                </View>
+
+                                {/*</ImageBackground>*/}
                             </View>
                         </Modal>
                         {/*MODAL SPELL <Pressable style={styles.spellModal} onPress={setModalSpellVisible(!modalSpellVisible)} >
@@ -384,9 +600,9 @@ const styles = StyleSheet.create({
 */
 
     //Modal NativeModal
-    modal:{
-         justifyContent:'flex-end',
-         borderRadius: 20,
+    modal: {
+        justifyContent: 'flex-end',
+        borderRadius: 20,
     },
     /*backgroundImageModal: {
         //flex: 1,
@@ -397,25 +613,25 @@ const styles = StyleSheet.create({
         backgroundColor:'green'
     },*/
     buttonContainer: {
-        
-        height:'100%',
+
+        height: '100%',
         width: "100%",
-        justifyContent:'left',
+        justifyContent: 'left',
         flexDirection: 'row',
-        backgroundColor:'rgb(180, 157, 136)',
+        backgroundColor: 'rgb(180, 157, 136)',
         borderRadius: 7,
-        borderColor:'rgb(85,69,63)',
-        borderWidth:5,
+        borderColor: 'rgb(85,69,63)',
+        borderWidth: 5,
     },
     btnModal: {
         //backgroundColor:'yellow',
         justifyContent: 'center',
         alignItems: 'center',
-        width:'30%',
-        borderRadius:20,
+        width: '30%',
+        borderRadius: 20,
     },
     buttonClose: {
-        
+
         height: 57,//'30%',//65px
         width: 57,//'18%',//65px
         borderRadius: 57 / 2,
@@ -424,28 +640,28 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         //marginTop: '2%'
-        borderWidth:3,
+        borderWidth: 3,
     },
-    spellContainer:{
+    spellContainer: {
         height: "100%",
         width: '70%',
-        justifyContent:'center',
+        justifyContent: 'center',
         //backgroundColor:'orange',
-        borderRadius:20,
+        borderRadius: 20,
     },
     spellContainerThreeMax: {
         flexDirection: 'row',
         justifyContent: 'center',
         //backgroundColor:'purple',
-        
-        
+
+
     },
     spellContainerTwoMax: {
         flexDirection: 'row',
         justifyContent: 'center',
         //backgroundColor:'blue',
-        
-        
+
+
     },
     spell: {
         alignItems: 'center',
@@ -457,8 +673,21 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         //marginTop: '2%'
-        marginInline:'4%',
-        borderWidth:3,
+        marginInline: '4%',
+        borderWidth: 3,
+    },
+    passiveSpell: {
+        alignItems: 'center',
+        height: 57,//'30%',//65px
+        width: 57,//'18%',//65px
+        borderRadius: 57 / 2,
+        backgroundColor: 'blue',
+        //marginBottom: '8.5%', //30px
+        justifyContent: 'center',
+        alignItems: 'center',
+        //marginTop: '2%'
+        marginInline: '4%',
+        borderWidth: 3,
     }
 
 }) 
