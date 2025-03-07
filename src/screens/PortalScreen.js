@@ -67,7 +67,7 @@ export default function PortalScreen({ navigation }) {
             </View>
             <View style={styles.inRoomRight}>
                 <View style={styles.rightUsernameAndJoin}>
-                    <Text style={styles.username}>{item.admin.username}</Text>
+                    <Text style={styles.username}>{item.admin?.username}</Text>
                     <TouchableOpacity style={styles.join} onPress={() => goToRoom(item._id)}>
                         <Text style={styles.textButton}>Join</Text>
                     </TouchableOpacity>
