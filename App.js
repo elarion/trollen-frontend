@@ -16,6 +16,7 @@ import ProfileScreen from './src/screens/ProfileScreen';
 import FriendsScreen from './src/screens/FriendsScreen';
 import GrimoireScreen from './src/screens/GrimoireScreen';
 import NewsScreen from './src/screens/NewsScreen';
+import PartyScreen from './src/screens/PartyScreen';
 
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
@@ -44,6 +45,7 @@ const LobbyStack = () => (
     <Stack.Screen name="News" component={NewsScreen} />
     <Stack.Screen name="Grimoire" component={GrimoireScreen} />
     <Stack.Screen name="Room" component={RoomScreen} />
+    <Stack.Screen name="Party" component={PartyScreen} />
   </Stack.Navigator>
 );
 
