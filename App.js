@@ -21,6 +21,8 @@ import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import user from './src/store/user';
 
+import { ModalPortal } from 'react-native-modals';
+
 const store = configureStore({
   reducer: { user },
 });
@@ -31,11 +33,17 @@ const Tab = createBottomTabNavigator();
 const LobbyStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }} >
     <Stack.Screen name="LobbyMain" component={LobbyScreen} />
-    <Stack.Screen name="Settings" component={SettingsScreen} />
+    <Stack.Screen name="Settings" component={SettingsScreen} /* options={{
+      animation: 'fade',
+      transitionSpec: {
+        open: { animation: 'timing', config: { duration: 0 } },
+        close: { animation: 'timing', config: { duration: 0 } }
+      }
+    }} */ />
     <Stack.Screen name="Profile" component={ProfileScreen} />
     <Stack.Screen name="News" component={NewsScreen} />
     <Stack.Screen name="Grimoire" component={GrimoireScreen} />
-    <Stack.Screen name="Room" component={RoomScreen}/>
+    <Stack.Screen name="Room" component={RoomScreen} />
   </Stack.Navigator>
 );
 
@@ -46,7 +54,7 @@ const PortalStack = () => (
     <Stack.Screen name="News" component={NewsScreen} />
     <Stack.Screen name="Profile" component={ProfileScreen} />
     <Stack.Screen name="Grimoire" component={GrimoireScreen} />
-    <Stack.Screen name="Room" component={RoomScreen}/>
+    <Stack.Screen name="Room" component={RoomScreen} />
   </Stack.Navigator>
 );
 
@@ -94,10 +102,21 @@ const TabNavigator = () => {
         marginBottom: 5,
       },
     })}>
-      <Tab.Screen name="Lobby" component=/* {LobbyScreen} */ {LobbyStack} />
-      <Tab.Screen name="Portal" component=/* {PortalStack} */ {PortalStack} />
-      <Tab.Screen name="Friends" component=/* {FriendsStack} */{FriendsStack} />
-      {/* <Stack.Screen name="TopTabs" component={TopTabNavigator} /> */}
+      <Tab.Screen name="Lobby" component=/* {LobbyScreen} */ {LobbyStack} listeners={({ navigation }) => ({
+        tabPress: (e) => {
+          navigation.navigate('Lobby');
+        },
+      })} />
+      <Tab.Screen name="Portal" component=/* {PortalStack} */ {PortalStack} listeners={({ navigation }) => ({
+        tabPress: (e) => {
+          navigation.navigate('Portal');
+        },
+      })} />
+      <Tab.Screen name="Friends" component=/* {FriendsStack} */{FriendsStack} listeners={({ navigation }) => ({
+        tabPress: (e) => {
+          navigation.navigate('Friends');
+        },
+      })} />
     </Tab.Navigator>
   );
 };
@@ -112,6 +131,7 @@ export default function App() {
           <Stack.Screen name="TabNavigator" component={TabNavigator} />
         </Stack.Navigator>
       </NavigationContainer>
+      <ModalPortal />
     </Provider>
   );
 }
