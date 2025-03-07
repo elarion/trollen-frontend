@@ -84,7 +84,7 @@ export default function LobbyScreen({ navigation }) {
                 setSafe(false);
                 set(false);
                 setModalRoomCreationVisible(!modalRoomCreationVisible);
-                navigation.navigate('Room');
+                navigation.navigate('Room', { room_id: data.room._id });
             }
         } catch (error) {
             console.error("Erreur lors de la création :", error);
@@ -127,7 +127,7 @@ export default function LobbyScreen({ navigation }) {
                 setRoomname('');
                 setPassword('');
                 setModalJoinRoomVisible(!modalJoinRoomVisible);
-                navigation.navigate('Room');
+                navigation.navigate('Room', { room_id: room._id });
             }
         } catch (error) {
             console.error("Erreur lors de la connexion :", error);
