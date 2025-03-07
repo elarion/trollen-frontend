@@ -27,8 +27,8 @@ export default function RoomScreen({ navigation, route }) {
 
     const { room_id } = route.params;
     const [roomInfo, setRoomInfo] = useState([]);
-    console.log(room_id);
-    console.log(roomInfo)
+    /* console.log(room_id);
+    console.log(roomInfo) */
 
     useEffect(() => {
         (async () => {
