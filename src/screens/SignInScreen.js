@@ -1,13 +1,10 @@
-import Config from "react-native-config"; // A CORRIGER
 import { StyleSheet, Text, View, Image, TouchableOpacity, Modal, Pressable, TextInput, ImageBackground } from "react-native"
-import {SafeAreaView, SafeAreaProvider} from 'react-native-safe-area-context';
+import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { useState } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import { loginData } from '../store/user';
 import Checkbox from 'expo-checkbox';
-import {jwtDecode} from 'jwt-decode';
-
-
+import { jwtDecode } from 'jwt-decode';
 
 export default function SignInScreen({ navigation }) {
     const EXPO = process.env.EXPO_PUBLIC_BACKEND_URL
@@ -19,7 +16,6 @@ export default function SignInScreen({ navigation }) {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [isChecked, setChecked] = useState(false);
     const dispatch = useDispatch();
-    //console.log(Config.API_URL)
     const guestMode = () => {
         //navigation.navigate('CharacterCreation')
         // OU
@@ -30,14 +26,14 @@ export default function SignInScreen({ navigation }) {
     const preSignUp = async () => {
         if (isChecked) {
             try {
-                const response = await fetch(`${EXPO}/users/pre-signup`, { // A MODIFIER
+                const response = await fetch(`${EXPO}/users/pre-signup`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username: username, email: email, password: password, confirmPassword: confirmPassword, has_consent: isChecked }),
                 });
 
                 const data = await response.json();
-                
+
                 if (data) {
                     dispatch(loginData({ username: username, email: email, password: password, confirmPassword: confirmPassword, has_consent: isChecked }));
                     setUsername('');
@@ -56,7 +52,7 @@ export default function SignInScreen({ navigation }) {
 
     const signInWithId = async () => {
         try {
-            const response = await fetch(`${EXPO}/users/signin`, { // A MODIFIER
+            const response = await fetch(`${EXPO}/users/signin`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username: username, password: password }),
