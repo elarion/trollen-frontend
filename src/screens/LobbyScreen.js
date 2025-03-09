@@ -3,20 +3,21 @@ import Checkbox from 'expo-checkbox';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { logoutUser } from '../store/authSlice';
 import { Header } from 'react-native-elements';
 import { Dropdown } from 'react-native-element-dropdown';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import axiosInstance from "../utils/axiosInstance";
 
 export default function LobbyScreen({ navigation }) {
-
     //MODAL CREATION DE ROOM INPUT DATA
-    const EXPO = process.env.EXPO_PUBLIC_BACKEND_URL
     const [modalRoomCreationVisible, setModalRoomCreationVisible] = useState(false);
     const [modalJoinRoomVisible, setModalJoinRoomVisible] = useState(false);
-    const user = useSelector(state => state.user.value);
+    const user = useSelector(state => state.auth);
+    const dispatch = useDispatch();
 
-    const [roomList, setRoomList] = useState([]);
+    // const [roomList, setRoomList] = useState([]);
     const [roomname, setRoomname] = useState('');
     const [tag, setTag] = useState('');
 
@@ -52,6 +53,15 @@ export default function LobbyScreen({ navigation }) {
     //console.log('user', user.tokenDecoded.id, 'room_socket_id', 'bojafo', 'name', roomname, 'tags', tag, 'settings', { max: capacityValue, is_safe: isSafe, is_: is, password: password });
 
     //REDIRECTION
+    const handleLogout = async () => {
+        await dispatch(logoutUser()).unwrap(); // Attendre la fin du logout
+
+        // navigation.reset sert à réinitialiser la pile de navigation pour empêcher le retour en arrière du retour en arrière
+        navigation.reset({
+            index: 0,
+            routes: [{ name: "SignIn" }], // Rediriger et empêcher le retour en arrière
+        });
+    };
     const goToSettings = () => {
         navigation.navigate('Settings');
     }
@@ -66,17 +76,17 @@ export default function LobbyScreen({ navigation }) {
     }
     const goToCreateRoom = async () => {
         try {
-            const response = await fetch(`${EXPO}/rooms/create`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user: user.tokenDecoded.id, room_socket_id: 'a'/* A MODIFIER */, name: roomname, tags: tag, settings: { max: capacityValue, is_safe: isSafe, is_: is, password: password } })
+            const response = await axiosInstance.post(`/rooms/create`, {
+                user: user.tokenDecoded.id,
+                room_socket_id: 'a',
+                name: roomname,
+                tags: tag,
+                settings: { max: capacityValue, is_safe: isSafe, is_: is, password: password }
             });
 
-            const data = await response.json();
-            console.log(data);
+            const data = response.data;
+
             if (data) {
-                console.log(data);
-                //dispatch(loginData({ user: user.tokenDecoded.id, room_socket_id: 'bojafo', name: roomname , tags: tag, settings: { max: capacityValue, is_safe: isSafe, is_: is, password: password } }));
                 setRoomname('');
                 setPassword('');
                 setTag('');
@@ -84,51 +94,42 @@ export default function LobbyScreen({ navigation }) {
                 setSafe(false);
                 set(false);
                 setModalRoomCreationVisible(!modalRoomCreationVisible);
-                navigation.navigate('Room', { room_id: data.room._id });
+                navigation.navigate('Room', { roomId: data.room._id });
             }
         } catch (error) {
             console.error("Erreur lors de la création :", error);
         }
-        console.log('Go to Create Room');
     }
 
-    useEffect(() => {
-        const getRoomList = async () => {
-            try {
-                const response = await fetch(`${EXPO}/rooms`, { // A MODIFIER
-                });
+    // useEffect(() => {
+    //     const getRoomList = async () => {
+    //         try {
+    //             const response = await axiosInstance.get(`/rooms`)
 
-                const data = await response.json();
-                if (data) {
-                    setRoomList(data.rooms)
-                    //console.log(data.rooms);
-                }
-            } catch (error) {
-                console.error("Erreur lors du get :", error);
-            }
-        };
-        getRoomList();
-    }, []);
+    //             const data = await response.data;
+
+    //             if (data) {
+    //                 setRoomList(data.rooms)
+    //             }
+    //         } catch (error) {
+    //             console.error("Erreur lors du get :", error);
+    //         }
+    //     };
+    //     getRoomList();
+    // }, []);
 
     const goToRoom = async () => {
-        
         try {
-            const room = roomList.find(room => room.name === roomname);
-            //console.log(room._id);
-            const response = await fetch(`${EXPO}/rooms/join/${room._id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user: user.tokenDecoded.id, password: password })
+            const roomToJoin = await axiosInstance.put(`/rooms/join-by-name/${roomname}`, {
+                password: password
             });
-            const data = await response.json();
 
-            if (data) {
-                console.log(data);
-                setRoomname('');
-                setPassword('');
-                setModalJoinRoomVisible(!modalJoinRoomVisible);
-                navigation.navigate('Room', { room_id: room._id });
-            }
+            if (!roomToJoin.data.success) return;
+
+            setRoomname('');
+            setPassword('');
+            setModalJoinRoomVisible(!modalJoinRoomVisible);
+            navigation.navigate('Room', { roomId: roomToJoin.data.room._id });
         } catch (error) {
             console.error("Erreur lors de la connexion :", error);
         }
@@ -139,6 +140,7 @@ export default function LobbyScreen({ navigation }) {
     return (
         <SafeAreaProvider>
             <SafeAreaView style={styles.container} edges={['left', 'right']}>
+
                 <ImageBackground source={require('../../assets/background/background.png')} style={styles.backgroundImage}>
 
                     {/* HEADER CONFIGURATION */}
@@ -300,6 +302,7 @@ export default function LobbyScreen({ navigation }) {
                         <TouchableOpacity style={styles.joinHazardRoomBtn} onPress={() => goToHazardRoom()}>
                             <Text style={styles.textJoinHazardRoomBtn}>HAZARD ROOM</Text>
                         </TouchableOpacity>
+                        <Text onPress={handleLogout}>logout</Text>
                     </View>
                 </ImageBackground>
             </SafeAreaView>

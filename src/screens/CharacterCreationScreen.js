@@ -4,10 +4,14 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import { loginData } from '../store/user';
+import { signupUser, resetState } from '../store/authSlice';
+import axiosInstance from "../utils/axiosInstance";
 
-export default function CharactereCreationScreen({ navigation }) {
+export default function CharactereCreationScreen({ navigation, route }) {
     const EXPO = process.env.EXPO_PUBLIC_BACKEND_URL
-    const user = useSelector((state) => state.user.value);
+    // const user = useSelector((state) => state.auth);
+    const user = route.params;
+    const dispatch = useDispatch();
     //console.log(user);
 
     const [races, setRaces] = useState([]);
@@ -18,6 +22,8 @@ export default function CharactereCreationScreen({ navigation }) {
     //console.log(spell2);
     //console.log(races[raceCount]?.name)
     //console.log(races[raceCount]?.avatar)
+
+    const { loading, error, success } = useSelector((state) => state.auth);
 
     const genres = [
         'male',
@@ -47,7 +53,7 @@ export default function CharactereCreationScreen({ navigation }) {
             try {
                 const response = await fetch(`${EXPO}/spells/67c6f3d337c666e9c7754125`, { // A MODIFIER
                 });
-    
+
                 const data = await response.json();
                 if (data) {
                     setSpell1(data);
@@ -62,7 +68,7 @@ export default function CharactereCreationScreen({ navigation }) {
             try {
                 const response = await fetch(`${EXPO}/spells/67c7049375266cda5a3c15f0`, { // A MODIFIER
                 });
-    
+
                 const data = await response.json();
                 if (data) {
                     setSpell2(data);
@@ -77,7 +83,7 @@ export default function CharactereCreationScreen({ navigation }) {
             try {
                 const response = await fetch(`${EXPO}/spells/67c7067a75266cda5a3c15f6`, { // A MODIFIER
                 });
-    
+
                 const data = await response.json();
                 if (data) {
                     setSpell3(data);
@@ -106,29 +112,22 @@ export default function CharactereCreationScreen({ navigation }) {
         setGenreCount(prev => prev < genres.length - 1 ? prev + 1 : 0);
     }
 
+    useEffect(() => {
+        (async () => {
+            dispatch(resetState());
+
+            success && navigation.replace('TabNavigator')
+        })();
+    }, [success]);
+
     const goToLobby = async () => {
         try {
-            const response = await fetch(`${EXPO}/users/signup`, { // A MODIFIER
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    username: user.username,
-                    email: user.email,
-                    password: user.password,
-                    confirmPassword: user.confirmPassword,
-                    has_consent: user.has_consent,
-                    gender: genres[genreCount],
-                    avatar: races[raceCount]?.avatar,
-                    race: races[raceCount]?._id }),
-            });
-
-
-            const data = await response.json();
-            //console.log(data);
-            if (data) {
-                //dispatch(loginData({ username: username, email: email }));
-                navigation.navigate('TabNavigator')
-            }
+            dispatch(signupUser({
+                ...user,
+                gender: genres[genreCount],
+                avatar: races[raceCount]?.avatar,
+                race: races[raceCount]?._id
+            }));
         } catch (error) {
             console.error("Erreur lors de l'inscription :", error);
         }

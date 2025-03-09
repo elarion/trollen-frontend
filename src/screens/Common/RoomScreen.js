@@ -1,13 +1,11 @@
-import { StyleSheet, Text, View, Image, TouchableOpacity, ImageBackground, TextInput, Pressable, FlatList } from "react-native"
+import { StyleSheet, Text, View, TouchableOpacity, ImageBackground, TextInput, FlatList } from "react-native"
 import { Modal, SlideAnimation } from 'react-native-modals'
-import axiosInstance from '../utils/axiosInstance';
-//import { Modal } from 'react-native'
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { Header } from 'react-native-elements';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { useSelector } from "react-redux";
 import { useState, useEffect } from "react";
-import { connectSocket, getSocket } from "../services/socketService";
+import { connectSocket } from "@services/socketService";
 
 
 export default function RoomScreen({ navigation, route }) {
@@ -101,7 +99,7 @@ export default function RoomScreen({ navigation, route }) {
     return (
         <SafeAreaProvider>
             <SafeAreaView style={styles.container} edges={['left', 'right']}>
-                <ImageBackground source={require('../../assets/background/background.png')} style={styles.backgroundImage}>
+                <ImageBackground source={require('@assets/background/background.png')} style={styles.backgroundImage}>
                     <Header
                         containerStyle={styles.header}
                         leftComponent={
