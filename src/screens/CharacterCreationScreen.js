@@ -353,7 +353,7 @@ const styles = StyleSheet.create({
 
     /* ACTIF SPELL TEXT*/
     actifSpellText: {
-        marginTop: '2%',
+        marginTop: '5%',
         color: 'rgb(239, 233, 225)',
         fontSize: 18,
         fontWeight: 800,
