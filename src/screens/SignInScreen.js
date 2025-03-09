@@ -1,16 +1,17 @@
-import Config from "react-native-config"; // A CORRIGER
+import { useEffect } from "react";
 import { StyleSheet, Text, View, Image, TouchableOpacity, Modal, Pressable, TextInput, ImageBackground } from "react-native"
-import {SafeAreaView, SafeAreaProvider} from 'react-native-safe-area-context';
+import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { useState } from "react";
 import { useDispatch, useSelector } from 'react-redux';
-import { loginData } from '../store/user';
+// import { loginData } from '../store/user';
+import { signinUser, resetState } from '../store/authSlice';
 import Checkbox from 'expo-checkbox';
-import {jwtDecode} from 'jwt-decode';
-
+import { jwtDecode } from 'jwt-decode';
+import axiosInstance from "../utils/axiosInstance";
 
 
 export default function SignInScreen({ navigation }) {
-    const EXPO = process.env.EXPO_PUBLIC_BACKEND_URL
+    const EXPO = process.env.EXPO_PUBLIC_BACKEND_URL;
     const [modalSignUpVisible, setModalSignUpVisible] = useState(false);
     const [modalSignInVisible, setModalSignInVisible] = useState(false);
     const [username, setUsername] = useState('');
@@ -18,34 +19,49 @@ export default function SignInScreen({ navigation }) {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [isChecked, setChecked] = useState(false);
-    const dispatch = useDispatch();
-    //console.log(Config.API_URL)
-    const guestMode = () => {
-        //navigation.navigate('CharacterCreation')
-        // OU
-        navigation.navigate('TabNavigator')
-    };
 
+    const { loading, error, success } = useSelector((state) => state.auth);
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        // Réinitialiser les erreurs et le succès quand on arrive sur l'écran
+        dispatch(resetState());
+
+        success && navigation.replace('TabNavigator')
+    }, [dispatch, success, navigation]); // on écoute success et dispatch car on les utilise dans le useEffect
+
+    const guestMode = () => {
+        setUsername('');
+        setPassword('');
+        setModalSignInVisible(!modalSignInVisible);
+        navigation.navigate('TabNavigator');
+    };
 
     const preSignUp = async () => {
         if (isChecked) {
             try {
-                const response = await fetch(`${EXPO}/users/pre-signup`, { // A MODIFIER
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username: username, email: email, password: password, confirmPassword: confirmPassword, has_consent: isChecked }),
+                const response = await axiosInstance.post(`/users/pre-signup`, {
+                    username,
+                    email,
+                    password,
+                    confirmPassword,
+                    has_consent: isChecked
                 });
 
-                const data = await response.json();
-                
-                if (data) {
-                    dispatch(loginData({ username: username, email: email, password: password, confirmPassword: confirmPassword, has_consent: isChecked }));
+                if (response.data.success) {
+                    // dispatch(signinUser({ username: username, email: email, password: password, confirmPassword: confirmPassword, has_consent: isChecked }));
                     setUsername('');
                     setEmail('');
                     setPassword('');
                     setConfirmPassword('');
                     setModalSignUpVisible(!modalSignUpVisible);
-                    navigation.navigate('CharacterCreation');
+                    navigation.navigate('CharacterCreation', {
+                        username,
+                        email,
+                        password,
+                        confirmPassword,
+                        has_consent: isChecked
+                    });
                 }
             } catch (error) {
                 console.error("Erreur lors de l'inscription :", error);
@@ -53,26 +69,11 @@ export default function SignInScreen({ navigation }) {
         }
     };
 
-
     const signInWithId = async () => {
         try {
-            const response = await fetch(`${EXPO}/users/signin`, { // A MODIFIER
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: username, password: password }),
-            });
-
-            const data = await response.json();
-            console.log(jwtDecode(data.token))
-            if (data) {
-                dispatch(loginData({ username: data.username, email: data.email, token: data.token, tokenDecoded: jwtDecode(data.token) })); // AJOUTER USER_ID REDUX
-                setUsername('');
-                setPassword('');
-                setModalSignInVisible(!modalSignInVisible);
-                navigation.navigate('TabNavigator')
-            }
+            dispatch(signinUser({ username, password }));
         } catch (error) {
-            console.error("Erreur lors de l'inscription :", error);
+            console.error("Erreur lors de la connexion =>", error);
         }
     };
 
