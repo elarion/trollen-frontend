@@ -3,7 +3,7 @@ import Checkbox from 'expo-checkbox';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Header } from 'react-native-elements';
+import CustomHeader from "../components/CustomHeader";
 import { Dropdown } from 'react-native-element-dropdown';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import AntDesign from 'react-native-vector-icons/AntDesign';
@@ -51,19 +51,6 @@ export default function LobbyScreen({ navigation }) {
     ];
     //console.log('user', user.tokenDecoded.id, 'room_socket_id', 'bojafo', 'name', roomname, 'tags', tag, 'settings', { max: capacityValue, is_safe: isSafe, is_: is, password: password });
 
-    //REDIRECTION
-    const goToSettings = () => {
-        navigation.navigate('Settings');
-    }
-    const goToNews = () => {
-        navigation.navigate('News');
-    }
-    const goToProfile = () => {
-        navigation.navigate('Profile');
-    }
-    const goToGrimoire = () => {
-        navigation.navigate('Grimoire');
-    }
     const goToCreateRoom = async () => {
         try {
             const response = await fetch(`${EXPO}/rooms/create`, {
@@ -111,7 +98,7 @@ export default function LobbyScreen({ navigation }) {
     }, []);
 
     const goToRoom = async () => {
-        
+
         try {
             const room = roomList.find(room => room.name === roomname);
             //console.log(room._id);
@@ -142,34 +129,8 @@ export default function LobbyScreen({ navigation }) {
                 <ImageBackground source={require('../../assets/background/background.png')} style={styles.backgroundImage}>
 
                     {/* HEADER CONFIGURATION */}
-                    <Header
-                        containerStyle={styles.header}
-                        leftComponent={
-                            <View style={styles.headerButtons}>
-                                <TouchableOpacity onPress={goToSettings}>
-                                    <FontAwesome name='cog' size={30} color='rgb(239, 233, 225)' />
-                                </TouchableOpacity>
-                                <TouchableOpacity onPress={goToNews}>
-                                    <FontAwesome name='newspaper-o' size={30} color='rgb(239, 233, 225)' />
-                                </TouchableOpacity>
-                            </View>
-                        }
-                        centerComponent={
-                            <View>
-                                <Text style={styles.title}>Trollen</Text>
-                            </View>
-                        }
-                        rightComponent={
-                            <View style={styles.headerButtons}>
-                                <TouchableOpacity onPress={goToProfile}>
-                                    <FontAwesome name='user' size={30} color='rgb(239, 233, 225)' />
-                                </TouchableOpacity>
-                                <TouchableOpacity onPress={goToGrimoire}>
-                                    <FontAwesome name='book' size={30} color='rgb(239, 233, 225)' />
-                                </TouchableOpacity>
-                            </View>
-                        }
-                    />
+                    <CustomHeader navigation={navigation} />
+
                     {/* PORTAL BOX CONTENT*/}
                     <View style={styles.portalBox}>
                         {/* MODALE CREATION DE ROOM */}
@@ -316,20 +277,6 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '100%',
         resizeMode: 'cover',
-    },
-    //HEADER
-    header: {
-        backgroundColor: 'rgb(74, 52, 57)',
-    },
-    headerButtons: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        width: 80,
-    },
-    title: {
-        color: 'rgb(239, 233, 225)',
-        fontSize: 30,
-        fontWeight: 800,
     },
     //PORTAL BOX
     portalBox: {

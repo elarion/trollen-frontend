@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import axiosInstance from '../utils/axiosInstance';
 import CustomHeader from "../components/CustomHeader";
 
-
 export default function GrimoireScreen({ navigation }) {
     const [modalShowRacesVisible, setModalShowRacesVisible] = useState(false);
     const [modalShowSpellsVisible, setModalShowSpellsVisible] = useState(false);
@@ -14,7 +13,6 @@ export default function GrimoireScreen({ navigation }) {
     const [racesData, setRacesData] = useState([]);
     const [spellsData, setSpellsData] = useState([]);
     //console.log(racesData)
-
 
     useEffect(() => {
         (async () => {
@@ -177,7 +175,6 @@ const styles = StyleSheet.create({
         height: '100%',
         resizeMode: 'cover',
     },
-    //HEADER
     
     //GRIMOIRE TEXT STYLE
     subTitle: {
