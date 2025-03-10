@@ -1,20 +1,37 @@
-import { StyleSheet, Text, View, Image, TouchableOpacity, ImageBackground, TextInput, Pressable, FlatList } from "react-native"
+import { StyleSheet, Text, View, TouchableOpacity, ImageBackground, TextInput, FlatList } from "react-native"
 import { Modal, SlideAnimation } from 'react-native-modals'
-import axiosInstance from '../utils/axiosInstance';
-//import { Modal } from 'react-native'
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
-import CustomHeader from "../components/CustomHeader";
+import { Header } from 'react-native-elements';
+import TopHeader from "@components/TopHeader";
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { useSelector } from "react-redux";
 import { useState, useEffect } from "react";
-import { useSelector } from "react-native"
+import { connectSocket } from "@services/socketService";
+import { loadUserData } from "@store/authSlice";
+import { useDispatch } from "react-redux";
 
 export default function RoomScreen({ navigation, route }) {
-
-    const { room_id } = route.params;
+    const [socket, setSocket] = useState(null);
+    const { roomId } = route.params;
+    const { user } = useSelector(state => state.auth);
+    const [content, setContent] = useState([]);
     const [roomInfo, setRoomInfo] = useState([]);
-    /* console.log(room_id);
-    console.log(roomInfo) */
+    const [messages, setMessages] = useState([]);
+    const [modalUserListVisible, setModalUserListVisible] = useState(false);
+    const [spelled, setSpelled] = useState(false);
+
+    const goToSettings = () => {
+        navigation.navigate('Settings');
+    }
+    const goToNews = () => {
+        navigation.navigate('News');
+    }
+    const goToProfile = () => {
+        navigation.navigate('Profile');
+    }
+    const goToGrimoire = () => {
+        navigation.navigate('Grimoire');
+    }
 
     useEffect(() => {
         (async () => {
@@ -43,15 +60,20 @@ export default function RoomScreen({ navigation, route }) {
             })
 
             // Rejoindre la room
-            newSocket.emit("joinRoom", { roomId, username: user.user.username }, (response) => {
+            newSocket.emit("joinRoom", { roomId, username: user.username }, (response) => {
                 if (!response.success) {
                     console.error("Erreur de connexion à la room :", response.error);
                 }
             });
 
+            newSocket.on('spelledInRoom', (response) => {
+                setSpelled(true);
+                console.log('spelledInRoom and I am =>', response, user.username);
+            })
+
             return () => {
                 if (socket) {
-                    socket.emit("leaveRoom", { roomId, username: user.user.username });
+                    socket.emit("leaveRoom", { roomId, username: user.username });
                     socket.off("roomInfo");
                     socket.off("roomMessage");
                 }
@@ -62,33 +84,50 @@ export default function RoomScreen({ navigation, route }) {
     const handleMessage = () => {
         try {
             setContent('');
-            socket.emit("sendMessage", { roomId, content, username: user.user.username }, (response) => {
-                console.log(response)
+            socket.emit("sendMessage", { roomId, content, username: user?.username, spelled: spelled }, (response) => {
+                setSpelled(false);
             });
         } catch (error) {
             console.error("Erreur lors de l'envoi du message :", error);
         }
     }
 
+    const handleSpell = (targetId) => {
+        socket.emit("spelled", { targetId, roomId }, (response) => {
+            setModalSpellVisible(false);
+            setModalUserListVisible(false);
+            console.log('spelled and I am =>', response, user.username);
+        });
+    }
+
     //MODALSPELL
     const [modalSpellVisible, setModalSpellVisible] = useState(false);
 
-
+    const renderMessage = ({ item }) => {
+        const isMyMessage = item.user._id === user._id;
+        return (
+            <View style={[styles.messageContainer, isMyMessage ? styles.myMessage : styles.otherMessage]}>
+                <Text style={styles.messageSender}>{isMyMessage ? "Moi" : item.user.username}</Text>
+                <Text style={styles.messageText}>{item.content}</Text>
+            </View>
+        );
+    };
 
     return (
-        <SafeAreaProvider>
-            <SafeAreaView style={styles.container} edges={['left', 'right']}>
-                <ImageBackground source={require('../../assets/background/background.png')} style={styles.backgroundImage}>
-                    <CustomHeader navigation={navigation} />
+        <ImageBackground source={require('@assets/background/background.png')} style={styles.backgroundImage}>
+            <SafeAreaProvider>
+                <SafeAreaView style={styles.container} edges={['left', 'top']}>
+                    {/* <TopHeader /> */}
+
                     <View style={styles.underheaderContainer}>
                         <View style={styles.upperMessageBox} key={roomInfo._id}>
                             <TouchableOpacity style={styles.roomSettings}>
                                 <FontAwesome name='cog' size={40} color='rgb(195, 157, 136)'/*'rgb(85,69,63)'*/ />
                             </TouchableOpacity>
                             <View style={styles.roomInfos}>
-                                <Text style={styles.creatorRoomName}>{roomInfo.admin?.username}</Text>
+                                <Text style={styles.creatorRoomName}>créateur: {roomInfo.admin?.username}</Text>
+                                <Text style={styles.creatorRoomName}>moi : {user?.username}</Text>
                                 <Text style={styles.roomName}>{roomInfo.name}</Text>
-                                <Text style={styles.roomName}>{user.user.username}</Text>
                                 <Text style={styles.numberOfParticipants}>{roomInfo.participants?.length} participant{roomInfo.participants?.length > 1 && `s`}</Text>
                             </View>
                             <TouchableOpacity style={styles.playerList}>
@@ -114,7 +153,7 @@ export default function RoomScreen({ navigation, route }) {
                             <View style={styles.placeholder}>
                                 <View style={styles.backgroundPlaceholder}>
                                     <TextInput
-                                        placeholder="Tape ton message ici !" //onChangeText={value => setMot(value)} value={mot}
+                                        placeholder="Tape ton message ici !"
                                         placeholderTextColor="gray"
                                         value={content}
                                         onChangeText={value => setContent(value)}
@@ -132,6 +171,30 @@ export default function RoomScreen({ navigation, route }) {
                                 <FontAwesome name='fire' size={30} color='rgb(239, 233, 225)' />
                             </TouchableOpacity>
                         </View>
+                        <Modal
+                            height={0.2}
+                            width={1}
+                            margin={0}
+                            padding={0}
+
+                            modalAnimation={new SlideAnimation({
+                                intialValue: 0,
+                                slideFrom: 'left',
+                                useNativeDriver: true,
+                            })}
+                            transparent={true}
+                            visible={modalUserListVisible}
+
+                        >
+                            <View>
+                                <Text>User List</Text>
+                                <FlatList
+                                    data={roomInfo.participants}
+                                    renderItem={({ item }) => <Text onPress={() => handleSpell(item.user._id)}>{item.user.username}</Text>}
+                                    keyExtractor={(item) => item._id.toString()}
+                                />
+                            </View>
+                        </Modal>
                         <Modal
                             height={0.2}
                             width={1}
@@ -157,7 +220,7 @@ export default function RoomScreen({ navigation, route }) {
                                             style={styles.backgroundImageModal}>*/}
                                 <View style={styles.spellContainer}>
                                     <View style={styles.spellContainerThreeMax}>
-                                        <TouchableOpacity style={styles.spell} ></TouchableOpacity>
+                                        <TouchableOpacity style={styles.spell} onPress={() => setModalUserListVisible(true)}><FontAwesome name='firefox' size={30} color='rgb(239, 233, 225)' /></TouchableOpacity>
                                         <TouchableOpacity style={styles.spell} ></TouchableOpacity>
                                         <TouchableOpacity style={styles.spell} ></TouchableOpacity>
                                     </View>
@@ -181,9 +244,9 @@ export default function RoomScreen({ navigation, route }) {
                             </Pressable>*/ }
 
                     </View>
-                </ImageBackground>
-            </SafeAreaView>
-        </SafeAreaProvider>
+                </SafeAreaView>
+            </SafeAreaProvider>
+        </ImageBackground>
     )
 }
 
@@ -198,7 +261,42 @@ const styles = StyleSheet.create({
         height: '100%',
         resizeMode: 'cover',
     },
-
+    title: {
+        color: 'rgb(239, 233, 225)',
+        fontSize: 30,
+        fontWeight: 800,
+    },
+    messageList: {
+        // alignItems: 'flex-end',
+        // justifyContent: 'flex-end',
+        paddingHorizontal: 10,
+        paddingBottom: 10,
+    },
+    messageContainer: {
+        padding: 10,
+        borderRadius: 10,
+        marginVertical: 5,
+        // width: '100%',
+        maxWidth: "100%",
+    },
+    myMessage: {
+        alignSelf: "flex-end",
+        backgroundColor: "rgb(195, 157, 136)",
+    },
+    otherMessage: {
+        alignSelf: "flex-start",
+        backgroundColor: "rgb(180, 157, 136)",
+    },
+    messageSender: {
+        fontSize: 12,
+        fontWeight: "bold",
+        color: "#fff",
+        marginBottom: 2,
+    },
+    messageText: {
+        fontSize: 14,
+        color: "#fff",
+    },
 
     //underheader
     underheaderContainer: {
