@@ -1,15 +1,18 @@
 import { StyleSheet, Text, View, Image, TouchableOpacity, ImageBackground } from "react-native"
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { useState, useEffect } from "react";
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import TopHeader from "@components/TopHeader";
 import { Avatar } from '@components/Avatar';
 import axiosInstance from '@utils/axiosInstance';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
+import { logout } from "@store/authSlice";
+
 export default function ProfileScreen({ navigation }) {
     const user = useSelector((state) => state.auth)
     const user_id = user.user._id
+    const dispatch = useDispatch()
 
     const [characterData, setCharacterData] = useState([]);
     console.log(characterData)
@@ -19,6 +22,32 @@ export default function ProfileScreen({ navigation }) {
             setCharacterData(response.data.character)
         })()
     }, [])
+
+    const handleLogout = async () => {
+            try {
+                dispatch(logout());
+    
+            await SecureStore.deleteItemAsync('accessToken');
+            await SecureStore.deleteItemAsync('refreshToken');
+    
+            // // navigation.reset sert à réinitialiser la pile de navigation pour empêcher le retour en arrière du retour en arrière
+            navigation.reset({
+                index: 0,
+                routes: [{ name: "Auth" }], // Rediriger et empêcher le retour en arrière
+            });
+        } catch (error) {
+            console.error('Error with logout =>', error);
+        }
+    };
+
+    const updateUsername = async () => {
+        try {
+            const response = await axiosInstance.put(`/users` )
+        } catch (error) {
+
+            console.error('Error with the update of your username =>', error)
+        }
+    }
 
     return (
         <ImageBackground source={require('@assets/background/background.png')} style={styles.backgroundImage}>
@@ -48,6 +77,12 @@ export default function ProfileScreen({ navigation }) {
                         </View>
                         <View style={styles.bot}>
                             <Text>Unlocked Spell:</Text>
+                            <TouchableOpacity style={styles.logOutButton} onPress={() => handleLogout()}>
+                                <FontAwesome name='cog' size={40} color='rgb(195, 157, 136)'/>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.renameButton} onPress={() => updateUsername()}>
+                                <Text style={styles.renameTextButton}>Rename</Text>
+                            </TouchableOpacity>     
                         </View>
                     </View>
                 </SafeAreaView>
@@ -134,5 +169,32 @@ const styles = StyleSheet.create({
         borderRadius: 25,
         backgroundColor: 'rgb(239, 233, 225)',
         alignItems: 'flex-start',
+    },
+    logOutButton: {
+        height: 57,//'30%',//65px
+        width: 57,//'18%',//65px
+        borderRadius: 57 / 2,
+        backgroundColor: 'rgb(246, 89, 89)',
+        //marginBottom: '8.5%', //30px
+        justifyContent: 'center',
+        alignItems: 'center',
+        //marginTop: '2%'
+    
+    },
+    renameButton: {
+        height: 57,//'30%',//65px
+        width: '28%',//'18%',//65px
+        borderRadius: 20,
+        backgroundColor: 'rgb(246, 89, 89)',
+        //marginBottom: '8.5%', //30px
+        justifyContent: 'center',
+        alignItems: 'center',
+        //marginTop: '2%'
+    },
+    renameTextButton: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: 'white',
+        //marginTop: '2%'
     },
 })
