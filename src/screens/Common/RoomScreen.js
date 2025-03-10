@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, TouchableOpacity, ImageBackground, TextInput, FlatList } from "react-native"
+import { StyleSheet, Text, View, TouchableOpacity, ImageBackground, TextInput, FlatList,Pressable, Alert } from "react-native"
 import { Modal, SlideAnimation } from 'react-native-modals'
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { Header } from 'react-native-elements';
@@ -9,6 +9,7 @@ import { useState, useEffect } from "react";
 import { connectSocket } from "@services/socketService";
 import { loadUserData } from "@store/authSlice";
 import { useDispatch } from "react-redux";
+import UsersModal from '@components/modals/UsersModal';
 
 export default function RoomScreen({ navigation, route }) {
     const [socket, setSocket] = useState(null);
@@ -99,7 +100,8 @@ export default function RoomScreen({ navigation, route }) {
             console.log('spelled and I am =>', response, user.username);
         });
     }
-
+    //modaluser
+    const [modalUserRoomVisible, setModalUserRoomVisible] = useState(false);
     //MODALSPELL
     const [modalSpellVisible, setModalSpellVisible] = useState(false);
 
@@ -130,7 +132,14 @@ export default function RoomScreen({ navigation, route }) {
                                 <Text style={styles.roomName}>{roomInfo.name}</Text>
                                 <Text style={styles.numberOfParticipants}>{roomInfo.participants?.length} participant{roomInfo.participants?.length > 1 && `s`}</Text>
                             </View>
-                            <TouchableOpacity style={styles.playerList}>
+                            <UsersModal 
+                                    modalUserRoomVisible={modalUserRoomVisible} 
+                                    setModalUserRoomVisible={setModalUserRoomVisible}
+                                    participants={roomInfo.participants}
+                                > 
+                                </UsersModal>
+
+                            <TouchableOpacity style={styles.playerList} onPress={() => setModalUserRoomVisible(true)}>
                                 <FontAwesome name='users' size={30} color='rgb(195, 157, 136)'/* 'rgb(85,69,63)'*/ />
                             </TouchableOpacity>
                         </View>
