@@ -3,20 +3,31 @@ import Checkbox from 'expo-checkbox';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Header } from 'react-native-elements';
+import CustomHeader from "../components/CustomHeader";
 import { Dropdown } from 'react-native-element-dropdown';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import axiosInstance from "../utils/axiosInstance";
 
 export default function LobbyScreen({ navigation }) {
-
+    //Party
+    const [partyName, setPartyName] = useState("");
+    const [partyNameCreate, setPartyNameCreate] = useState("")
+    const [modalJoinPartyVisible, setModalJoinPartyVisible] = useState(false);
+    const [modalHazardPartyVisible, setModalHazardPartyVisible] = useState(false);
+    const [modalCreatePartyVisible, setModalCreatePartyVisible] = useState(false);
+    const [selectedCheckBoxGame, setSelectedCheckBoxGame] = useState(null);
+    const handleCheckBoxChangeCreateParty = (gameName) => {
+        setSelectedCheckBoxGame(prev => (prev === gameName ? null : gameName));
+    };
+    
     //MODAL CREATION DE ROOM INPUT DATA
-    const EXPO = process.env.EXPO_PUBLIC_BACKEND_URL
     const [modalRoomCreationVisible, setModalRoomCreationVisible] = useState(false);
     const [modalJoinRoomVisible, setModalJoinRoomVisible] = useState(false);
-    const user = useSelector(state => state.user.value);
+    const user = useSelector(state => state.auth);
+    const dispatch = useDispatch();
 
-    const [roomList, setRoomList] = useState([]);
+    // const [roomList, setRoomList] = useState([]);
     const [roomname, setRoomname] = useState('');
     const [tag, setTag] = useState('');
 
@@ -51,32 +62,19 @@ export default function LobbyScreen({ navigation }) {
     ];
     //console.log('user', user.tokenDecoded.id, 'room_socket_id', 'bojafo', 'name', roomname, 'tags', tag, 'settings', { max: capacityValue, is_safe: isSafe, is_: is, password: password });
 
-    //REDIRECTION
-    const goToSettings = () => {
-        navigation.navigate('Settings');
-    }
-    const goToNews = () => {
-        navigation.navigate('News');
-    }
-    const goToProfile = () => {
-        navigation.navigate('Profile');
-    }
-    const goToGrimoire = () => {
-        navigation.navigate('Grimoire');
-    }
     const goToCreateRoom = async () => {
         try {
-            const response = await fetch(`${EXPO}/rooms/create`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user: user.tokenDecoded.id, room_socket_id: 'a'/* A MODIFIER */, name: roomname, tags: tag, settings: { max: capacityValue, is_safe: isSafe, is_: is, password: password } })
+            const response = await axiosInstance.post(`/rooms/create`, {
+                user: user.tokenDecoded.id,
+                room_socket_id: 'a',
+                name: roomname,
+                tags: tag,
+                settings: { max: capacityValue, is_safe: isSafe, is_: is, password: password }
             });
 
-            const data = await response.json();
-            console.log(data);
+            const data = response.data;
+
             if (data) {
-                console.log(data);
-                //dispatch(loginData({ user: user.tokenDecoded.id, room_socket_id: 'bojafo', name: roomname , tags: tag, settings: { max: capacityValue, is_safe: isSafe, is_: is, password: password } }));
                 setRoomname('');
                 setPassword('');
                 setTag('');
@@ -84,51 +82,43 @@ export default function LobbyScreen({ navigation }) {
                 setSafe(false);
                 set(false);
                 setModalRoomCreationVisible(!modalRoomCreationVisible);
-                navigation.navigate('Room');
+                navigation.navigate('Room', { roomId: data.room._id });
             }
         } catch (error) {
             console.error("Erreur lors de la création :", error);
         }
-        console.log('Go to Create Room');
     }
 
-    useEffect(() => {
-        const getRoomList = async () => {
-            try {
-                const response = await fetch(`${EXPO}/rooms`, { // A MODIFIER
-                });
+    // useEffect(() => {
+    //     const getRoomList = async () => {
+    //         try {
+    //             const response = await axiosInstance.get(`/rooms`)
 
-                const data = await response.json();
-                if (data) {
-                    setRoomList(data.rooms)
-                    //console.log(data.rooms);
-                }
-            } catch (error) {
-                console.error("Erreur lors du get :", error);
-            }
-        };
-        getRoomList();
-    }, []);
+    //             const data = await response.data;
+
+    //             if (data) {
+    //                 setRoomList(data.rooms)
+    //             }
+    //         } catch (error) {
+    //             console.error("Erreur lors du get :", error);
+    //         }
+    //     };
+    //     getRoomList();
+    // }, []);
 
     const goToRoom = async () => {
-        
-        try {
-            const room = roomList.find(room => room.name === roomname);
-            //console.log(room._id);
-            const response = await fetch(`${EXPO}/rooms/join/${room._id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user: user.tokenDecoded.id, password: password })
-            });
-            const data = await response.json();
 
-            if (data) {
-                console.log(data);
-                setRoomname('');
-                setPassword('');
-                setModalJoinRoomVisible(!modalJoinRoomVisible);
-                navigation.navigate('Room');
-            }
+        try {
+            const roomToJoin = await axiosInstance.put(`/rooms/join-by-name/${roomname}`, {
+                password: password
+            });
+
+            if (!roomToJoin.data.success) return;
+
+            setRoomname('');
+            setPassword('');
+            setModalJoinRoomVisible(!modalJoinRoomVisible);
+            navigation.navigate('Room', { roomId: roomToJoin.data.room._id });
         } catch (error) {
             console.error("Erreur lors de la connexion :", error);
         }
@@ -136,40 +126,65 @@ export default function LobbyScreen({ navigation }) {
     const goToHazardRoom = () => {
         console.log('Go to Hazard Room');
     }
+  
+    const goToParty = async () => {
+        try {
+            const response = await fetch(`${EXPO}/parties`, { 
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ user: user.tokenDecoded.id, join_id: partyName }),
+            });
+    
+            const data = await response.json();
+    
+            if (data) {
+                setPartyName('');
+                setModalJoinPartyVisible(!modalJoinPartyVisible);
+                navigation.navigate('Party', { party_id: data.party._id });
+            }
+    
+            console.log('Party joined successfully:', data);
+        } catch (error) {
+            console.error('Error joining party:', error.message);
+        }
+    };
+    const goToHazardParty = () => {
+        console.log('Go to Hazard Room');
+    }
+    const goToCreateParty = async () => {
+        try {
+            const response = await fetch(`${EXPO}/parties`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user: user.tokenDecoded.id, party_socket_id: '49994'/* A MODIFIER */, name: partyNameCreate, game:selectedCheckBoxGame })
+            });
+
+            const data = await response.json();
+            console.log(data)
+            if (data) {
+                setPartyNameCreate('');
+                setSelectedCheckBoxGame(false);
+                setModalCreatePartyVisible(!modalCreatePartyVisible);
+                navigation.navigate('Party', { party_id: data.party._id });
+            }
+        } catch (error) {
+            console.error("Erreur lors de la création :", error);
+        }
+        console.log("Selected game:", selectedCheckBoxGame);
+    }
+
+
     return (
         <SafeAreaProvider>
             <SafeAreaView style={styles.container} edges={['left', 'right']}>
+
                 <ImageBackground source={require('../../assets/background/background.png')} style={styles.backgroundImage}>
 
                     {/* HEADER CONFIGURATION */}
-                    <Header
-                        containerStyle={styles.header}
-                        leftComponent={
-                            <View style={styles.headerButtons}>
-                                <TouchableOpacity onPress={goToSettings}>
-                                    <FontAwesome name='cog' size={30} color='rgb(239, 233, 225)' />
-                                </TouchableOpacity>
-                                <TouchableOpacity onPress={goToNews}>
-                                    <FontAwesome name='newspaper-o' size={30} color='rgb(239, 233, 225)' />
-                                </TouchableOpacity>
-                            </View>
-                        }
-                        centerComponent={
-                            <View>
-                                <Text style={styles.title}>Trollen</Text>
-                            </View>
-                        }
-                        rightComponent={
-                            <View style={styles.headerButtons}>
-                                <TouchableOpacity onPress={goToProfile}>
-                                    <FontAwesome name='user' size={30} color='rgb(239, 233, 225)' />
-                                </TouchableOpacity>
-                                <TouchableOpacity onPress={goToGrimoire}>
-                                    <FontAwesome name='book' size={30} color='rgb(239, 233, 225)' />
-                                </TouchableOpacity>
-                            </View>
-                        }
-                    />
+                    <CustomHeader navigation={navigation} />
+
                     {/* PORTAL BOX CONTENT*/}
                     <View style={styles.portalBox}>
                         {/* MODALE CREATION DE ROOM */}
@@ -300,6 +315,162 @@ export default function LobbyScreen({ navigation }) {
                         <TouchableOpacity style={styles.joinHazardRoomBtn} onPress={() => goToHazardRoom()}>
                             <Text style={styles.textJoinHazardRoomBtn}>HAZARD ROOM</Text>
                         </TouchableOpacity>
+                         {/* MODALE JOIN  PARTY */}
+                         <Modal
+                            animationType="slide"
+                            transparent={true}
+                            visible={modalJoinPartyVisible}
+                            onRequestClose={() => {
+                                Alert.alert('Modal has been closed.');
+                                setModalJoinPartyVisible(!modalJoinPartyVisible);
+                            }}>
+                            <View style={styles.centeredViewCreateParty}>
+                                <View style={styles.modalViewCreateParty}>
+                                    <Text style={styles.modalTitle}>Join party</Text>
+                                    <View style={styles.inputSectionCreateParty}>
+                                        <Text>Code d'accès :</Text>
+                                        <TextInput style={styles.roomname} placeholder="Hulu#09876" onChangeText={value => setPartyName(value)} value={partyName} />
+                                    </View>
+                                    <View style={styles.btnModalJoinRoom}>
+                                        <Pressable
+                                            style={[styles.button, styles.buttonClose]}
+                                            onPress={() => setModalJoinPartyVisible(!modalJoinPartyVisible)}>
+                                            <Text style={styles.textStyle}>Retour</Text>
+                                        </Pressable>
+                                        <Pressable
+                                            style={[styles.button, styles.buttonValidation]}
+                                            onPress={() => goToParty()}>
+                                            <Text style={styles.textStyle}>Valider</Text>
+                                        </Pressable>
+                                    </View>
+                                </View>
+                            </View>
+                        </Modal>
+                        {/* REJOINDRE PARTY */}
+                        <Pressable
+                            style={[styles.joinRoomBtn, styles.buttonOpen]}
+                            onPress={() => setModalJoinPartyVisible(true)}>
+                            <Text style={styles.textJoinRoomBtn}>JOIN PARTY</Text>
+                        </Pressable>
+                          {/* MODALE HAZARD PARTY */}
+                          <Modal
+                            animationType="slide"
+                            transparent={true}
+                            visible={modalHazardPartyVisible}
+                            onRequestClose={() => {
+                                Alert.alert('Modal has been closed.');
+                                setModalHazardPartyVisible(!modalHazardPartyVisible);
+                            }}>
+                            <View style={styles.centeredView}>
+                                <View style={styles.modalViewHazardParty}>
+                                    <Text style={styles.modalTitle}>Matchmaking</Text>
+                                    <View style={styles.inputSectionHazardParty}>
+                                        <Text>Choose game(s)</Text>
+                                        <View style={styles.sectionBoxHazardParty}>
+                                        <Checkbox
+                                            style={styles.checkbox}
+                                            value={isSafe}
+                                            onValueChange={setSafe}
+                                            color={isSafe ? '#4630EB' : undefined}
+                                        />
+                                        <Text style={styles.checkboxTextHazardParty}>Dragon</Text>
+                                    </View>
+                                    <View style={styles.sectionBoxHazardParty}>
+                                        <Checkbox
+                                            style={styles.checkbox}
+                                            value={isSafe}
+                                            onValueChange={setSafe}
+                                            color={isSafe ? '#4630EB' : undefined}
+                                        />
+                                        <Text style={styles.checkboxTextHazardParty}>Dragon</Text>
+                                    </View>
+                                    </View>
+                                    <View style={styles.btnModalJoinRoom}>
+                                        <Pressable
+                                            style={[styles.button, styles.buttonClose]}
+                                            onPress={() => setModalHazardPartyVisible(!modalHazardPartyVisible)}>
+                                            <Text style={styles.textStyle}>Retour</Text>
+                                        </Pressable>
+                                        <Pressable
+                                            style={[styles.button, styles.buttonValidation]}
+                                            onPress={() => goToHazardParty()}>
+                                            <Text style={styles.textStyle}>Rejoindre</Text>
+                                        </Pressable>
+                                    </View>
+                                </View>
+                            </View>
+                        </Modal>
+                          {/* REJOINDRE HAZARD PARTY */}
+                          <TouchableOpacity style={styles.joinHazardRoomBtn} 
+                          onPress={() => setModalHazardPartyVisible(true)}>
+                            <Text style={styles.textJoinHazardRoomBtn}>HAZARD PARTY</Text>
+                        </TouchableOpacity>
+                             {/* MODALE CREATION DE PARTY */}
+                            <Modal
+                            animationType="slide"
+                            transparent={true}
+                            visible={modalCreatePartyVisible}
+                            onRequestClose={() => setModalCreatePartyVisible(false)}
+                            >
+                            <View style={styles.centeredViewCreateParty}>
+                                <View style={styles.modalViewCreateParty}>
+                                <Text style={styles.modalTitle}>CREATE A PARTY</Text>
+
+                               
+                                <View style={styles.inputSectionCreateParty}>
+                                    
+                                    <TextInput
+                                    style={styles.roomname}
+                                    placeholder="Room name"
+                                    onChangeText={setPartyNameCreate}
+                                    value={partyNameCreate}
+                                    />
+                                </View>
+                                <Text>Game:</Text>
+                                <View style={styles.checkboxContainerCreateParty}>
+                                    <View style={styles.checkboxWrapperCreateParty}>
+                                    <Checkbox
+                                         style={styles.checkbox}
+                                         value={selectedCheckBoxGame === 'Motamaux'}
+                                         onValueChange={() => handleCheckBoxChangeCreateParty('Motamaux')}
+                                         color={selectedCheckBoxGame ? '#4630EB' : undefined}
+                                    />
+                                    <Text style={styles.checkboxTextCreateParty}>Motamaux</Text>
+                                    </View>
+                                    <View style={styles.checkboxWrapperCreateParty}>
+                                    <Checkbox
+                                         style={styles.checkbox}
+                                         value={selectedCheckBoxGame === 'FTK'}
+                                         onValueChange={() => handleCheckBoxChangeCreateParty('FTK')}
+                                         color={selectedCheckBoxGame ? '#4630EB' : undefined}
+                                    />
+                                    <Text style={styles.checkboxTextCreateParty}>Ftk</Text>
+                                    </View>
+                                </View>
+
+                                <View style={styles.btnModalCreateParty}>
+                                    <Pressable
+                                    style={[styles.button, styles.buttonCloseCreateParty]}
+                                    onPress={() => setModalCreatePartyVisible(false)}
+                                    >
+                                    <Text style={styles.textStyleCreateParty}>Retour</Text>
+                                    </Pressable>
+                                    <Pressable
+                                    style={[styles.button, styles.buttonValidationCreateParty]}
+                                    onPress={goToCreateParty}
+                                    >
+                                    <Text style={styles.textStyleCreateParty}>Valider</Text>
+                                    </Pressable>
+                                </View>
+                                </View>
+                            </View>
+                            </Modal>
+
+                        {/* CREATE PARTY */}
+                        <TouchableOpacity style={styles.joinHazardRoomBtn} 
+                          onPress={() => setModalCreatePartyVisible(true)}>
+                            <Text style={styles.textJoinHazardRoomBtn}>CREATE PARTY</Text>
+                        </TouchableOpacity>
                     </View>
                 </ImageBackground>
             </SafeAreaView>
@@ -316,20 +487,6 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '100%',
         resizeMode: 'cover',
-    },
-    //HEADER
-    header: {
-        backgroundColor: 'rgb(74, 52, 57)',
-    },
-    headerButtons: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        width: 80,
-    },
-    title: {
-        color: 'rgb(239, 233, 225)',
-        fontSize: 30,
-        fontWeight: 800,
     },
     //PORTAL BOX
     portalBox: {
@@ -383,10 +540,11 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
     modalViewCreationRoom: {
         margin: 20,
-        backgroundColor: 'white',
+        backgroundColor: '#F0E9E0',
         borderRadius: 20,
         padding: 35,
         alignItems: 'center',
@@ -403,7 +561,7 @@ const styles = StyleSheet.create({
     },
     modalViewJoinRoom: {
         margin: 20,
-        backgroundColor: 'white',
+        backgroundColor: '#F0E9E0',
         borderRadius: 20,
         padding: 35,
         alignItems: 'center',
@@ -436,12 +594,12 @@ const styles = StyleSheet.create({
         width: '100%'
     },
     buttonClose: {
-        backgroundColor: 'red',
+        backgroundColor: '#F65959',
         width: '45%',
         alignItems: 'center',
     },
     buttonValidation: {
-        backgroundColor: 'green',
+        backgroundColor: '#899E6A',
         width: '45%',
         alignItems: 'center',
     },
@@ -461,12 +619,13 @@ const styles = StyleSheet.create({
         gap: 10
     },
 
+
     //INPUT STYLE CREATION ROOM MODAL
     roomname: {
         width: '80%',
         height: 40,
         borderWidth: 1,
-        borderColor: 'red',
+        borderColor: '#F65959',
         borderRadius: 20,
         paddingLeft: 15,
     },
@@ -474,7 +633,7 @@ const styles = StyleSheet.create({
         width: '80%',
         height: 40,
         borderWidth: 1,
-        borderColor: 'green',
+        borderColor: '#899E6A',
         borderRadius: 20,
         paddingLeft: 15,
     },
@@ -533,4 +692,114 @@ const styles = StyleSheet.create({
     textHazardRoomBtn: {
         color: 'white',
     },
+
+
+    // Section hazard party
+
+    modalViewHazardParty: {
+        margin: 20,
+        backgroundColor: '#F0E9E0',
+        borderRadius: 20,
+        padding: 35,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+        width: '90%',
+        height: '40%'
+    },
+
+    sectionBoxHazardParty: {
+        gap: 10,
+        flexDirection: 'row',
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        width: '100%',
+        marginTop: '1%',
+        paddingVertical: 10, 
+    },
+    
+    inputSectionHazardParty: {
+        height: '60%',
+        marginTop: '5%',
+        justifyContent: 'flex-start',
+        alignItems: 'center', 
+        width: '100%',
+        gap: 10,
+    },
+    checkboxTextHazardParty: {
+        fontSize: 15,
+        marginLeft: 10,
+    },
+// Section create Party
+centeredViewCreateParty: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalViewCreateParty: {
+    width: '90%',
+    backgroundColor: '#F0E9E0',
+    borderRadius: 20,
+    padding: 20,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  inputSectionCreateParty: {
+    width: '100%',
+    marginVertical: 10,
+    alignItems: 'center',
+  },
+  checkboxContainerCreateParty: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginVertical: 15,
+  },
+  checkboxWrapperCreateParty: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  checkboxTextCreateParty: {
+    fontSize: 15,
+    marginLeft: 5,
+  },
+  btnModalCreateParty: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginTop: 20,
+  },
+  buttonCreateParty: {
+    backgroundColor: '#e8be4b',
+    padding: 10,
+    borderRadius: 10,
+    width: '40%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  buttonCloseCreateParty: {
+        backgroundColor: '#F65959',
+        width: '45%',
+        alignItems: 'center',
+  },
+  buttonValidationCreateParty: {
+    backgroundColor: '#899E6A',
+    width: '45%',
+    alignItems: 'center',
+  },
+  textStyleCreateParty: {
+    color: 'white',
+  },
+    
 })

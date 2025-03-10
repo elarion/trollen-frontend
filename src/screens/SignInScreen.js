@@ -1,16 +1,14 @@
-import Config from "react-native-config"; // A CORRIGER
 import { StyleSheet, Text, View, Image, TouchableOpacity, Modal, Pressable, TextInput, ImageBackground } from "react-native"
-import {SafeAreaView, SafeAreaProvider} from 'react-native-safe-area-context';
+import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { useState } from "react";
 import { useDispatch, useSelector } from 'react-redux';
-import { loginData } from '../store/user';
+// import { loginData } from '../store/user';
+import { signinUser, resetState } from '../store/authSlice';
 import Checkbox from 'expo-checkbox';
-import {jwtDecode} from 'jwt-decode';
-
-
+import { jwtDecode } from 'jwt-decode';
 
 export default function SignInScreen({ navigation }) {
-    const EXPO = process.env.EXPO_PUBLIC_BACKEND_URL
+    const EXPO = process.env.EXPO_PUBLIC_BACKEND_URL;
     const [modalSignUpVisible, setModalSignUpVisible] = useState(false);
     const [modalSignInVisible, setModalSignInVisible] = useState(false);
     const [username, setUsername] = useState('');
@@ -18,26 +16,27 @@ export default function SignInScreen({ navigation }) {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [isChecked, setChecked] = useState(false);
-    const dispatch = useDispatch();
-    //console.log(Config.API_URL)
-    const guestMode = () => {
-        //navigation.navigate('CharacterCreation')
-        // OU
-        navigation.navigate('TabNavigator')
-    };
 
+    const { loading, error, success } = useSelector((state) => state.auth);
+    const dispatch = useDispatch();
+    const guestMode = () => {
+        setUsername('');
+        setPassword('');
+        setModalSignInVisible(!modalSignInVisible);
+        navigation.navigate('TabNavigator');
+    };
 
     const preSignUp = async () => {
         if (isChecked) {
             try {
-                const response = await fetch(`${EXPO}/users/pre-signup`, { // A MODIFIER
+                const response = await fetch(`${EXPO}/users/pre-signup`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username: username, email: email, password: password, confirmPassword: confirmPassword, has_consent: isChecked }),
                 });
 
                 const data = await response.json();
-                
+
                 if (data) {
                     dispatch(loginData({ username: username, email: email, password: password, confirmPassword: confirmPassword, has_consent: isChecked }));
                     setUsername('');
@@ -45,7 +44,13 @@ export default function SignInScreen({ navigation }) {
                     setPassword('');
                     setConfirmPassword('');
                     setModalSignUpVisible(!modalSignUpVisible);
-                    navigation.navigate('CharacterCreation');
+                    navigation.navigate('CharacterCreation', {
+                        username,
+                        email,
+                        password,
+                        confirmPassword,
+                        has_consent: isChecked
+                    });
                 }
             } catch (error) {
                 console.error("Erreur lors de l'inscription :", error);
@@ -53,10 +58,9 @@ export default function SignInScreen({ navigation }) {
         }
     };
 
-
     const signInWithId = async () => {
         try {
-            const response = await fetch(`${EXPO}/users/signin`, { // A MODIFIER
+            const response = await fetch(`${EXPO}/users/signin`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username: username, password: password }),
@@ -72,7 +76,7 @@ export default function SignInScreen({ navigation }) {
                 navigation.navigate('TabNavigator')
             }
         } catch (error) {
-            console.error("Erreur lors de l'inscription :", error);
+            console.error("Erreur lors de la connexion =>", error);
         }
     };
 

@@ -4,10 +4,14 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import { loginData } from '../store/user';
+import { signupUser, resetState } from '../store/authSlice';
+import axiosInstance from "../utils/axiosInstance";
 
-export default function CharactereCreationScreen({ navigation }) {
+export default function CharactereCreationScreen({ navigation, route }) {
     const EXPO = process.env.EXPO_PUBLIC_BACKEND_URL
-    const user = useSelector((state) => state.user.value);
+    // const user = useSelector((state) => state.auth);
+    const user = route.params;
+    const dispatch = useDispatch();
     //console.log(user);
 
     const [races, setRaces] = useState([]);
@@ -18,6 +22,8 @@ export default function CharactereCreationScreen({ navigation }) {
     //console.log(spell2);
     //console.log(races[raceCount]?.name)
     //console.log(races[raceCount]?.avatar)
+
+    const { loading, error, success } = useSelector((state) => state.auth);
 
     const genres = [
         'male',
@@ -30,7 +36,7 @@ export default function CharactereCreationScreen({ navigation }) {
     useEffect(() => {
         const getDataRaces = async () => {
             try {
-                const response = await fetch(`${EXPO}/races`, { // A MODIFIER
+                const response = await fetch(`${EXPO}/races`, {
                 });
 
                 const data = await response.json();
@@ -45,9 +51,9 @@ export default function CharactereCreationScreen({ navigation }) {
         getDataRaces();
         const getSpell1 = async () => {
             try {
-                const response = await fetch(`${EXPO}/spells/67c6f3d337c666e9c7754125`, { // A MODIFIER
+                const response = await fetch(`${EXPO}/spells/67c6f3d337c666e9c7754125`, {
                 });
-    
+
                 const data = await response.json();
                 if (data) {
                     setSpell1(data);
@@ -60,9 +66,9 @@ export default function CharactereCreationScreen({ navigation }) {
         getSpell1()
         const getSpell2 = async () => {
             try {
-                const response = await fetch(`${EXPO}/spells/67c7049375266cda5a3c15f0`, { // A MODIFIER
+                const response = await fetch(`${EXPO}/spells/67c7049375266cda5a3c15f0`, {
                 });
-    
+
                 const data = await response.json();
                 if (data) {
                     setSpell2(data);
@@ -77,7 +83,7 @@ export default function CharactereCreationScreen({ navigation }) {
             try {
                 const response = await fetch(`${EXPO}/spells/67c7067a75266cda5a3c15f6`, { // A MODIFIER
                 });
-    
+
                 const data = await response.json();
                 if (data) {
                     setSpell3(data);
@@ -106,9 +112,17 @@ export default function CharactereCreationScreen({ navigation }) {
         setGenreCount(prev => prev < genres.length - 1 ? prev + 1 : 0);
     }
 
+    useEffect(() => {
+        (async () => {
+            dispatch(resetState());
+
+            success && navigation.replace('TabNavigator')
+        })();
+    }, [success]);
+
     const goToLobby = async () => {
         try {
-            const response = await fetch(`${EXPO}/users/signup`, { // A MODIFIER
+            const response = await fetch(`${EXPO}/users/signup`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -119,7 +133,8 @@ export default function CharactereCreationScreen({ navigation }) {
                     has_consent: user.has_consent,
                     gender: genres[genreCount],
                     avatar: races[raceCount]?.avatar,
-                    race: races[raceCount]?._id }),
+                    race: races[raceCount]?._id
+                }),
             });
 
 
@@ -150,20 +165,19 @@ export default function CharactereCreationScreen({ navigation }) {
                         {/* SECTION DESCRIPTION */}
 
                         <View style={styles.characterChoice}>
-                            <View style={styles.raceAndClasseChoice}>
+                            <View style={styles.raceChoice}>
                                 <TouchableOpacity style={styles.leftBtn} onPress={() => goLeftRace()}>
                                     <FontAwesome name='chevron-left' size={30} color='rgb(239, 233, 225)' />
                                 </TouchableOpacity>
                                 <View style={styles.middle}>
-                                    <Text style={styles.textRaces}>{races[raceCount]?.name}</Text>
-                                    {/* <Text style={styles.textClasses}>Dénicheur de Secret</Text> */}
+                                    {<Text style={styles.textRacesName}>{races[raceCount]?.name}</Text>}
                                 </View>
                                 <TouchableOpacity style={styles.rightBtn} onPress={() => goRightRace()}>
                                     <FontAwesome name='chevron-right' size={30} color='rgb(239, 233, 225)' />
                                 </TouchableOpacity>
                             </View>
                             <View style={styles.raceDescription}>
-                                <Text>{races[raceCount]?.description}</Text>
+                                <Text style={styles.textRacesDescription}>{races[raceCount]?.description}</Text>
                             </View>
 
                             {/* SECTION SPELLS */}
@@ -252,6 +266,7 @@ const styles = StyleSheet.create({
         color: 'rgb(121, 102, 91)',
         fontSize: 30,
         fontWeight: 800,
+        textShadowColor: 'black', textShadowOffset: { width: 3, height: 3 }, textShadowRadius: 2,
     },
     logo: {
         width: 50,
@@ -268,29 +283,41 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center'
     },
-    raceAndClasseChoice: {
+    raceChoice: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'center',
-        height: '10%'
+        height: '10%',
+        position: 'relative'
+    },
+    leftBtn: {
+        left: '5',
+        position: 'absolute',
+        padding:5
+    },
+    rightBtn: {
+        right: '5',
+        position: 'absolute',
+        padding:5
     },
     middle: {
         alignItems: 'center',
-        justifyContent: 'center'
+        width: '55%',
     },
-    leftBtn: {
-        marginRight: '15%'
+    textRacesName: {
+        color: 'rgb(121, 102, 91)',
+        fontSize: 20,
+        fontWeight: 900,
     },
-    rightBtn: {
-        marginLeft: '15%'
+    textRacesDescription: {
+        color: 'rgb(226, 215, 204)',
+        fontSize: 15,
+        fontWeight: 900,
     },
     raceDescription: {
-        // marginTop:'5%',
         alignItems: 'center',
         justifyContent: 'center',
         height: '20%',
         width: '95%',
-        //backgroundColor: 'rgb(189, 159, 138)',
         padding: '5%'
     },
 
@@ -298,10 +325,9 @@ const styles = StyleSheet.create({
     spells: {
         backgroundColor: 'rgb(121, 102, 91)',
         alignItems: 'center',
-        //justifyContent: 'center',
         width: '95%',
         borderRadius: 47,
-        height: '60%'
+        height: '65%'
     },
 
     /* PASSIF SPELL BOX*/
@@ -309,13 +335,15 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgb(189, 159, 138)',
         borderRadius: 40,
         height: '40%',
-        width: '90%',
+        width: '96%',
         marginTop: '2%',
         alignItems: 'center',
-        //justifyContent: 'center',
     },
     passifSpellText: {
         marginTop: '2%',
+        color: 'rgb(239, 233, 225)',
+        fontSize: 18,
+        fontWeight: 800,
     },
     passifSpellDescription: {
         marginTop: '3%',
@@ -326,6 +354,10 @@ const styles = StyleSheet.create({
     },
     spellText: {
         marginLeft: '5%',
+        color: 'rgb(226, 215, 204)',
+        fontSize: 15,
+        fontWeight: 400,
+
     },
     /* SPELL IMAGE */
     spellImg: {
@@ -335,29 +367,34 @@ const styles = StyleSheet.create({
 
     /* ACTIF SPELL TEXT*/
     actifSpellText: {
-        marginTop: '2%',
+        marginTop: '5%',
+        color: 'rgb(239, 233, 225)',
+        fontSize: 18,
+        fontWeight: 800,
     },
 
     /* ACTIF SPELL BOX*/
     actifSpellBox: {
         alignItems: 'center',
         justifyContent: 'center',
-        width: '90%',
+        width: '96%',
+        gap: 10
     },
     actifSpell: {
+        width: '100%',
         flexDirection: 'row',
         flexWrap: 'wrap',
         justifyContent: 'center',
+        gap: 12
     },
     spell: {
         flexDirection: 'row',
-        width: '50%',
-        height: '45%',
-        justifyContent: 'center',
+        width: '48%',
+        height: '65%',
+        justifyContent: 'space-evenly',
         alignItems: 'center',
         backgroundColor: 'rgb(189, 159, 138)',
         borderRadius: 40,
-        marginTop: '4%',
     },
 
     /* GENRE CHOICE BOX*/
@@ -365,11 +402,16 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         marginTop: '2%',
         height: '5%',
-        width: '45%',
+        width: '55%',
         justifyContent: 'space-around',
         alignItems: 'center',
         backgroundColor: 'rgb(121, 144, 197)',
         borderRadius: 40,
+    },
+    textGenreChoice: {
+        color: 'rgb(239, 233, 225)',
+        fontSize: 18,
+        fontWeight: 800,
     },
 
     /* AVATAR CHOICE BOX*/
@@ -383,7 +425,7 @@ const styles = StyleSheet.create({
     /* VALIDATION SECTION BOX*/
     validationSection: {
         marginTop: '1%',
-        width: '45%',
+        width: '55%',
         height: '5%',
         backgroundColor: 'rgb(83, 70, 64)',
         borderRadius: 40,
@@ -393,5 +435,11 @@ const styles = StyleSheet.create({
     avatarImg: {
         height: 90,
         width: 90
+    },
+    textBtn: {
+        color: 'rgb(239, 233, 225)',
+        fontSize: 20,
+        fontWeight: 800,
+        textShadowColor: 'black', textShadowOffset: { width: 3, height: 3 }, textShadowRadius: 1,
     }
 })
