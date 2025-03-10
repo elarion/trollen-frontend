@@ -5,6 +5,8 @@ import CustomHeader from "../components/CustomHeader";
 import axiosInstance from '../utils/axiosInstance';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
+
+
 export default function ProfileScreen({ navigation }) {
 
     const [characterData, setCharacterData] = useState([]);
@@ -15,6 +17,8 @@ export default function ProfileScreen({ navigation }) {
             setCharacterData(response.data.character)
         })()
     }, [])
+
+
 
     return (
         <SafeAreaProvider>

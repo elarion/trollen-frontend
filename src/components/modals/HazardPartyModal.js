@@ -1,48 +1,50 @@
-import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
-import { Header } from 'react-native-elements';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import { useSelector } from "react-redux";
-import { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ImageBackground, Modal, TextInput, Pressable, Alert } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, Modal, Pressable, TextInput, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import Checkbox from 'expo-checkbox';
+import { Dropdown } from 'react-native-element-dropdown';
+import AntDesign from 'react-native-vector-icons/AntDesign';
 
-const JoinRoomModal = ({ visible, onClose, onConfirm }) => {
-    const [roomname, setRoomname] = useState('');
-    const [password, setPassword] = useState('');
+const HazardPartyModal = ({ visible, onClose, onConfirm }) => {
+    const [game, setGame] = useState(true);
 
     return (
         <Modal
             animationType="slide"
             transparent={true}
             visible={visible}
-            onRequestClose={() => {
-                onClose();
-            }}>
+            onRequestClose={onClose}>
             <View style={styles.centeredView}>
-                <View style={styles.modalViewJoinRoom}>
-                    <Text style={styles.modalTitle}>Join a room</Text>
-                    <View style={styles.inputSection}>
-                        <Text>Room name</Text>
-                        <TextInput autoCapitalize="none" style={styles.input} placeholder="Room name" onChangeText={value => setRoomname(value)} value={roomname} />
-                        <Text>Password (optionnel)</Text>
-                        <TextInput autoCapitalize="none" style={styles.input} placeholder="Password" onChangeText={value => setPassword(value)} value={password} secureTextEntry={true} />
+                <View style={styles.modalViewHazardParty}>
+                    <Text style={styles.modalTitle}>Join a Hazard Party</Text>
+                    <View style={styles.inputSectionHazardParty}>
+                        <Text>Choose any game you want to play</Text>
+                        <View style={styles.sectionBoxHazardParty}>
+                            <Checkbox
+                                style={styles.checkbox}
+                                value={game}
+                                onValueChange={setGame}
+                                color={game ? '#4630EB' : undefined}
+                            />
+                            <Text style={styles.checkboxTextHazardParty}>Motamaux</Text>
+                        </View>
                     </View>
                     <View style={styles.btnModalJoinRoom}>
                         <Pressable
                             style={[styles.button, styles.buttonClose]}
-                            onPress={onClose}>
-                            <Text style={styles.textStyle}>cancel</Text>
+                            onPress={() => onClose()}>
+                            <Text style={styles.textStyle}>back</Text>
                         </Pressable>
                         <Pressable
                             style={[styles.button, styles.buttonValidation]}
-                            onPress={() => onConfirm({ roomname, password })}>
+                            onPress={() => onConfirm()}>
                             <Text style={styles.textStyle}>join</Text>
                         </Pressable>
                     </View>
                 </View>
             </View>
         </Modal>
-    )
-}
+    );
+};
 
 const styles = StyleSheet.create({
     centeredView: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' },
@@ -54,7 +56,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         width: '90%',
     },
-    modalViewJoinRoom: {
+    modalViewHazardParty: {
         margin: 20,
         backgroundColor: 'white',
         borderRadius: 20,
@@ -70,10 +72,26 @@ const styles = StyleSheet.create({
         elevation: 5,
         width: '90%',
     },
+    sectionBoxHazardParty: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: '100%',
+        marginTop: '1%',
+        paddingVertical: 10,
+    },
+
+    inputSectionHazardParty: {
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+        width: '100%',
+    },
+    checkboxTextHazardParty: {
+        fontSize: 15,
+    },
     button: {
         borderRadius: 20,
         padding: 10,
-        elevation: 2,
     },
     btnModal: {
         flexDirection: 'row',
@@ -126,4 +144,4 @@ const styles = StyleSheet.create({
     textStyle: { color: 'white', fontWeight: 'bold', textAlign: 'center' },
 });
 
-export default JoinRoomModal;
+export default HazardPartyModal;

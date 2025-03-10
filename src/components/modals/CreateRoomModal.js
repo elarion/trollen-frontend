@@ -4,7 +4,16 @@ import Checkbox from 'expo-checkbox';
 import { Dropdown } from 'react-native-element-dropdown';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 
-const LobbyModalRoom = ({ visible, onClose, onConfirm }) => {
+const initialRoomForm = {
+    roomname: '',
+    tag: '',
+    password: '',
+    isSafe: false,
+    isPrivate: false,
+    capacityValue: '0',
+};
+const CreateRoomModal = ({ visible, onClose, onConfirm }) => {
+    const [roomForm, setRoomForm] = useState(initialRoomForm);
     const [roomname, setRoomname] = useState('');
     const [tag, setTag] = useState('');
     const [password, setPassword] = useState('');
@@ -118,4 +127,4 @@ const styles = StyleSheet.create({
     textStyle: { color: 'white', fontWeight: 'bold', textAlign: 'center' },
 });
 
-export default LobbyModalRoom;
+export default CreateRoomModal;
