@@ -57,7 +57,7 @@ export default function RoomScreen({ navigation, route }) {
                             <View style={styles.placeholder}>
                                 <View style={styles.backgroundPlaceholder}>
                                     <TextInput
-                                        placeholder="Tape ton message ici !"
+                                        placeholder="Tape ton message ici !" //onChangeText={value => setMot(value)} value={mot}
                                         placeholderTextColor="gray"
                                         style={styles.placeholderText}>
                                     </TextInput>

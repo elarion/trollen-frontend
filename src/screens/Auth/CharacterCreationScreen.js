@@ -9,12 +9,15 @@ import {
 } from "react-native";
 import { Avatar } from '@components/Avatar';
 
+/** Imports SecureStore */
+import * as SecureStore from 'expo-secure-store';
+
 /** Imports icons */
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 /** Imports store */
 import { useDispatch, useSelector } from 'react-redux';
-import { signupUser, resetState } from '@store/authSlice';
+import { setUserSignup } from '@store/authSlice';
 
 /** Imports axios */
 import axiosInstance from '@utils/axiosInstance';
@@ -25,14 +28,16 @@ import theme from '@theme';
 export default function CharactereCreationScreen({ navigation }) {
     const dispatch = useDispatch();
     const { user } = useSelector((state) => state.auth);
+    console.log('In character creation screen user =>', user);
 
     // États pour stocker les données
     const [races, setRaces] = useState([]);
     const [raceIndex, setRaceIndex] = useState(0);
     const [spells, setSpells] = useState({});
     const [genreIndex, setGenreIndex] = useState(0);
+    const [error, setError] = useState(null);
 
-    const { success } = useSelector((state) => state.auth);
+    // const { success } = useSelector((state) => state.auth);
 
     // useMemo pour les genres car pas de changement
     // donc pas besoin de re-rendre
@@ -42,7 +47,6 @@ export default function CharactereCreationScreen({ navigation }) {
     useEffect(() => {
         (async () => {
 
-            console.log('here in useEffect de character creation');
             try {
                 // Promise.all pour les requêtes en parallèle
                 // Faire un fetch global pour les données
@@ -66,10 +70,10 @@ export default function CharactereCreationScreen({ navigation }) {
     }, []);
 
     // Gestion du succès
-    useEffect(() => {
-        dispatch(resetState());
-        success && navigation.replace('TabNavigator');
-    }, [success, navigation, dispatch]);
+    // useEffect(() => {
+    //     dispatch(resetState());
+    //     success && navigation.replace('TabNavigator');
+    // }, [success, navigation, dispatch]);
 
     // Navigation Race & Genre
     const changeRace = useCallback((direction) => {
@@ -81,13 +85,31 @@ export default function CharactereCreationScreen({ navigation }) {
     }, [genres]);
 
     // Validation et envoi des données
-    const goToLobby = () => {
-        dispatch(signupUser({
-            ...user,
-            gender: genres[genreIndex],
-            avatar: races[raceIndex]?.avatar,
-            race: races[raceIndex]?._id
-        }));
+    const goToLobby = async () => {
+        console.log('Go to lobby')
+        try {
+            console.log('In go yo lobby user =>', user);
+            const response = await axiosInstance.post(`/users/signup`, { ...user, gender: genres[genreIndex], avatar: races[raceIndex]?.avatar, race: races[raceIndex]?._id });
+            const { user: userResponse, accessToken, refreshToken } = response.data;
+
+            dispatch(setUserSignup({ user: userResponse, accessToken, refreshToken }));
+
+            console.log('After dispatch =>', userResponse, accessToken, refreshToken);
+            await SecureStore.setItemAsync('accessToken', accessToken);
+            await SecureStore.setItemAsync('refreshToken', refreshToken);
+
+            console.log('After Setitem =>', userResponse, accessToken, refreshToken);
+
+            navigation.replace('TabNavigator');
+        } catch (error) {
+            console.log('User in error =>', user);
+            if (!error.response.data.success) {
+                console.log(error.response.data)
+                setError(error.response.data.message);
+            }
+
+            console.error('Error with goToLobby =>', error);
+        }
     };
 
     // Loader si les données ne sont pas encore là
@@ -130,7 +152,7 @@ export default function CharactereCreationScreen({ navigation }) {
                                 </View>
 
                                 <View style={{ alignItems: 'center', marginBottom: 20 }}>
-                                    <Avatar avatar={races[raceIndex]?.avatar} username={user.username} />
+                                    <Avatar avatar={races[raceIndex]?.avatar} username={user?.username} />
                                 </View>
 
                                 {/* CHOIX DU GENRE */}
