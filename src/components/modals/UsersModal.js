@@ -1,14 +1,18 @@
-import React from "react";
+import { useState, useEffect } from "react";
 import { Modal, View, Text, TouchableOpacity, FlatList } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
+import UserReportModal from "./UserReportModal";
 
 const UsersModal = ({ modalUserRoomVisible, setModalUserRoomVisible, participants }) => {
+    const [modalReportVisible, setModalReportVisible] = useState(false);
+    const [userToReport, setUserToReport] = useState(null);
     const handleAddFriend = (item) => {
         
         console.log("Ajouter ami:", item);
     };
     const handleReportFriend = (item) => {
-        
+        setUserToReport(item); 
+        setModalReportVisible(true);
         console.log("Report friend:", item);
     };
 
@@ -31,8 +35,8 @@ const UsersModal = ({ modalUserRoomVisible, setModalUserRoomVisible, participant
                         renderItem={({ item }) => (
                             <View style={styles.inputSection} key={item._id}>
                                 <Text style={styles.modalTitle}>{item.user.username}</Text>
-                                
-                                <TouchableOpacity onPress={() => handleAddFriend(item)}>
+                               
+                                <TouchableOpacity onPress={() => handleReportFriend(item)}>
                                     <FontAwesome name="exclamation-circle" size={24} color="red" />
                                 </TouchableOpacity>
                                 <TouchableOpacity onPress={() => handleAddFriend(item)}>
@@ -44,6 +48,17 @@ const UsersModal = ({ modalUserRoomVisible, setModalUserRoomVisible, participant
                     />
                 </View>
             </View>
+            {userToReport && (
+                <UserReportModal
+                    visible={modalReportVisible}
+                    onClose={() => setModalReportVisible(false)}
+                    userToReport={userToReport}
+                    onReport={(user) => {
+                        console.log("Utilisateur signalé:", user);
+                        setModalReportVisible(false); 
+                    }}
+                />
+            )}
         </Modal>
     );
 };
