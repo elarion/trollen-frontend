@@ -40,7 +40,7 @@ export const AuthModal = ({ title, visible, toggleModal, fields, setField, onCon
                         <Text style={styles.textStyle}>Back</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={[styles.button, styles.buttonValidation]} onPress={onConfirm}>
-                        <Text style={styles.textStyle}>Validate</Text>
+                        <Text style={styles.textStyle}>{isSignUp ? 'Sign up' : 'Sign in'}</Text>
                     </TouchableOpacity>
                 </View>
                 {error && <Text style={styles.errorText}>{error}</Text>}

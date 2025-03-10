@@ -20,29 +20,32 @@ const Stack = createNativeStackNavigator();
  */
 const RootNavigator = () => {
     const dispatch = useDispatch();
-    const { user, token, loading } = useSelector(state => state.auth);
+    const { user, token, refreshToken, loading } = useSelector(state => state.auth);
+    console.log('RootNavigator => User =>', user);
+    console.log('RootNavigator => Token =>', token);
+    console.log('RootNavigator => Refresh Token =>', refreshToken);
     // const [loading, setLoading] = useState(true);
     // const [token, setToken] = useState(null);
 
-    useEffect(() => {
-        (async () => {
-            try {
-                const token = await SecureStore.getItemAsync("accessToken");
-                console.log('token =>', token);
+    // useEffect(() => {
+    //     (async () => {
+    //         try {
+    //             // const token = await SecureStore.getItemAsync("accessToken");
+    //             console.log('token =>', token);
 
-                console.log('Loading user data');
-                token && await dispatch(loadUserData()).unwrap();
-            } catch (err) {
-                if (err.message === "No active session") {
-                    console.log('In RootNavigator =>', err.message);
-                } else {
-                    console.error("Erreur chargement des données utilisateur:", err);
-                }
-            } finally {
-                // setInitialLoading(false);
-            }
-        })();
-    }, []);
+    //             console.log('Loading user data');
+    //             // token && await dispatch(loadUserData()).unwrap();
+    //         } catch (err) {
+    //             if (err.message === "No active session") {
+    //                 console.log('In RootNavigator =>', err.message);
+    //             } else {
+    //                 console.error("Erreur chargement des données utilisateur:", err);
+    //             }
+    //         } finally {
+    //             // setInitialLoading(false);
+    //         }
+    //     })();
+    // }, []);
 
     // useEffect(() => {
     //     (async () => {
