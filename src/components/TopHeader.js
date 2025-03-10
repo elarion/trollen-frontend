@@ -50,11 +50,14 @@ const TopHeader = () => {
             <View style={styles.header}>
                 {/* LEFT SIDE */}
                 <View style={styles.headerButtons}>
-                    <TouchableOpacity onPress={() => navigation.navigate('Settings')}>
+                    {/*  <TouchableOpacity onPress={() => navigation.navigate('Settings')}>
                         <MaterialCommunityIcons name="cog-outline" size={28} color={theme.colors.darkBrown} />
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => navigation.navigate('News')}>
                         <MaterialCommunityIcons name="newspaper-variant-outline" size={28} color={theme.colors.darkBrown} />
+                    </TouchableOpacity> */}
+                    <TouchableOpacity onPress={() => navigation.navigate('Grimoire')}>
+                        <MaterialCommunityIcons name="book-outline" size={28} color={theme.colors.darkBrown} />
                     </TouchableOpacity>
                 </View>
 
@@ -66,9 +69,7 @@ const TopHeader = () => {
                     <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
                         <MaterialCommunityIcons name="account-outline" size={28} color={theme.colors.darkBrown} />
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => navigation.navigate('Grimoire')}>
-                        <MaterialCommunityIcons name="book-outline" size={28} color={theme.colors.darkBrown} />
-                    </TouchableOpacity>
+
                 </View>
             </View>
         </View>
