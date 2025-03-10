@@ -47,7 +47,7 @@ const UserReportModal = ({ visible, onClose, userToReport, onReport }) => {
             visible={visible}
             onRequestClose={onClose}
         >
-            <View style={styles.modalOverlay}>
+            <View style={[styles.modalOverlay, { backgroundColor: 'rgba(0, 0, 0, 0.5)' }]}>
                 <View style={styles.modalContainer}>
 
                     <Text style={styles.title}>Signaler {userToReport?.user?.username}</Text>
@@ -93,7 +93,7 @@ const UserReportModal = ({ visible, onClose, userToReport, onReport }) => {
 
                    
                     <TouchableOpacity onPress={handleReport}>
-                        <Text style={styles.button}>Signaler</Text>
+                        <Text style={styles.buttonSignal}>Signaler</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity onPress={onClose}>
@@ -108,20 +108,21 @@ const UserReportModal = ({ visible, onClose, userToReport, onReport }) => {
 const styles = {
     modalOverlay: {
         flex: 1,
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
         justifyContent: "center",
         alignItems: "center",
     },
     modalContainer: {
         width: "80%",
         padding: 20,
-        backgroundColor: "white",
+        backgroundColor: "#F0E9E0",
         borderRadius: 10,
         alignItems: "center",
+        
     },
     title: {
         fontSize: 18,
         fontWeight: "bold",
+        padding: 10,
     },
     message: {
         fontSize: 16,
@@ -129,7 +130,12 @@ const styles = {
     },
     button: {
         fontSize: 16,
-        color: "blue",
+        color: "#55453F",
+        marginTop: 10,
+    },
+    buttonSignal: {
+        fontSize: 16,
+        color: "#F65959",
         marginTop: 10,
     },
     description: {
