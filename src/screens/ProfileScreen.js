@@ -5,8 +5,7 @@ import CustomHeader from "../components/CustomHeader";
 import axiosInstance from '../utils/axiosInstance';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
-import { logout } from '@store/authSlice';
-import { useDispatch } from 'react-redux';
+
 
 export default function ProfileScreen({ navigation }) {
 
@@ -18,25 +17,6 @@ export default function ProfileScreen({ navigation }) {
             setCharacterData(response.data.character)
         })()
     }, [])
-
-     
-
-const handleLogout = async () => {
-        try {
-            dispatch(logout());
-
-        await SecureStore.deleteItemAsync('accessToken');
-        await SecureStore.deleteItemAsync('refreshToken');
-
-        // // navigation.reset sert à réinitialiser la pile de navigation pour empêcher le retour en arrière du retour en arrière
-        navigation.reset({
-            index: 0,
-            routes: [{ name: "Auth" }], // Rediriger et empêcher le retour en arrière
-        });
-    } catch (error) {
-        console.error('Error with logout =>', error);
-    }
-};
 
 
 
