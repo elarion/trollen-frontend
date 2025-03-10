@@ -1,6 +1,7 @@
 /** Imports Hooks */
-import React, { useEffect, useReducer } from "react";
+import React, { useEffect, useReducer, useState } from "react";
 import { useNavigation } from '@react-navigation/native';
+import * as SecureStore from 'expo-secure-store';
 
 /** Imports components */
 import { BlurView } from 'expo-blur';
@@ -10,7 +11,10 @@ import Checkbox from 'expo-checkbox';
 
 /** Imports store */
 import { useDispatch, useSelector } from 'react-redux';
-import { signinUser, preSignupUser, resetState } from '@store/authSlice';
+import { signinUser, preSignupUser, setUserSignin, setUserPreSignup, resetState, setUser } from '@store/authSlice';
+
+/** Imports axios */
+import axiosInstance from '@utils/axiosInstance';
 
 /** Imports theme */
 import theme from '@theme';
@@ -46,8 +50,12 @@ const reducer = (state, action) => {
 export default function SignInScreen() {
     const navigation = useNavigation();
     const [state, dispatchState] = useReducer(reducer, initialState);
-    const { loading, error, success, successSignup } = useSelector((state) => state.auth);
+    // const { user } = useSelector((state) => state.auth);
+    // const { loading, success, successSignup } = useSelector((state) => state.auth);
     const dispatch = useDispatch();
+    const [error, setError] = useState(null);
+    const [success, setSuccess] = useState(false);
+    const [successSignup, setSuccessSignup] = useState(false);
 
     // Reset state and navigate if success
     useEffect(() => {
@@ -75,25 +83,53 @@ export default function SignInScreen() {
         if (!state.has_consent) return false;
 
         try {
+            const response = await axiosInstance.post(`/users/pre-signup`, { username: state.username, email: state.email, password: state.password, confirmPassword: state.confirmPassword, has_consent: state.has_consent });
+
+            if (!response.data.success) {
+                console.log('Error with preSignUp =>', response.data.error);
+            }
+
+            dispatch(setUserPreSignup({ user: { username: state.username, email: state.email, password: state.password, confirmPassword: state.confirmPassword, has_consent: state.has_consent } }));
+
             // unwrap sert à gérer les erreurs et les success et les pending et les fulfilled et les rejected et les pending et les fulfilled et les rejected
-            const response = await dispatch(preSignupUser({ username: state.username, email: state.email, password: state.password, confirmPassword: state.confirmPassword, has_consent: state.has_consent })).unwrap();
+            // const response = await dispatch(preSignupUser({ username: state.username, email: state.email, password: state.password, confirmPassword: state.confirmPassword, has_consent: state.has_consent })).unwrap();
 
             // Gérer ça dans le useEffect specifiquement au pre signup en séparant aussi le pre signin dans un successSignin
 
-            if (!response.success) return false;
 
-            // dispatchState({ type: 'TOGGLE_SIGNUP_MODAL' });
-            // dispatchState({ type: 'RESET_FIELDS' });
+            dispatchState({ type: 'TOGGLE_SIGNUP_MODAL' });
+            dispatchState({ type: 'RESET_FIELDS' });
 
-            // navigation.navigate('CharacterCreation');
+            navigation.navigate('CharacterCreation');
         } catch (error) {
             console.log('Error with preSignUp =>', error);
         }
     };
 
     // Connexion utilisateur
-    const signInWithId = () => {
-        dispatch(signinUser({ username: state.username, password: state.password }));
+    const signInWithId = async () => {
+        try {
+            if (!state.username || !state.password) {
+                return false;
+            }
+
+            const response = await axiosInstance.post(`/users/signin`, { username: state.username, password: state.password });
+
+            const { user, accessToken, refreshToken } = response.data;
+            dispatch(setUserSignin({ user, accessToken, refreshToken }));
+
+            await SecureStore.setItemAsync('accessToken', accessToken);
+            await SecureStore.setItemAsync('refreshToken', refreshToken);
+
+            navigation.replace('TabNavigator');
+            // dispatch(signinUser({ username: state.username, password: state.password }));
+        } catch (error) {
+            if (!error.response.data.success) {
+                setError(error.response.data.message);
+            }
+
+            console.error('Error with signInWithId =>', error);
+        }
     };
 
     // safeareaProvider est un composant qui permet de s'assurer que le contenu de l'application est visible dans la zone sécurisée de l'appareil
