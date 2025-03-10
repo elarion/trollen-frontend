@@ -19,11 +19,11 @@ const JoinRoomModal = ({ visible, onClose, onConfirm }) => {
             }}>
             <View style={styles.centeredView}>
                 <View style={styles.modalViewJoinRoom}>
-                    <Text style={styles.modalTitle}>Join a room</Text>
+                    <Text style={styles.modalTitle}>Join an existing party</Text>
                     <View style={styles.inputSection}>
-                        <Text>Room name</Text>
+                        <Text>Party name</Text>
                         <TextInput autoCapitalize="none" style={styles.input} placeholder="Room name" onChangeText={value => setRoomname(value)} value={roomname} />
-                        <Text>Password (optionnel)</Text>
+                        <Text>Password (optional)</Text>
                         <TextInput autoCapitalize="none" style={styles.input} placeholder="Password" onChangeText={value => setPassword(value)} value={password} secureTextEntry={true} />
                     </View>
                     <View style={styles.btnModalJoinRoom}>

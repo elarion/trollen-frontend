@@ -49,13 +49,12 @@ const persistConfig = {
 };
 
 // Combine tous les reducers
-const rootReducer = combineReducers({
-    auth: persistReducer(persistConfig, authReducer), // On persiste uniquement auth
-});
+const combinedReducers = combineReducers({ auth: authReducer });
+const persistedReducer = persistReducer(persistConfig, combinedReducers);
 
 // Configuration du store Redux
 const store = configureStore({
-    reducer: rootReducer,
+    reducer: persistedReducer,
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({
             serializableCheck: false, // Désactiver la vérification pour Redux-Persist
