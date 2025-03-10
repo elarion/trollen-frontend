@@ -220,95 +220,93 @@ const removeTokens = async () => {
     await SecureStore.deleteItemAsync("refreshToken");
 };
 
-// preSignupUser : Pré-inscription
-export const preSignupUser = createAsyncThunk(
-    "auth/preSignupUser",
-    async (userData, { rejectWithValue }) => {
-        try {
-            const response = await axiosInstance.post(`/users/pre-signup`, userData);
-            return response.data;
-        } catch (error) {
-            return rejectWithValue(error.response?.data?.errors[0]?.msg || "Erreur d'inscription");
-        }
-    }
-);
+// // preSignupUser : Pré-inscription
+// export const preSignupUser = createAsyncThunk(
+//     "auth/preSignupUser",
+//     async (userData, { rejectWithValue }) => {
+//         try {
+//             const response = await axiosInstance.post(`/users/pre-signup`, userData);
+//             return response.data;
+//         } catch (error) {
+//             return rejectWithValue(error.response?.data?.errors[0]?.msg || "Erreur d'inscription");
+//         }
+//     }
+// );
 
-// signupUser : Inscription complète
-export const signupUser = createAsyncThunk(
-    "auth/signupUser",
-    async (userData, { rejectWithValue }) => {
-        try {
-            const response = await axiosInstance.post(`/users/signup`, userData);
-            const { user, accessToken, refreshToken } = response.data;
+// // signupUser : Inscription complète
+// export const signupUser = createAsyncThunk(
+//     "auth/signupUser",
+//     async (userData, { rejectWithValue }) => {
+//         try {
+//             const response = await axiosInstance.post(`/users/signup`, userData);
+//             const { user, accessToken, refreshToken } = response.data;
 
-            await storeTokens(accessToken, refreshToken);
-            await AsyncStorage.setItem("user", JSON.stringify(user)); // Sauvegarde en AsyncStorage
+//             await storeTokens(accessToken, refreshToken);
+//             await AsyncStorage.setItem("user", JSON.stringify(user)); // Sauvegarde en AsyncStorage
 
-            return response.data;
-        } catch (error) {
-            return rejectWithValue(error.response?.data?.errors[0]?.msg || "Registration error");
-        }
-    }
-);
+//             return response.data;
+//         } catch (error) {
+//             return rejectWithValue(error.response?.data?.errors[0]?.msg || "Registration error");
+//         }
+//     }
+// );
 
-// 🔥 `signinUser` : Connexion
-export const signinUser = createAsyncThunk(
-    "auth/signinUser",
-    async (userData, { rejectWithValue }) => {
-        try {
-            const response = await axiosInstance.post(`/users/signin`, userData);
-            const { user, accessToken, refreshToken } = response.data;
+// // 🔥 `signinUser` : Connexion
+// export const signinUser = createAsyncThunk(
+//     "auth/signinUser",
+//     async (userData, { rejectWithValue }) => {
+//         try {
+//             const response = await axiosInstance.post(`/users/signin`, userData);
+//             const { user, accessToken, refreshToken } = response.data;
 
-            await storeTokens(accessToken, refreshToken);
-            await AsyncStorage.setItem("user", JSON.stringify(user)); // Sauvegarde en AsyncStorage
+//             await storeTokens(accessToken, refreshToken);
+//             await AsyncStorage.setItem("user", JSON.stringify(user)); // Sauvegarde en AsyncStorage
 
-            return response.data;
-        } catch (error) {
-            return rejectWithValue(error.response?.data?.message || "Connection error");
-        }
-    }
-);
+//             return response.data;
+//         } catch (error) {
+//             return rejectWithValue(error.response?.data?.message || "Connection error");
+//         }
+//     }
+// );
 
-// 🔥 `logoutUser` : Déconnexion
-export const logoutUser = createAsyncThunk(
-    "auth/logoutUser",
-    async (_, { rejectWithValue }) => {
-        try {
-            const refreshToken = await SecureStore.getItemAsync("refreshToken");
-            if (!refreshToken) return rejectWithValue("Aucun token trouvé");
+// export const logoutUser = createAsyncThunk(
+//     "auth/logoutUser",
+//     async (_, { rejectWithValue }) => {
+//         try {
+//             const refreshToken = await SecureStore.getItemAsync("refreshToken");
+//             if (!refreshToken) return rejectWithValue("Aucun token trouvé");
 
-            await axiosInstance.post(`/users/logout`, { refreshToken });
+//             await axiosInstance.post(`/users/logout`, { refreshToken });
 
-            console.log('In logoutUser after post=>', refreshToken);
+//             console.log('In logoutUser after post=>', refreshToken);
 
-            await removeTokens(); // Supprime les tokens
-            await AsyncStorage.removeItem("user"); // Supprime les infos utilisateur
+//             await removeTokens(); // Supprime les tokens
+//             await AsyncStorage.removeItem("user"); // Supprime les infos utilisateur
 
-            return true;
-        } catch (error) {
-            return rejectWithValue("Logout error");
-        }
-    }
-);
+//             return true;
+//         } catch (error) {
+//             return rejectWithValue("Logout error");
+//         }
+//     }
+// );
 
-// 🔥 `loadUserData` : Récupération des données persistées
-export const loadUserData = createAsyncThunk(
-    "auth/loadUserData",
-    async (_, { rejectWithValue }) => {
-        try {
-            const user = await AsyncStorage.getItem("user");
-            const token = await getToken();
+// export const loadUserData = createAsyncThunk(
+//     "auth/loadUserData",
+//     async (_, { rejectWithValue }) => {
+//         try {
+//             const user = await AsyncStorage.getItem("user");
+//             const token = await getToken();
 
-            console.log('In reduxer =>', user);
+//             console.log('In reduxer =>', user);
 
-            if (user && token) return { user: JSON.parse(user), token };
-            // return rejectWithValue("No active session");
-            return false;
-        } catch (error) {
-            return rejectWithValue("Error while loading user data");
-        }
-    }
-);
+//             if (user && token) return { user: JSON.parse(user), token };
+//             // return rejectWithValue("No active session");
+//             return false;
+//         } catch (error) {
+//             return rejectWithValue("Error while loading user data");
+//         }
+//     }
+// );
 
 // 🔥 Auth Slice
 const authSlice = createSlice({
@@ -320,6 +318,8 @@ const authSlice = createSlice({
         error: null,
         success: false,
         successSignup: false,
+        modalSignInVisible: false,
+        modalSignUpVisible: false,
     },
     reducers: {
         resetState: (state) => {
@@ -331,87 +331,109 @@ const authSlice = createSlice({
         updateAccessToken: (state, action) => {
             state.token = action.payload;
         },
+        setUserPreSignup: (state, action) => {
+            state.user = action.payload.user;
+        },
+        setUserSignin: (state, action) => {
+            state.user = action.payload.user;
+            state.token = action.payload.accessToken;
+            state.refreshToken = action.payload.refreshToken;
+        },
+        setUserSignup: (state, action) => {
+            state.user = action.payload.user;
+            state.token = action.payload.accessToken;
+            state.refreshToken = action.payload.refreshToken;
+        },
+        setUser: (state, action) => {
+            state.user = action.payload.user;
+        },
+        logout: (state) => {
+            state.user = null;
+            state.token = null;
+            state.refreshToken = null;
+        },
     },
-    extraReducers: (builder) => {
-        builder // builder est
-            // Gestion de l'inscription préalablement à l'inscription
-            .addCase(preSignupUser.pending, (state) => {
-                state.loading = true;
-                state.error = null;
-            })
-            .addCase(preSignupUser.fulfilled, (state, action) => {
-                state.loading = false;
-                state.user = action.payload.user;
-                state.successSignup = true;
-                state.error = null;
-            })
-            .addCase(preSignupUser.rejected, (state, action) => {
-                state.successSignup = false;
-                state.loading = false;
-                state.error = action.payload;
-            })
+    // extraReducers: (builder) => {
+    //     builder // builder est
+    //         // Gestion de l'inscription préalablement à l'inscription
+    //         .addCase(preSignupUser.pending, (state) => {
+    //             state.loading = true;
+    //             state.error = null;
+    //         })
+    //         .addCase(preSignupUser.fulfilled, (state, action) => {
+    //             state.loading = false;
+    //             state.user = action.payload.user;
+    //             state.successSignup = true;
+    //             state.error = null;
+    //         })
+    //         .addCase(preSignupUser.rejected, (state, action) => {
+    //             state.successSignup = false;
+    //             state.loading = false;
+    //             state.error = action.payload;
+    //         })
 
-            // Gestion de l'inscription
-            .addCase(signupUser.pending, (state) => {
-                state.loading = true;
-                state.error = null;
-            })
-            .addCase(signupUser.fulfilled, (state, action) => {
-                state.loading = false;
-                state.user = action.payload.user;
-                state.token = action.payload.accessToken;
-                state.error = null;
-                state.success = true;
-            })
-            .addCase(signupUser.rejected, (state, action) => {
-                state.loading = false;
-                state.error = action.payload;
+    //         // Gestion de l'inscription
+    //         .addCase(signupUser.pending, (state) => {
+    //             state.loading = true;
+    //             state.error = null;
+    //         })
+    //         .addCase(signupUser.fulfilled, (state, action) => {
+    //             state.loading = false;
+    //             state.user = action.payload.user;
+    //             state.token = action.payload.accessToken;
+    //             state.error = null;
+    //             state.success = true;
+    //         })
+    //         .addCase(signupUser.rejected, (state, action) => {
+    //             state.loading = false;
+    //             state.error = action.payload;
 
-            })
+    //         })
 
-            // Gestion de la connexion
-            .addCase(signinUser.pending, (state) => {
-                state.loading = true;
-                state.error = null;
-            })
-            .addCase(signinUser.fulfilled, (state, action) => {
-                state.loading = false;
-                state.user = action.payload.user;
-                state.token = action.payload.accessToken;
-                state.success = true;
-            })
-            .addCase(signinUser.rejected, (state, action) => {
-                state.loading = false;
-                state.error = action.payload;
-            })
+    //         // Gestion de la connexion
+    //         .addCase(signinUser.pending, (state) => {
+    //             state.loading = true;
+    //             state.error = null;
+    //         })
+    //         .addCase(signinUser.fulfilled, (state, action) => {
+    //             state.loading = false;
+    //             state.user = action.payload.user;
+    //             state.token = action.payload.accessToken;
+    //             state.success = true;
+    //         })
+    //         .addCase(signinUser.rejected, (state, action) => {
+    //             state.loading = false;
+    //             state.error = action.payload;
+    //         })
 
-            // Gestion de la déconnexion
-            .addCase(logoutUser.fulfilled, (state) => {
-                state.user = null;
-                state.token = null;
-                state.success = false;
-            })
-            .addCase(logoutUser.rejected, (state, action) => {
-                state.error = action.payload;
-            })
+    //         // Gestion de la déconnexion
+    //         .addCase(logoutUser.fulfilled, (state) => {
+    //             state.user = null;
+    //             state.token = null;
+    //             state.success = false;
+    //         })
+    //         .addCase(logoutUser.rejected, (state, action) => {
+    //             state.error = action.payload;
+    //         })
 
-            // Chargement des données utilisateur
-            .addCase(loadUserData.pending, (state) => {
-                state.loading = true;
-                state.error = null;
-            })
-            .addCase(loadUserData.fulfilled, (state, action) => {
-                state.loading = false;
-                state.user = action.payload.user;
-                state.token = action.payload.token;
-                state.error = null;
-            })
-            .addCase(loadUserData.rejected, (state, action) => {
-                state.loading = false;
-                // state.error = action.payload;
-            });
-    },
+    //         // Chargement des données utilisateur
+    //         .addCase(loadUserData.pending, (state) => {
+    //             state.loading = true;
+    //             state.error = null;
+    //         })
+    //         .addCase(loadUserData.fulfilled, (state, action) => {
+    //             state.loading = false;
+    //             state.user = action.payload.user;
+    //             state.token = action.payload.token;
+    //             state.error = null;
+    //         })
+    //         .addCase(loadUserData.rejected, (state, action) => {
+    //             state.loading = false;
+    //             // state.error = action.payload;
+    //         });
+    // },
 });
 
-export const { resetState, updateAccessToken } = authSlice.actions;
+// export const { resetState, updateAccessToken, setUserPreSignup, setUserSignin, setUser, logout } = authSlice.actions;
+export const { setUserPreSignup, setUserSignin, setUserSignup, setUser, logout } = authSlice.actions;
 export default authSlice.reducer;
