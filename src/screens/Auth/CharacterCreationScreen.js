@@ -22,7 +22,7 @@ import axiosInstance from '@utils/axiosInstance';
 /** Imports theme */
 import theme from '@theme';
 
-export default function CharactereCreationScreen({ navigation, route }) {
+export default function CharactereCreationScreen({ navigation }) {
     const dispatch = useDispatch();
     const { user } = useSelector((state) => state.auth);
 
@@ -41,6 +41,8 @@ export default function CharactereCreationScreen({ navigation, route }) {
     // Fetch des données races et sorts
     useEffect(() => {
         (async () => {
+
+            console.log('here in useEffect de character creation');
             try {
                 // Promise.all pour les requêtes en parallèle
                 // Faire un fetch global pour les données

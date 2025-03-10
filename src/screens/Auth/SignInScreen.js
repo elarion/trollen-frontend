@@ -46,15 +46,21 @@ const reducer = (state, action) => {
 export default function SignInScreen() {
     const navigation = useNavigation();
     const [state, dispatchState] = useReducer(reducer, initialState);
-    const { loading, error, success } = useSelector((state) => state.auth);
+    const { loading, error, success, successSignup } = useSelector((state) => state.auth);
     const dispatch = useDispatch();
 
     // Reset state and navigate if success
     useEffect(() => {
-        dispatch(resetState());
+        if (success) {
+            dispatch(resetState());
+            navigation.replace('TabNavigator');
+        }
 
-        success && navigation.replace('TabNavigator');
-    }, [dispatch, success, navigation]);
+        if (successSignup) {
+            dispatch(resetState());
+            navigation.navigate('CharacterCreation');
+        }
+    }, [dispatch, success, navigation, successSignup]);
 
     // Mode invité
     const guestMode = () => {
@@ -71,12 +77,15 @@ export default function SignInScreen() {
         try {
             // unwrap sert à gérer les erreurs et les success et les pending et les fulfilled et les rejected et les pending et les fulfilled et les rejected
             const response = await dispatch(preSignupUser({ username: state.username, email: state.email, password: state.password, confirmPassword: state.confirmPassword, has_consent: state.has_consent })).unwrap();
+
             // Gérer ça dans le useEffect specifiquement au pre signup en séparant aussi le pre signin dans un successSignin
+
             if (!response.success) return false;
 
-            dispatchState({ type: 'TOGGLE_SIGNUP_MODAL' });
-            dispatchState({ type: 'RESET_FIELDS' });
-            navigation.navigate('CharacterCreation');
+            // dispatchState({ type: 'TOGGLE_SIGNUP_MODAL' });
+            // dispatchState({ type: 'RESET_FIELDS' });
+
+            // navigation.navigate('CharacterCreation');
         } catch (error) {
             console.log('Error with preSignUp =>', error);
         }

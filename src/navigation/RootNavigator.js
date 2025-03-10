@@ -20,23 +20,44 @@ const Stack = createNativeStackNavigator();
  */
 const RootNavigator = () => {
     const dispatch = useDispatch();
-    const [loading, setLoading] = useState(true);
-    const [token, setToken] = useState(null);
+    const { user, token, loading } = useSelector(state => state.auth);
+    // const [loading, setLoading] = useState(true);
+    // const [token, setToken] = useState(null);
 
     useEffect(() => {
         (async () => {
             try {
                 const token = await SecureStore.getItemAsync("accessToken");
-                setToken(token);
+                console.log('token =>', token);
 
-                !token && await dispatch(loadUserData()).unwrap();
+                console.log('Loading user data');
+                token && await dispatch(loadUserData()).unwrap();
             } catch (err) {
-                console.log("Erreur de chargement des données utilisateur :", err);
+                if (err.message === "No active session") {
+                    console.log('In RootNavigator =>', err.message);
+                } else {
+                    console.error("Erreur chargement des données utilisateur:", err);
+                }
             } finally {
-                setLoading(false);
+                // setInitialLoading(false);
             }
         })();
     }, []);
+
+    // useEffect(() => {
+    //     (async () => {
+    //         try {
+    //             const token = await SecureStore.getItemAsync("accessToken");
+    //             setToken(token);
+
+    //             !token && await dispatch(loadUserData()).unwrap();
+    //         } catch (err) {
+    //             console.log("Erreur de chargement des données utilisateur :", err);
+    //         } finally {
+    //             setLoading(false);
+    //         }
+    //     })();
+    // }, []);
 
     if (loading) {
         return (
@@ -50,6 +71,8 @@ const RootNavigator = () => {
         <NavigationContainer>
             {/* {token && <TopHeader />} */}
             <Stack.Navigator screenOptions={{ headerShown: false }}>
+                {/* <Stack.Screen name="TabNavigator" component={TabNavigator} /> */}
+
                 {token ? (
                     <>
                         <Stack.Screen name="TabNavigator" component={TabNavigator} />
