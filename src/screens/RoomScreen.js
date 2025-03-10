@@ -1,11 +1,10 @@
-import { StyleSheet, Text, View, Image, TouchableOpacity, ImageBackground, TextInput, Pressable, FlatList } from "react-native"
+import { StyleSheet, Text, View, Image, TouchableOpacity, ImageBackground, TextInput, Pressable } from "react-native"
 import { Modal, SlideAnimation } from 'react-native-modals'
 import axiosInstance from '../utils/axiosInstance';
 //import { Modal } from 'react-native'
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import CustomHeader from "../components/CustomHeader";
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import { useSelector } from "react-redux";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-native"
 
@@ -18,57 +17,12 @@ export default function RoomScreen({ navigation, route }) {
 
     useEffect(() => {
         (async () => {
-            const newSocket = await connectSocket();
+            const response = await axiosInstance.get(`/rooms/by-id/${room_id}`)
+            setRoomInfo(response.data.room)
 
-            if (!newSocket) {
-                console.error("Impossible de se connecter à WebSocket");
-                return;
-            }
-
-            setSocket(newSocket);
-
-            // Écouter les informations de la room
-            newSocket.on("roomInfo", (data) => {
-                setRoomInfo(data.room);
-            });
-
-            // Charger les messages
-            newSocket.emit("loadMessages", { roomId }, (loadedMessages) => {
-                setMessages(loadedMessages);
-            });
-
-            // Écouter les nouveaux messages
-            newSocket.on("roomMessage", (response) => {
-                setMessages(prev => [response.message, ...prev]);
-            })
-
-            // Rejoindre la room
-            newSocket.emit("joinRoom", { roomId, username: user.user.username }, (response) => {
-                if (!response.success) {
-                    console.error("Erreur de connexion à la room :", response.error);
-                }
-            });
-
-            return () => {
-                if (socket) {
-                    socket.emit("leaveRoom", { roomId, username: user.user.username });
-                    socket.off("roomInfo");
-                    socket.off("roomMessage");
-                }
-            };
         })()
-    }, []);
 
-    const handleMessage = () => {
-        try {
-            setContent('');
-            socket.emit("sendMessage", { roomId, content, username: user.user.username }, (response) => {
-                console.log(response)
-            });
-        } catch (error) {
-            console.error("Erreur lors de l'envoi du message :", error);
-        }
-    }
+    }, [])
 
     //MODALSPELL
     const [modalSpellVisible, setModalSpellVisible] = useState(false);
@@ -88,7 +42,6 @@ export default function RoomScreen({ navigation, route }) {
                             <View style={styles.roomInfos}>
                                 <Text style={styles.creatorRoomName}>{roomInfo.admin?.username}</Text>
                                 <Text style={styles.roomName}>{roomInfo.name}</Text>
-                                <Text style={styles.roomName}>{user.user.username}</Text>
                                 <Text style={styles.numberOfParticipants}>{roomInfo.participants?.length} participant{roomInfo.participants?.length > 1 && `s`}</Text>
                             </View>
                             <TouchableOpacity style={styles.playerList}>
@@ -97,17 +50,7 @@ export default function RoomScreen({ navigation, route }) {
                         </View>
 
                         <View style={styles.messageBox}>
-                            <FlatList
-                                data={messages}
-                                renderItem={renderMessage}
-                                keyExtractor={(item) => item._id.toString()}
-                                contentContainerStyle={styles.messageList}
-                                inverted
-                            // onEndReached={ } // Charge plus de rooms quand on atteint la fin
-                            // onEndReachedThreshold={0.5} // Déclenche le chargement quand on est à 50% du bas
-                            // ListFooterComponent={loading && <ActivityIndicator size="small" color="white" />} // Affiche un loader en bas de la liste
-                            />
-                            {/* <Text>Messages are coming</Text> */}
+                            <Text>Messages are coming</Text>
                         </View>
 
                         <View style={styles.underMessageBox}>
@@ -116,15 +59,13 @@ export default function RoomScreen({ navigation, route }) {
                                     <TextInput
                                         placeholder="Tape ton message ici !"
                                         placeholderTextColor="gray"
-                                        value={content}
-                                        onChangeText={value => setContent(value)}
                                         style={styles.placeholderText}>
                                     </TextInput>
                                 </View>
                             </View>
                         </View>
                         <View style={styles.buttons}>
-                            <TouchableOpacity style={styles.placeholderButton} onPress={handleMessage}>
+                            <TouchableOpacity style={styles.placeholderButton}>
                                 <Text style={styles.placeholderButtonText}>Envoyer message</Text>
                                 <FontAwesome name='send-o' size={15} color='rgb(239, 233, 225)' marginHorizontal={'13%'} />
                             </TouchableOpacity>
@@ -202,15 +143,15 @@ const styles = StyleSheet.create({
 
     //underheader
     underheaderContainer: {
-        padding: 10,
         //backgroundColor: "blue",
         marginTop: 0,
         //heigth:'100%',
         flex: 1,
-        width: '100%',
+        width: '96%',
 
         alignItems: 'center',
         //justifyContent: 'center',
+        margin: '2%',
     },
     upperMessageBox: {
         //backgroundColor: 'grey',
@@ -241,6 +182,7 @@ const styles = StyleSheet.create({
         fontSize: 23,
         fontWeight: 'bold',
         color: 'rgb(85,69,63)',
+
     },
     numberOfParticipants: {
         color: 'rgb(195, 137, 156)',
@@ -259,8 +201,8 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         borderColor: 'maroon',
         borderWidth: 2,
-        // justifyContent: 'center',
-        // alignItems: 'center',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     underMessageBox: {
         //backgroundColor: 'green', 
