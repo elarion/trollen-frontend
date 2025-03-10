@@ -3,6 +3,7 @@ import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { useState, useEffect } from "react";
 import { useSelector } from 'react-redux';
 import TopHeader from "@components/TopHeader";
+import { Avatar } from '@components/Avatar';
 import axiosInstance from '@utils/axiosInstance';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
@@ -28,7 +29,7 @@ export default function ProfileScreen({ navigation }) {
                     <View style={styles.profileBox}>
                         <View style={styles.top}>
                             <View style={styles.topLeft}>
-                                <Text>{characterData.avatar}</Text>
+                            <Avatar avatar={characterData?.race?.avatar ?? 'defaultAvatar'} />
                             </View>
                             <View style={styles.topRight}>
                                 <Text>{characterData.user?.username}</Text>
@@ -39,6 +40,7 @@ export default function ProfileScreen({ navigation }) {
                         <View style={styles.middle1}>
                             <Text>Classe description :</Text>
                             <Text>{characterData.race?.description}</Text>
+                            <Text>{characterData.race?.tagline}</Text>
                         </View>
                         <View style={styles.middle2}>
                             <Text>Actif spells :</Text>
