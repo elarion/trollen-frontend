@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { StyleSheet, Text, View, Image, TouchableOpacity, Modal, Pressable, TextInput, ImageBackground } from "react-native"
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { useState } from "react";
@@ -7,8 +6,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { signinUser, resetState } from '../store/authSlice';
 import Checkbox from 'expo-checkbox';
 import { jwtDecode } from 'jwt-decode';
-import axiosInstance from "../utils/axiosInstance";
-
 
 export default function SignInScreen({ navigation }) {
     const EXPO = process.env.EXPO_PUBLIC_BACKEND_URL;
@@ -22,14 +19,6 @@ export default function SignInScreen({ navigation }) {
 
     const { loading, error, success } = useSelector((state) => state.auth);
     const dispatch = useDispatch();
-
-    useEffect(() => {
-        // Réinitialiser les erreurs et le succès quand on arrive sur l'écran
-        dispatch(resetState());
-
-        success && navigation.replace('TabNavigator')
-    }, [dispatch, success, navigation]); // on écoute success et dispatch car on les utilise dans le useEffect
-
     const guestMode = () => {
         setUsername('');
         setPassword('');
@@ -40,16 +29,16 @@ export default function SignInScreen({ navigation }) {
     const preSignUp = async () => {
         if (isChecked) {
             try {
-                const response = await axiosInstance.post(`/users/pre-signup`, {
-                    username,
-                    email,
-                    password,
-                    confirmPassword,
-                    has_consent: isChecked
+                const response = await fetch(`${EXPO}/users/pre-signup`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: username, email: email, password: password, confirmPassword: confirmPassword, has_consent: isChecked }),
                 });
 
-                if (response.data.success) {
-                    // dispatch(signinUser({ username: username, email: email, password: password, confirmPassword: confirmPassword, has_consent: isChecked }));
+                const data = await response.json();
+
+                if (data) {
+                    dispatch(loginData({ username: username, email: email, password: password, confirmPassword: confirmPassword, has_consent: isChecked }));
                     setUsername('');
                     setEmail('');
                     setPassword('');
@@ -71,7 +60,21 @@ export default function SignInScreen({ navigation }) {
 
     const signInWithId = async () => {
         try {
-            dispatch(signinUser({ username, password }));
+            const response = await fetch(`${EXPO}/users/signin`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: username, password: password }),
+            });
+
+            const data = await response.json();
+            console.log(jwtDecode(data.token))
+            if (data) {
+                dispatch(loginData({ username: data.username, email: data.email, token: data.token, tokenDecoded: jwtDecode(data.token) })); // AJOUTER USER_ID REDUX
+                setUsername('');
+                setPassword('');
+                setModalSignInVisible(!modalSignInVisible);
+                navigation.navigate('TabNavigator')
+            }
         } catch (error) {
             console.error("Erreur lors de la connexion =>", error);
         }
