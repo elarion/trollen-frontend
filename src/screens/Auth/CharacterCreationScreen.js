@@ -126,11 +126,22 @@ export default function CharactereCreationScreen({ navigation }) {
                                     </TouchableOpacity>
                                 </View>
                                 <View style={styles.raceDescription}>
-                                    <Text style={styles.textRaceDescription}>{races[raceIndex]?.description}</Text>
+                                    <Text style={styles.textRaceDescription}>{races[raceIndex]?.tagline}</Text>
                                 </View>
 
                                 <View style={{ alignItems: 'center', marginBottom: 20 }}>
                                     <Avatar avatar={races[raceIndex]?.avatar} username={user.username} />
+                                </View>
+
+                                {/* CHOIX DU GENRE */}
+                                <View style={[styles.genreChoise, { alignSelf: 'center' }]}>
+                                    <TouchableOpacity style={styles.leftBtnGenre} onPress={() => changeGenre(-1)}>
+                                        <FontAwesome name='chevron-left' size={20} color='rgb(239, 233, 225)' />
+                                    </TouchableOpacity>
+                                    <Text style={styles.textGenreChoice}>{genres[genreIndex]}</Text>
+                                    <TouchableOpacity style={styles.rightBtnGenre} onPress={() => changeGenre(1)}>
+                                        <FontAwesome name='chevron-right' size={20} color='rgb(239, 233, 225)' />
+                                    </TouchableOpacity>
                                 </View>
 
                                 <View style={styles.spells}>
@@ -162,17 +173,6 @@ export default function CharactereCreationScreen({ navigation }) {
                                         </View>
                                     </View>
                                 </View>
-                            </View>
-
-                            {/* CHOIX DU GENRE */}
-                            <View style={styles.genreChoise}>
-                                <TouchableOpacity style={styles.leftBtnGenre} onPress={() => changeGenre(-1)}>
-                                    <FontAwesome name='chevron-left' size={20} color='rgb(239, 233, 225)' />
-                                </TouchableOpacity>
-                                <Text style={styles.textGenreChoice}>{genres[genreIndex]}</Text>
-                                <TouchableOpacity style={styles.rightBtnGenre} onPress={() => changeGenre(1)}>
-                                    <FontAwesome name='chevron-right' size={20} color='rgb(239, 233, 225)' />
-                                </TouchableOpacity>
                             </View>
 
 
