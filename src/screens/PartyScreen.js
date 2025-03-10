@@ -8,9 +8,6 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { useState, useEffect } from "react";
 import { useSelector } from "react-native"
 
-
-
-
 export default function RoomScreen({ navigation, route }) {
     const goToSettings = () => {
         navigation.navigate('Settings');
@@ -27,7 +24,7 @@ export default function RoomScreen({ navigation, route }) {
 
     const { party_id } = route.params;
     const [partyInfo, setPartyInfo] = useState([]);
- 
+
 
     useEffect(() => {
         (async () => {
@@ -40,8 +37,8 @@ export default function RoomScreen({ navigation, route }) {
 
     //MODALSPELL
     const [modalSpellVisible, setModalSpellVisible] = useState(false);
-    
-    
+
+
 
     return (
         <SafeAreaProvider>
@@ -120,9 +117,9 @@ export default function RoomScreen({ navigation, route }) {
                             margin={0}
                             padding={0}
                             style={styles.modal}
-                           
+
                             modalAnimation={new SlideAnimation({
-                                intialValue:0,
+                                intialValue: 0,
                                 slideFrom: 'left',
                                 useNativeDriver: true,
                             })}
@@ -131,32 +128,32 @@ export default function RoomScreen({ navigation, route }) {
                             visible={modalSpellVisible}
                             //onToucheOutside={() => setModalSpellVisible(visible=false)}
                             onRequestClose={() => {
-                                setModalSpellVisible(visible=false);
+                                setModalSpellVisible(visible = false);
                             }}>
                             <View style={styles.buttonContainer}>
-                                        {/*<ImageBackground
+                                {/*<ImageBackground
                                             source={require('../../assets/background/background.png')}
                                             style={styles.backgroundImageModal}>*/}
-                                    <View style={styles.spellContainer}>
-                                        <View style={styles.spellContainerThreeMax}>
-                                            <TouchableOpacity style={styles.spell} ></TouchableOpacity>
-                                            <TouchableOpacity style={styles.spell} ></TouchableOpacity>
-                                            <TouchableOpacity style={styles.spell} ></TouchableOpacity>
-                                        </View>
-                                        <View style={styles.spellContainerTwoMax}>    
-                                            <TouchableOpacity style={styles.spell} ></TouchableOpacity>
-                                            <TouchableOpacity style={styles.spell} ></TouchableOpacity>
-                                        </View>
+                                <View style={styles.spellContainer}>
+                                    <View style={styles.spellContainerThreeMax}>
+                                        <TouchableOpacity style={styles.spell} ></TouchableOpacity>
+                                        <TouchableOpacity style={styles.spell} ></TouchableOpacity>
+                                        <TouchableOpacity style={styles.spell} ></TouchableOpacity>
                                     </View>
-                                    <View style={styles.btnModal}>
-                                                <TouchableOpacity
-                                                    style={[styles.button, styles.buttonClose]}
-                                                    onPress={() => setModalSpellVisible(!modalSpellVisible)}>
-                                                    <Text style={styles.textStyle}>Retour</Text>
-                                                </TouchableOpacity>
+                                    <View style={styles.spellContainerTwoMax}>
+                                        <TouchableOpacity style={styles.spell} ></TouchableOpacity>
+                                        <TouchableOpacity style={styles.spell} ></TouchableOpacity>
                                     </View>
-                                    
-                                        {/*</ImageBackground>*/}
+                                </View>
+                                <View style={styles.btnModal}>
+                                    <TouchableOpacity
+                                        style={[styles.button, styles.buttonClose]}
+                                        onPress={() => setModalSpellVisible(!modalSpellVisible)}>
+                                        <Text style={styles.textStyle}>Retour</Text>
+                                    </TouchableOpacity>
+                                </View>
+
+                                {/*</ImageBackground>*/}
                             </View>
                         </Modal>
                         {/*MODAL SPELL <Pressable style={styles.spellModal} onPress={setModalSpellVisible(!modalSpellVisible)} >
@@ -383,9 +380,9 @@ const styles = StyleSheet.create({
 */
 
     //Modal NativeModal
-    modal:{
-         justifyContent:'flex-end',
-         borderRadius: 20,
+    modal: {
+        justifyContent: 'flex-end',
+        borderRadius: 20,
     },
     /*backgroundImageModal: {
         //flex: 1,
@@ -396,25 +393,25 @@ const styles = StyleSheet.create({
         backgroundColor:'green'
     },*/
     buttonContainer: {
-        
-        height:'100%',
+
+        height: '100%',
         width: "100%",
-        justifyContent:'left',
+        justifyContent: 'left',
         flexDirection: 'row',
-        backgroundColor:'rgb(180, 157, 136)',
+        backgroundColor: 'rgb(180, 157, 136)',
         borderRadius: 7,
-        borderColor:'rgb(85,69,63)',
-        borderWidth:5,
+        borderColor: 'rgb(85,69,63)',
+        borderWidth: 5,
     },
     btnModal: {
         //backgroundColor:'yellow',
         justifyContent: 'center',
         alignItems: 'center',
-        width:'30%',
-        borderRadius:20,
+        width: '30%',
+        borderRadius: 20,
     },
     buttonClose: {
-        
+
         height: 57,//'30%',//65px
         width: 57,//'18%',//65px
         borderRadius: 57 / 2,
@@ -423,28 +420,28 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         //marginTop: '2%'
-        borderWidth:3,
+        borderWidth: 3,
     },
-    spellContainer:{
+    spellContainer: {
         height: "100%",
         width: '70%',
-        justifyContent:'center',
+        justifyContent: 'center',
         //backgroundColor:'orange',
-        borderRadius:20,
+        borderRadius: 20,
     },
     spellContainerThreeMax: {
         flexDirection: 'row',
         justifyContent: 'center',
         //backgroundColor:'purple',
-        
-        
+
+
     },
     spellContainerTwoMax: {
         flexDirection: 'row',
         justifyContent: 'center',
         //backgroundColor:'blue',
-        
-        
+
+
     },
     spell: {
         alignItems: 'center',
@@ -456,8 +453,8 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         //marginTop: '2%'
-        marginInline:'4%',
-        borderWidth:3,
+        marginInline: '4%',
+        borderWidth: 3,
     }
 
 }) 
