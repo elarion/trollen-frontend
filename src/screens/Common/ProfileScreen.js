@@ -1,6 +1,6 @@
-import { StyleSheet, Text, View, Image, TouchableOpacity, ImageBackground } from "react-native"
+import { StyleSheet, Text, View, Image, TouchableOpacity, ImageBackground, TextInput } from "react-native"
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
-import { useState, useEffect } from "react";
+import { useState, useEffect, useReducer } from "react";
 import { useSelector, useDispatch } from 'react-redux';
 import TopHeader from "@components/TopHeader";
 import { Avatar } from '@components/Avatar';
@@ -8,21 +8,39 @@ import axiosInstance from '@utils/axiosInstance';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 import { logout } from "@store/authSlice";
+import * as SecureStore from 'expo-secure-store';
+import { setUser } from "../../store/authSlice";
 
 export default function ProfileScreen({ navigation }) {
-    const user = useSelector((state) => state.auth)
-    const user_id = user.user._id
+    const [state, dispatchState] = useReducer(reducer, initialState);
+    const {user} = useSelector((state) => state.auth)
+    console.log('user', user)
+
+    const initialState = {
+        username:'',
+    };
+
+    const reducer = (state,action) => {
+        switch(action.type) {
+            case 'UPDATE_FIELD':
+                return { ...state, [action.field]: action.value };
+            default: 
+                return state
+            }
+    }
+    console.log('reducer', reducer)
     const dispatch = useDispatch()
 
     const [characterData, setCharacterData] = useState([]);
     console.log(characterData)
     useEffect(() => {
         (async () => {
-            const response = await axiosInstance.get(`/characters/${user_id}`)
+            const response = await axiosInstance.get(`/characters/${user._id}`)
             setCharacterData(response.data.character)
         })()
     }, [])
 
+    //Logout
     const handleLogout = async () => {
             try {
                 dispatch(logout());
@@ -40,9 +58,18 @@ export default function ProfileScreen({ navigation }) {
         }
     };
 
+    //Modifier le username
+    const [updatingUsername, setUpdatingUsername] = useState(user.username)
+    console.log('username updated : ', updatingUsername)
     const updateUsername = async () => {
         try {
-            const response = await axiosInstance.put(`/users` )
+           // dispatch(setUpdatingUsername(updatingUsername))
+
+            const response = await axiosInstance.put(`/users/modify-profile`, {username: updatingUsername/*updatingUsername*/} )
+
+            const {user} = response.data;
+            dispatch(setUser({user}))
+
         } catch (error) {
 
             console.error('Error with the update of your username =>', error)
@@ -61,7 +88,13 @@ export default function ProfileScreen({ navigation }) {
                             <Avatar avatar={characterData?.race?.avatar ?? 'defaultAvatar'} />
                             </View>
                             <View style={styles.topRight}>
-                                <Text>{characterData.user?.username}</Text>
+                                <TextInput  value={characterData.username} 
+                                            onChangeText={value => setUpdatingUsername(value)}
+                                            setField={(field, value) => dispatchState({ type: 'UPDATE_FIELD', field, value})}
+                                            onConfirm = {updateUsername}
+                                            >
+                                            {characterData.user?.username}
+                                </TextInput>
                                 <Text>{characterData.race?.name}</Text>
                                 <Text>LEVEL:</Text>
                             </View>
@@ -80,7 +113,7 @@ export default function ProfileScreen({ navigation }) {
                             <TouchableOpacity style={styles.logOutButton} onPress={() => handleLogout()}>
                                 <FontAwesome name='cog' size={40} color='rgb(195, 157, 136)'/>
                             </TouchableOpacity>
-                            <TouchableOpacity style={styles.renameButton} onPress={() => updateUsername()}>
+                            <TouchableOpacity style={styles.renameButton} onPress={() => updateUsername({updatingUsername})}>
                                 <Text style={styles.renameTextButton}>Rename</Text>
                             </TouchableOpacity>     
                         </View>
