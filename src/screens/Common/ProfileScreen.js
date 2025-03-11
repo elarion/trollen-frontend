@@ -1,6 +1,6 @@
-import { StyleSheet, Text, View, Image, TouchableOpacity, ImageBackground } from "react-native"
+import { StyleSheet, Text, View, Image, TouchableOpacity, ImageBackground, TextInput } from "react-native"
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
-import { useState, useEffect } from "react";
+import { useState, useEffect, useReducer } from "react";
 import { useSelector, useDispatch } from 'react-redux';
 import TopHeader from "@components/TopHeader";
 import { Avatar } from '@components/Avatar';
@@ -8,21 +8,30 @@ import axiosInstance from '@utils/axiosInstance';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 import { logout } from "@store/authSlice";
+import * as SecureStore from 'expo-secure-store';
+import { setUser } from "../../store/authSlice";
 
 export default function ProfileScreen({ navigation }) {
-    const user = useSelector((state) => state.auth)
-    const user_id = user.user._id
+    const {user} = useSelector((state) => state.auth)
+    const [username, setUsername] = useState(user.username);
+    console.log('user', user)
+
+    const initialState = {
+        username:'',
+    };
+
     const dispatch = useDispatch()
 
     const [characterData, setCharacterData] = useState([]);
-    console.log(characterData)
+
     useEffect(() => {
         (async () => {
-            const response = await axiosInstance.get(`/characters/${user_id}`)
+            const response = await axiosInstance.get(`/characters/${user._id}`)
             setCharacterData(response.data.character)
-        })()
-    }, [])
+        })();
+    }, [user])
 
+    //Logout
     const handleLogout = async () => {
             try {
                 dispatch(logout());
@@ -40,9 +49,16 @@ export default function ProfileScreen({ navigation }) {
         }
     };
 
+    //Modifier le username
     const updateUsername = async () => {
         try {
-            const response = await axiosInstance.put(`/users` )
+           // dispatch(setUpdatingUsername(updatingUsername))
+
+            const response = await axiosInstance.put(`/users/modify-profile`, {username} )
+
+            const {user} = response.data;
+            dispatch(setUser({user}))
+
         } catch (error) {
 
             console.error('Error with the update of your username =>', error)
@@ -61,7 +77,10 @@ export default function ProfileScreen({ navigation }) {
                             <Avatar avatar={characterData?.race?.avatar ?? 'defaultAvatar'} />
                             </View>
                             <View style={styles.topRight}>
-                                <Text>{characterData.user?.username}</Text>
+                                <TextInput  value={username} 
+                                            onChangeText={setUsername}
+                                            >
+                                </TextInput>
                                 <Text>{characterData.race?.name}</Text>
                                 <Text>LEVEL:</Text>
                             </View>
