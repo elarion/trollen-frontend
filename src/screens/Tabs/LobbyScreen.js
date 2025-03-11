@@ -191,13 +191,13 @@ export default function LobbyScreen({ navigation }) {
                       
                         <TouchableOpacity style={[styles.createRoomBtn, styles.button]} onPress={() => setModalJoinRoomVisible(true)}>
                             <Text style={styles.textCreateBtn}>Join Room</Text>
-                            {/* <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}> */}
+                            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                             <Image
                                 source={require('@assets/portals/vortex-8.gif')}
                                 style={{ width: 400, height: 400 }}
                                 
                             />
-                        {/* </View> */}
+                        </View>
                         </TouchableOpacity>
 
                         <TouchableOpacity style={[styles.createRoomBtn, styles.button]} onPress={() => setModalCreateRoomVisible(true)}>
