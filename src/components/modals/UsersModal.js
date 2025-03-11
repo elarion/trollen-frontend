@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, FlatList } from "react-native";
 import { Modal, SlideAnimation } from "react-native-modals";
 import { FontAwesome } from "@expo/vector-icons";
@@ -6,10 +6,22 @@ import axiosInstance from '@utils/axiosInstance';
 import { useSelector } from "react-redux";
 import UserReportModal from "./UserReportModal";
 
-const UsersModal = ({ modalUserRoomVisible, setModalUserRoomVisible, participants }) => {
+import theme from '@theme';
+
+const UsersModal = ({ modalUserRoomVisible, setModalUserRoomVisible, participants = [] }) => {
     const { user } = useSelector(state => state.auth);
     const [modalReportVisible, setModalReportVisible] = useState(false);
     const [userToReport, setUserToReport] = useState(null);
+    const [sortedParticipants, setSortedParticipants] = useState([]);
+
+    useEffect(() => {
+        if (participants) {
+            console.log("participants", participants);
+            // socket id peut être et on veut trier quand meme avec le socket_id
+
+            setSortedParticipants(participants.sort((a, b) => (a.user.socket_id === null) - (b.user.socket_id === null)));
+        }
+    }, [participants]);
 
     const handleAddFriend = async (item) => {
         try {
@@ -19,7 +31,7 @@ const UsersModal = ({ modalUserRoomVisible, setModalUserRoomVisible, participant
             });
             console.log("Friends added", response.data);
         } catch (error) {
-            console.error("Erreur lors de la création d'amis:", error);
+            console.error("Error with adding friends:", error);
         }
     };
 
@@ -46,38 +58,37 @@ const UsersModal = ({ modalUserRoomVisible, setModalUserRoomVisible, participant
         >
             <View style={styles.modalContainer}>
                 <TouchableOpacity onPress={() => setModalUserRoomVisible(false)} style={styles.closeButton}>
-                    <FontAwesome name="times" size={24} color="white" />
+                    <FontAwesome name="times" size={24} color={theme.colors.darkBrown} />
                 </TouchableOpacity>
                 <Text style={styles.modalTitle}>Users</Text>
-                
-               
+
+
                 <FlatList
-                    data={participants}
+                    data={sortedParticipants}
                     keyExtractor={(item) => item._id}
                     renderItem={({ item }) => (
-                        <View style={styles.inputSection}>
-                            <Text style={styles.username}>{item.user.username}</Text>
+                        item.user._id !== user._id && (
+                            <View style={styles.inputSection}>
+                                <View style={styles.username}><View style={[styles.statusIndicator, { backgroundColor: item.user.socket_id ? theme.colors.green : theme.colors.red }]} /><Text>{item.user.username}</Text></View>
 
-                            
-                            <View style={[styles.statusIndicator, { backgroundColor: item.status === "online" ? "#00FF00" : "#FF4D4D" }]} />
-
-                            <View style={styles.actions}>
-                                <TouchableOpacity onPress={() => handleAddFriend(item)} style={styles.addButton}>
-                                    <FontAwesome name="user-plus" size={20} color="#7391C9" />
-                                </TouchableOpacity>
-                                <TouchableOpacity onPress={() => handleReportFriend(item)} style={styles.reportButton}>
-                                    <FontAwesome name="flag" size={15} color="#F65959" />
-                                </TouchableOpacity>
+                                <View style={styles.actions}>
+                                    <TouchableOpacity onPress={() => handleAddFriend(item)} style={styles.addButton}>
+                                        <FontAwesome name="user-plus" size={20} color="#7391C9" />
+                                    </TouchableOpacity>
+                                    <TouchableOpacity onPress={() => handleReportFriend(item)} style={styles.reportButton}>
+                                        <FontAwesome name="flag" size={15} color="#F65959" />
+                                    </TouchableOpacity>
+                                </View>
                             </View>
-                        </View>
+                        )
                     )}
-                    contentContainerStyle={styles.flatListContainer} 
-                    ListEmptyComponent={<Text style={styles.emptyText}>No users in this room</Text>} 
+                    contentContainerStyle={styles.flatListContainer}
+                    ListEmptyComponent={<Text style={styles.emptyText}>No users in this room</Text>}
                 />
             </View>
             {userToReport && (
                 <UserReportModal
-                
+
                     visible={modalReportVisible}
                     onClose={() => setModalReportVisible(false)}
                     userToReport={userToReport}
@@ -96,21 +107,21 @@ const styles = {
         flex: 1,
         justifyContent: "center",
         alignItems: "flex-end",
-        
+
     },
     modalContainer: {
         flex: 1,
         width: "80%",
-        height: "80%", 
+        height: "80%",
         backgroundColor: "#F0E9E0",
         opacity: 0.9,
         padding: 20,
         borderTopLeftRadius: 40,
         borderBottomLeftRadius: 40,
         alignSelf: "flex-end",
-        justifyContent: "flex-start", 
+        justifyContent: "flex-start",
     },
-    
+
     closeButton: {
         alignSelf: "flex-end",
         marginBottom: 20,
@@ -123,7 +134,7 @@ const styles = {
     },
     inputSection: {
         padding: 12,
-        backgroundColor: '#F8F8F8', 
+        backgroundColor: '#F8F8F8',
         borderRadius: 100,
         marginBottom: 8,
         flexDirection: 'row',
@@ -138,18 +149,22 @@ const styles = {
         fontSize: 16,
         fontWeight: '500',
         color: '#55453F',
-        flex: 1, 
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        gap: 10,
     },
     statusIndicator: {
+        marginTop: 3,
         width: 8,
         height: 8,
         borderRadius: 4,
-        marginRight: 15, 
     },
     actions: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 12, 
+        gap: 12,
     },
     addButton: {
         marginLeft: 15,
@@ -159,7 +174,7 @@ const styles = {
         padding: 6,
     },
     flatListContainer: {
-        paddingBottom: 20, 
+        paddingBottom: 20,
     },
     emptyText: {
         textAlign: "center",
