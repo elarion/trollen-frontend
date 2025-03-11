@@ -1,114 +1,186 @@
-import React from "react";
-import { Modal, View, Text, TouchableOpacity, FlatList } from "react-native";
+import { useState, useEffect } from "react";
+import { View, Text, TouchableOpacity, FlatList } from "react-native";
+import { Modal, SlideAnimation } from "react-native-modals";
 import { FontAwesome } from "@expo/vector-icons";
 import axiosInstance from '@utils/axiosInstance';
 import { useSelector } from "react-redux";
+import UserReportModal from "./UserReportModal";
+
+import theme from '@theme';
 
 const UsersModal = ({ modalUserRoomVisible, setModalUserRoomVisible, participants }) => {
     const { user } = useSelector(state => state.auth);
-    
+    const [modalReportVisible, setModalReportVisible] = useState(false);
+    const [userToReport, setUserToReport] = useState(null);
+    const [sortedParticipants, setSortedParticipants] = useState(participants);
+
+    // useEffect(() => {
+    //     if (participants) {
+    //         console.log("participants", participants);
+    //         // socket id peut être et on veut trier quand meme avec le socket_id
+
+    //         setSortedParticipants(participants.sort((a, b) => (a.user?.socket_id === null) - (b.user?.socket_id === null)));
+    //     }
+    // }, [participants]);
+
     const handleAddFriend = async (item) => {
-        //console.log(item.user._id)
         try {
             const response = await axiosInstance.post(`/users/friends`, {
                 user_1: user._id,
                 targetUserId: item.user._id,
-                
-        })
-        console.log(response)
-
-            const data = response.data;
-
-            if (data) {
-                console.log("Friends added");
-            }
+            });
+            console.log("Friends added", response.data);
         } catch (error) {
-            console.error("Erreur lors de la création d'amis:", error);
+            console.error("Error with adding friends:", error);
         }
     };
+
     const handleReportFriend = (item) => {
-        
-        console.log("Report friend:", item);
+        setUserToReport(item);
+        setModalReportVisible(true);
     };
 
     return (
         <Modal
-            animationType="slide"
-            transparent={true}
+            style={[styles.modal, { opacity: modalUserRoomVisible ? 1 : 0.5 }]}
+            height={0.9}
+            width={0.8}
+            onSwipeOut={() => setModalUserRoomVisible(false)}
+            swipeDirection={["right"]}
+            modalAnimation={new SlideAnimation({
+                initialValue: 0,
+                slideFrom: 'right',
+                useNativeDriver: true,
+            })}
             visible={modalUserRoomVisible}
             onRequestClose={() => setModalUserRoomVisible(false)}
+            modalStyle={{ backgroundColor: "transparent" }}
         >
-            <View style={styles.modalOverlay}>
-                <View style={styles.modalContainer}>
-                    <TouchableOpacity onPress={() => setModalUserRoomVisible(false)}>
-                        <FontAwesome name="times" size={24} color="white" />
-                    </TouchableOpacity>
-                    <Text style={styles.modalTitle}>Users</Text>
-                    <FlatList
-                        data={participants}
-                        keyExtractor={(item) => item._id}
-                        renderItem={({ item }) => (
-                            <View style={styles.inputSection} key={item._id}>
-                                <Text style={styles.modalTitle}>{item.user.username}</Text>
+            <View style={styles.modalContainer}>
+                <TouchableOpacity onPress={() => setModalUserRoomVisible(false)} style={styles.closeButton}>
+                    <FontAwesome name="times" size={24} color={theme.colors.darkBrown} />
+                </TouchableOpacity>
+                <Text style={styles.modalTitle}>Users</Text>
 
-                                <TouchableOpacity onPress={() => handleReportFriend(item)}>
-                                    <FontAwesome name="exclamation-circle" size={24} color="red" />
-                                </TouchableOpacity>
-                                <TouchableOpacity onPress={() => handleAddFriend(item)}>
-                                    <FontAwesome name="user-plus" size={24} color="blue" />
-                                </TouchableOpacity>
 
+                <FlatList
+                    data={participants}
+                    keyExtractor={(item) => item._id}
+                    renderItem={({ item }) => (
+                        item.user._id !== user._id && (
+                            <View style={styles.inputSection}>
+                                <View style={styles.username}><View style={[styles.statusIndicator, { backgroundColor: item.user.socket_id ? theme.colors.green : theme.colors.red }]} /><Text>{item.user.username}</Text></View>
+
+                                <View style={styles.actions}>
+                                    <TouchableOpacity onPress={() => handleAddFriend(item)} style={styles.addButton}>
+                                        <FontAwesome name="user-plus" size={20} color="#7391C9" />
+                                    </TouchableOpacity>
+                                    <TouchableOpacity onPress={() => handleReportFriend(item)} style={styles.reportButton}>
+                                        <FontAwesome name="flag" size={15} color="#F65959" />
+                                    </TouchableOpacity>
+                                </View>
                             </View>
-                        )}
-                    />
-                </View>
+                        )
+                    )}
+                    contentContainerStyle={styles.flatListContainer}
+                    ListEmptyComponent={<Text style={styles.emptyText}>No users in this room</Text>}
+                />
             </View>
+            {userToReport && (
+                <UserReportModal
+
+                    visible={modalReportVisible}
+                    onClose={() => setModalReportVisible(false)}
+                    userToReport={userToReport}
+                    onReport={(user) => {
+                        console.log("Utilisateur signalé:", user);
+                        setModalReportVisible(false);
+                    }}
+                />
+            )}
         </Modal>
     );
 };
 
 const styles = {
-    modalOverlay: {
+    modal: {
         flex: 1,
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
-        justifyContent: "flex-end",
+        justifyContent: "center",
         alignItems: "flex-end",
+
     },
     modalContainer: {
-        width: "60%",
-        height: "100%",
+        flex: 1,
+        width: "80%",
+        height: "80%",
         backgroundColor: "#F0E9E0",
+        opacity: 0.9,
         padding: 20,
-        borderTopLeftRadius: 15,
-        borderBottomLeftRadius: 15,
+        borderTopLeftRadius: 40,
+        borderBottomLeftRadius: 40,
+        alignSelf: "flex-end",
+        justifyContent: "flex-start",
     },
+
     closeButton: {
-        position: "absolute",
-        top: 10,
-        right: 10,
-        padding: 10,
+        alignSelf: "flex-end",
+        marginBottom: 20,
     },
     modalTitle: {
         fontSize: 20,
         fontWeight: "bold",
-        color: "black",
+        color: "#55453F",
         marginBottom: 20,
     },
     inputSection: {
-        padding: 10,
-        backgroundColor: 'lightgrey',
-        marginBottom: 5,
+        padding: 12,
+        backgroundColor: '#F8F8F8',
+        borderRadius: 100,
+        marginBottom: 8,
         flexDirection: 'row',
-        justifyContent: 'space-between',
+        alignItems: 'center',
+        // borderLeftWidth: 3,  
+        // borderLeftColor: '#55453F', 
+        // borderRadius: 100,
+        // borderColor: '#55453F',
+        // borderWidth: 1,
     },
-    button: {
-        padding: 10,
-        borderRadius: 5,
+    username: {
+        fontSize: 16,
+        fontWeight: '500',
+        color: '#55453F',
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        gap: 10,
     },
-    textStyle: {
-        color: "white",
-        fontWeight: "bold",
+    statusIndicator: {
+        marginTop: 3,
+        width: 8,
+        height: 8,
+        borderRadius: 4,
     },
+    actions: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+    },
+    addButton: {
+        marginLeft: 15,
+        padding: 6,
+    },
+    reportButton: {
+        padding: 6,
+    },
+    flatListContainer: {
+        paddingBottom: 20,
+    },
+    emptyText: {
+        textAlign: "center",
+        color: "#888",
+        fontStyle: "italic",
+    }
 };
 
 export default UsersModal;

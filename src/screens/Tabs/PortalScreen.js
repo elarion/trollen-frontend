@@ -2,6 +2,7 @@
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, ImageBackground, FlatList, ActivityIndicator } from "react-native";
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import TopHeader from '@components/TopHeader';
+import { getSocket } from "@services/socketService";
 
 // Imports Utils
 import axiosInstance from '@utils/axiosInstance';
@@ -35,7 +36,6 @@ export default function PortalScreen({ navigation }) {
 
         try {
             const response = await axiosInstance.get(`/rooms/by-limit?page=${page}&limit=${limit}`);
-            console.log("response =>", response.data);
 
             if (response.data.success === false) return;
 
@@ -59,12 +59,21 @@ export default function PortalScreen({ navigation }) {
 
     // Charger la première page au montage
     useEffect(() => {
+        const socket = getSocket();
+        socket.on("newRoom", (newRoom) => {
+            setRooms(prevRooms => [newRoom.room, ...prevRooms]);
+        });
+
         fetchRooms();
+
+        return () => {
+            socket.off("newRoom");
+        };
     }, []);
 
     // Fonction pour aller vers une room spécifique
-    const goToRoom = (room_id) => {
-        navigation.navigate('Room', { room_id });
+    const goToRoom = (roomId) => {
+        navigation.navigate('Room', { roomId });
     };
 
     // Fonction de rendu de chaque item dans FlatList

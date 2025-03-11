@@ -1,6 +1,6 @@
-// Imports Hooks
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
+// Imports Hooks
 import * as SecureStore from 'expo-secure-store';
 
 // Imports Components
@@ -24,6 +24,10 @@ import axiosInstance from '@utils/axiosInstance';
 // Imports Theme
 import theme from '@theme';
 
+// Imports Socket
+import { connectSocket, getSocket } from "@services/socketService";
+
+
 export default function LobbyScreen({ navigation }) {
     const dispatch = useDispatch();
     const [modalCreateRoomVisible, setModalCreateRoomVisible] = useState(false);
@@ -31,6 +35,18 @@ export default function LobbyScreen({ navigation }) {
     const [modalHazardPartyVisible, setModalHazardPartyVisible] = useState(false);
     const [modalCreatePartyVisible, setModalCreatePartyVisible] = useState(false);
     const [modalJoinPartyVisible, setModalJoinPartyVisible] = useState(false);
+
+    useEffect(() => {
+        (async () => {
+            const socket = await connectSocket();
+            if (!socket) return;
+
+            return () => {
+                console.log("Déconnexion du socket");
+                socket.disconnect();
+            };
+        })();
+    }, [])
 
     const handleCreateRoom = async (roomData) => {
         try {
@@ -88,9 +104,11 @@ export default function LobbyScreen({ navigation }) {
                 navigation.navigate('Party', { party_id: data.party._id });
             }
         } catch (error) {
-            console.error("Erreur lors de la création :", error);
+            if (!error.response.data.success) {
+                console.error("Error with party creation real error:", error.response.data);
+            }
+            console.error("Error with party creation :", error);
         }
-        console.log("Selected game:", selectedCheckBoxGame);
     }
 
     const handleJoinParty = async () => {
@@ -123,6 +141,11 @@ export default function LobbyScreen({ navigation }) {
 
     const handleLogout = async () => {
         try {
+            const socket = getSocket();
+            if (socket) {
+                socket.disconnect(); // 🔥 Déconnecte du serveur WebSocket
+            }
+
             dispatch(logout());
 
             await SecureStore.deleteItemAsync('accessToken');
@@ -139,7 +162,7 @@ export default function LobbyScreen({ navigation }) {
     };
 
     return (
-        <ImageBackground source={require('@assets/background/background.png')} style={styles.backgroundImage}>
+        <ImageBackground source={require('@assets/background/background.png')} style={[styles.backgroundImage, { backgroundColor: 'transparent' }]}>
             <SafeAreaProvider>
                 <SafeAreaView style={styles.container} edges={['top', 'left']}>
                     <TopHeader />
@@ -195,7 +218,7 @@ export default function LobbyScreen({ navigation }) {
                     </View>
                 </SafeAreaView>
             </SafeAreaProvider>
-        </ImageBackground>
+        </ImageBackground >
     );
 }
 
