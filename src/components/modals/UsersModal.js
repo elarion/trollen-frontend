@@ -12,16 +12,16 @@ const UsersModal = ({ modalUserRoomVisible, setModalUserRoomVisible, participant
     const { user } = useSelector(state => state.auth);
     const [modalReportVisible, setModalReportVisible] = useState(false);
     const [userToReport, setUserToReport] = useState(null);
-    const [sortedParticipants, setSortedParticipants] = useState([]);
+    const [sortedParticipants, setSortedParticipants] = useState(participants);
 
-    useEffect(() => {
-        if (participants) {
-            console.log("participants", participants);
-            // socket id peut être et on veut trier quand meme avec le socket_id
+    // useEffect(() => {
+    //     if (participants) {
+    //         console.log("participants", participants);
+    //         // socket id peut être et on veut trier quand meme avec le socket_id
 
-            setSortedParticipants(participants.sort((a, b) => (a.user.socket_id === null) - (b.user.socket_id === null)));
-        }
-    }, [participants]);
+    //         setSortedParticipants(participants.sort((a, b) => (a.user?.socket_id === null) - (b.user?.socket_id === null)));
+    //     }
+    // }, [participants]);
 
     const handleAddFriend = async (item) => {
         try {
