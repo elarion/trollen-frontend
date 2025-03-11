@@ -31,8 +31,8 @@ const UsersModal = ({ modalUserRoomVisible, setModalUserRoomVisible, participant
     return (
         <Modal
             style={[styles.modal, { opacity: modalUserRoomVisible ? 1 : 0.5 }]}
-            height={1}
-            width={0.6}
+            height={0.9}
+            width={0.8}
             onSwipeOut={() => setModalUserRoomVisible(false)}
             swipeDirection={["right"]}
             modalAnimation={new SlideAnimation({
@@ -42,6 +42,7 @@ const UsersModal = ({ modalUserRoomVisible, setModalUserRoomVisible, participant
             })}
             visible={modalUserRoomVisible}
             onRequestClose={() => setModalUserRoomVisible(false)}
+            modalStyle={{ backgroundColor: "transparent" }}
         >
             <View style={styles.modalContainer}>
                 <TouchableOpacity onPress={() => setModalUserRoomVisible(false)} style={styles.closeButton}>
@@ -93,17 +94,23 @@ const UsersModal = ({ modalUserRoomVisible, setModalUserRoomVisible, participant
 const styles = {
     modal: {
         flex: 1,
-        justifyContent: "flex-end",
+        justifyContent: "center",
         alignItems: "flex-end",
+        
     },
     modalContainer: {
         flex: 1,
+        width: "80%",
+        height: "80%", 
         backgroundColor: "#F0E9E0",
+        opacity: 0.9,
         padding: 20,
-        borderTopLeftRadius: 15,
-        borderBottomLeftRadius: 15,
-        paddingBottom: 0, 
+        borderTopLeftRadius: 40,
+        borderBottomLeftRadius: 40,
+        alignSelf: "flex-end",
+        justifyContent: "flex-start", 
     },
+    
     closeButton: {
         alignSelf: "flex-end",
         marginBottom: 20,

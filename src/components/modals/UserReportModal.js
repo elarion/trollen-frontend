@@ -3,6 +3,7 @@ import { Modal, View, Text, TouchableOpacity, TextInput } from "react-native";
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import { Dropdown } from 'react-native-element-dropdown';
 import axiosInstance from '@utils/axiosInstance'; 
+import { withBadge } from "react-native-elements";
 
 const UserReportModal = ({ visible, onClose, userToReport, onReport }) => {
     const [capacityValue, setCapacityValue] = useState('');
@@ -112,12 +113,12 @@ const styles = {
         alignItems: "center",
     },
     modalContainer: {
-        width: "80%",
+        // width: "60%",
         padding: 20,
         backgroundColor: "#F0E9E0",
-        borderRadius: 10,
+        borderRadius: 50,
         alignItems: "center",
-        
+
     },
     title: {
         fontSize: 18,
@@ -126,6 +127,8 @@ const styles = {
     },
     message: {
         fontSize: 16,
+        marginTop: 30,
+        marginBottom: 10,
         marginVertical: 10,
     },
     button: {
@@ -140,16 +143,17 @@ const styles = {
     },
     description: {
         height: 40,
-        borderColor: 'gray',
+        borderColor: '#55453F',
         borderWidth: 0.5,
         borderRadius: 20,
         paddingHorizontal: 15,
+        marginTop: 30,
       
     },
     // DROPDOWN
     capacityDropdown: {
         height: 40,
-        borderColor: 'gray',
+        borderColor: '#55453F',
         borderWidth: 0.5,
         borderRadius: 20,
         paddingHorizontal: 15,
