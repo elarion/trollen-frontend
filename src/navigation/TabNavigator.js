@@ -29,12 +29,12 @@ export default function TabNavigator() {
                             : require('@assets/lobby.png');        // Icône non sélectionnée
                     } else if (route.name === 'Portal') {
                         iconSource = focused
-                            ? require('@assets/portal.png')
-                            : require('@assets/portal.png');
+                            ? require('@assets/vortex.png')
+                            : require('@assets/vortex.png');
                     } else if (route.name === 'Friends') {
                         iconSource = focused
-                            ? require('@assets/friends.png')
-                            : require('@assets/friends.png');
+                            ? require('@assets/friends2.png')
+                            : require('@assets/friends2.png');
                     }
 
                     return (
@@ -43,7 +43,7 @@ export default function TabNavigator() {
                             style={{
                                 width: 30, // Ajuste la taille selon tes besoins
                                 height: 30,
-                                tintColor: focused ? theme.colors.darkBrown : theme.colors.darkBrown05, // Optionnel : change la couleur si besoin
+                                tintColor: focused ? theme.colors.darkBrown : theme.colors.darkBrown, // Optionnel : change la couleur si besoin
                             }}
                             resizeMode="cover"
                         />
