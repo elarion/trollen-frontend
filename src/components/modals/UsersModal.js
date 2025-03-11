@@ -6,16 +6,16 @@ import { useSelector } from "react-redux";
 
 const UsersModal = ({ modalUserRoomVisible, setModalUserRoomVisible, participants }) => {
     const { user } = useSelector(state => state.auth);
-    
+
     const handleAddFriend = async (item) => {
         //console.log(item.user._id)
         try {
             const response = await axiosInstance.post(`/users/friends`, {
                 user_1: user._id,
                 targetUserId: item.user._id,
-                
-        })
-        console.log(response)
+
+            })
+            console.log(response)
 
             const data = response.data;
 
@@ -27,7 +27,7 @@ const UsersModal = ({ modalUserRoomVisible, setModalUserRoomVisible, participant
         }
     };
     const handleReportFriend = (item) => {
-        
+
         console.log("Report friend:", item);
     };
 
@@ -49,7 +49,7 @@ const UsersModal = ({ modalUserRoomVisible, setModalUserRoomVisible, participant
                         keyExtractor={(item) => item._id}
                         renderItem={({ item }) => (
                             <View style={styles.inputSection} key={item._id}>
-                                <Text style={styles.modalTitle}>{item.user.username}</Text>
+                                <Text style={styles.modalTitle}>{item.user?.username}</Text>
 
                                 <TouchableOpacity onPress={() => handleReportFriend(item)}>
                                     <FontAwesome name="exclamation-circle" size={24} color="red" />

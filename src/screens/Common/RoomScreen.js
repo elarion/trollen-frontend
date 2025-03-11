@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, TouchableOpacity, ImageBackground, TextInput, FlatList,Pressable, Alert } from "react-native"
+import { StyleSheet, Text, View, TouchableOpacity, ImageBackground, TextInput, FlatList, Pressable, Alert } from "react-native"
 import { Modal, SlideAnimation } from 'react-native-modals'
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { Header } from 'react-native-elements';
@@ -10,7 +10,7 @@ import { connectSocket } from "@services/socketService";
 import { loadUserData } from "@store/authSlice";
 import { useDispatch } from "react-redux";
 import UsersModal from '@components/modals/UsersModal';
-
+import { getSocket } from "@services/socketService";
 export default function RoomScreen({ navigation, route }) {
     const [socket, setSocket] = useState(null);
     const { roomId } = route.params;
@@ -36,40 +36,37 @@ export default function RoomScreen({ navigation, route }) {
 
     useEffect(() => {
         (async () => {
-            const newSocket = await connectSocket();
+            const socket = getSocket();
 
-            if (!newSocket) {
-                console.error("Impossible de se connecter à WebSocket");
-                return;
-            }
-
-            setSocket(newSocket);
-
-            // Écouter les informations de la room
-            newSocket.on("roomInfo", (data) => {
-                setRoomInfo(data.room);
-            });
-
-            // Charger les messages
-            newSocket.emit("loadMessages", { roomId }, (loadedMessages) => {
-                setMessages(loadedMessages);
-            });
-
-            // Écouter les nouveaux messages
-            newSocket.on("roomMessage", (response) => {
-                setMessages(prev => [response.message, ...prev]);
-            })
-
-            // Rejoindre la room
-            newSocket.emit("joinRoom", { roomId, username: user.username }, (response) => {
+            socket.emit("joinRoom", { roomId, username: user.username }, (response) => {
                 if (!response.success) {
                     console.error("Erreur de connexion à la room :", response.error);
                 }
             });
 
-            newSocket.on('spelledInRoom', (response) => {
-                setSpelled(true);
-                console.log('spelledInRoom and I am =>', response, user.username);
+            // const newSocket = await connectSocket();
+
+            // if (!newSocket) {
+            //     console.error("Impossible de se connecter à WebSocket");
+            //     return;
+            // }
+
+            // setSocket(newSocket);
+
+            // // Écouter les informations de la room
+            socket.on("roomInfo", (data) => {
+                console.log('roomInfo =>', data.room.participants);
+                setRoomInfo(data.room);
+            });
+
+            // // Charger les messages
+            socket.emit("loadMessages", { roomId }, (loadedMessages) => {
+                setMessages(loadedMessages);
+            });
+
+            // // Écouter les nouveaux messages
+            socket.on("roomMessage", (response) => {
+                setMessages(prev => [response.message, ...prev]);
             })
 
             return () => {
@@ -83,6 +80,8 @@ export default function RoomScreen({ navigation, route }) {
     }, []);
 
     const handleMessage = () => {
+        const socket = getSocket();
+
         try {
             setContent('');
             socket.emit("sendMessage", { roomId, content, username: user?.username, spelled: spelled }, (response) => {
@@ -94,6 +93,8 @@ export default function RoomScreen({ navigation, route }) {
     }
 
     const handleSpell = (targetId) => {
+        const socket = getSocket();
+
         socket.emit("spelled", { targetId, roomId }, (response) => {
             setModalSpellVisible(false);
             setModalUserListVisible(false);
@@ -132,12 +133,12 @@ export default function RoomScreen({ navigation, route }) {
                                 <Text style={styles.roomName}>{roomInfo.name}</Text>
                                 <Text style={styles.numberOfParticipants}>{roomInfo.participants?.length} participant{roomInfo.participants?.length > 1 && `s`}</Text>
                             </View>
-                            <UsersModal 
-                                    modalUserRoomVisible={modalUserRoomVisible} 
-                                    setModalUserRoomVisible={setModalUserRoomVisible}
-                                    participants={roomInfo.participants}
-                                > 
-                                </UsersModal>
+                            <UsersModal
+                                modalUserRoomVisible={modalUserRoomVisible}
+                                setModalUserRoomVisible={setModalUserRoomVisible}
+                                participants={roomInfo.participants}
+                            >
+                            </UsersModal>
 
                             <TouchableOpacity style={styles.playerList} onPress={() => setModalUserRoomVisible(true)}>
                                 <FontAwesome name='users' size={30} color='rgb(195, 157, 136)'/* 'rgb(85,69,63)'*/ />

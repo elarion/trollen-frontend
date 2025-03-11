@@ -3,7 +3,7 @@ import React from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
 // Imports components
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 // import { Header } from 'react-native-elements';
 
 // Imports icons
@@ -57,7 +57,8 @@ const TopHeader = () => {
                         <MaterialCommunityIcons name="newspaper-variant-outline" size={28} color={theme.colors.darkBrown} />
                     </TouchableOpacity> */}
                     <TouchableOpacity onPress={() => navigation.navigate('Grimoire')}>
-                        <MaterialCommunityIcons name="book-outline" size={28} color={theme.colors.darkBrown} />
+                        <Image source={require('@assets/grimoire.png')} color={theme.colors.darkBrown} style={[styles.headerIcon, { width: 28, height: 28, tintColor: theme.colors.darkBrown }]} />
+                        {/* <MaterialCommunityIcons name="book-outline" size={28} color={theme.colors.darkBrown} /> */}
                     </TouchableOpacity>
                 </View>
 
@@ -67,7 +68,8 @@ const TopHeader = () => {
                 {/* RIGHT SIDE */}
                 <View style={styles.headerButtons}>
                     <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
-                        <MaterialCommunityIcons name="account-outline" size={28} color={theme.colors.darkBrown} />
+                        <Image source={require('@assets/profile.png')} color={theme.colors.darkBrown} style={[styles.headerIcon, { width: 28, height: 28, tintColor: theme.colors.darkBrown }]} />
+                        {/* <MaterialCommunityIcons name="account-outline" size={28} color={theme.colors.darkBrown} /> */}
                     </TouchableOpacity>
 
                 </View>

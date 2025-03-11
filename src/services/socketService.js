@@ -46,7 +46,6 @@ const connectSocket = async () => {
         return null;
     }
 
-
     socket = io(API_URL, {
         auth: { token: `Bearer ${token}` },
         // transports: ["websocket"],
@@ -54,6 +53,10 @@ const connectSocket = async () => {
 
     socket.on("connect", () => {
         console.log("Connecté au socket");
+    });
+
+    socket.on("disconnect", () => {
+        console.log("Déconnecté du socket");
     });
 
     socket.on("connect_error", (err) => {
