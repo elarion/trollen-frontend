@@ -2,15 +2,16 @@ import React, { useState } from "react";
 import { Modal, View, Text, TouchableOpacity, TextInput } from "react-native";
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import { Dropdown } from 'react-native-element-dropdown';
-import axiosInstance from '@utils/axiosInstance'; 
+import axiosInstance from '@utils/axiosInstance';
 import { withBadge } from "react-native-elements";
+import theme from '@theme';
 
 const UserReportModal = ({ visible, onClose, userToReport, onReport }) => {
     const [capacityValue, setCapacityValue] = useState('');
     const [description, setDescription] = useState('');
     const [countIsFocus, setCountIsFocus] = useState(false);
 
-  
+
     const dataCapacity = [
         { label: 'Spam', value: 'spam' },
         { label: 'Toxic Behavior', value: 'toxic behavior' },
@@ -21,20 +22,20 @@ const UserReportModal = ({ visible, onClose, userToReport, onReport }) => {
         { label: 'Other', value: 'other' },
     ];
 
-   
+
     const handleReport = async () => {
-      
+
         const reportData = {
-            reason: capacityValue,      
-            description: description || '',  
+            reason: capacityValue,
+            description: description || '',
         };
 
         try {
             console.log('Signalement en cours...');
             const response = await axiosInstance.post(`/users-reports/${userToReport.user._id}`, reportData);
             console.log('Signalement réussi:', response.data);
-            onReport(userToReport);  
-            onClose();  
+            onReport(userToReport);
+            onClose();
         } catch (error) {
             console.log('in error =>', error.response)
             console.error('Erreur lors du signalement:', error);
@@ -80,8 +81,8 @@ const UserReportModal = ({ visible, onClose, userToReport, onReport }) => {
                         )}
                     />
 
-                    <View >
-                        <Text>Description (facultatif):</Text>
+                    <View style={{ width: '100%', alignItems: 'center' }}>
+                        <Text style={{ marginBottom: 10 }}>Description (facultatif):</Text>
                         <TextInput
                             style={styles.description}
                             placeholder="Décrivez brièvement le problème"
@@ -90,16 +91,17 @@ const UserReportModal = ({ visible, onClose, userToReport, onReport }) => {
                         />
                     </View>
 
-                    <Text style={styles.message}>Es-tu sûr de vouloir signaler cet utilisateur ?</Text>
+                    <Text style={styles.message}>Do you want to report this user ?</Text>
 
-                   
-                    <TouchableOpacity onPress={handleReport}>
-                        <Text style={styles.buttonSignal}>Signaler</Text>
-                    </TouchableOpacity>
+                    <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center', justifyContent: 'center', width: '100%' }}>
+                        <TouchableOpacity onPress={handleReport}>
+                            <Text style={styles.buttonSignal}>Signaler</Text>
+                        </TouchableOpacity>
 
-                    <TouchableOpacity onPress={onClose}>
-                        <Text style={styles.button}>Annuler</Text>
-                    </TouchableOpacity>
+                        <TouchableOpacity onPress={onClose}>
+                            <Text style={styles.button}>Annuler</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
             </View>
         </Modal>
@@ -127,28 +129,37 @@ const styles = {
     },
     message: {
         fontSize: 16,
-        marginTop: 30,
         marginBottom: 10,
         marginVertical: 10,
+        fontWeight: "bold",
     },
     button: {
+        backgroundColor: theme.colors.green,
         fontSize: 16,
-        color: "#55453F",
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        color: theme.colors.white,
         marginTop: 10,
+        fontWeight: "bold",
+        borderRadius: 100,
     },
     buttonSignal: {
+        backgroundColor: theme.colors.red,
         fontSize: 16,
-        color: "#F65959",
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        color: theme.colors.white,
         marginTop: 10,
+        fontWeight: "bold",
+        borderRadius: 100,
     },
     description: {
-        height: 40,
+        height: 60,
         borderColor: '#55453F',
         borderWidth: 0.5,
         borderRadius: 20,
         paddingHorizontal: 15,
-        marginTop: 30,
-      
+
     },
     // DROPDOWN
     capacityDropdown: {
@@ -157,7 +168,8 @@ const styles = {
         borderWidth: 0.5,
         borderRadius: 20,
         paddingHorizontal: 15,
-        width: '80%',
+        width: 250,
+        marginBottom: 20,
     },
     icon: {
         marginRight: 5,
