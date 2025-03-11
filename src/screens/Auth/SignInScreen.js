@@ -1,17 +1,18 @@
 /** Imports Hooks */
-import React, { useEffect, useReducer, useState } from "react";
+import React, { useReducer, useState } from "react";
 import { useNavigation } from '@react-navigation/native';
 import * as SecureStore from 'expo-secure-store';
 
 /** Imports components */
 import { BlurView } from 'expo-blur';
-import { StyleSheet, Text, View, Image, TouchableOpacity, Modal, TextInput, ImageBackground } from "react-native";
+import { StyleSheet, Text, View, Image, TouchableOpacity, Modal, TextInput, ImageBackground, Alert } from "react-native";
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import Checkbox from 'expo-checkbox';
 
+
 /** Imports store */
-import { useDispatch, useSelector } from 'react-redux';
-import { signinUser, preSignupUser, setUserSignin, setUserPreSignup, resetState, setUser } from '@store/authSlice';
+import { useDispatch } from 'react-redux';
+import { setUserSignin, setUserPreSignup } from '@store/authSlice';
 
 /** Imports axios */
 import axiosInstance from '@utils/axiosInstance';
@@ -48,34 +49,19 @@ const reducer = (state, action) => {
 };
 
 export default function SignInScreen() {
+    const dispatch = useDispatch();
     const navigation = useNavigation();
     const [state, dispatchState] = useReducer(reducer, initialState);
-    // const { user } = useSelector((state) => state.auth);
-    // const { loading, success, successSignup } = useSelector((state) => state.auth);
-    const dispatch = useDispatch();
     const [error, setError] = useState(null);
-    const [success, setSuccess] = useState(false);
-    const [successSignup, setSuccessSignup] = useState(false);
-
-    // Reset state and navigate if success
-    useEffect(() => {
-        if (success) {
-            dispatch(resetState());
-            navigation.replace('TabNavigator');
-        }
-
-        if (successSignup) {
-            dispatch(resetState());
-            navigation.navigate('CharacterCreation');
-        }
-    }, [dispatch, success, navigation, successSignup]);
+    const [errorPresignup, setErrorPresignup] = useState([]);
+    const [loading, setLoading] = useState(false);
 
     // Mode invité
     const guestMode = () => {
+        Alert.alert('Guest mode', 'Not working yet... but have been');
         dispatchState({ type: 'RESET_FIELDS' });
-        // dispatchState({ type: 'TOGGLE_SIGNIN_MODAL' });
 
-        navigation.navigate('TabNavigator');
+        // navigation.navigate('TabNavigator');
     };
 
     // Inscription utilisateur
@@ -83,6 +69,8 @@ export default function SignInScreen() {
         if (!state.has_consent) return false;
 
         try {
+            setLoading(true);
+
             const response = await axiosInstance.post(`/users/pre-signup`, { username: state.username, email: state.email, password: state.password, confirmPassword: state.confirmPassword, has_consent: state.has_consent });
 
             if (!response.data.success) {
@@ -91,44 +79,41 @@ export default function SignInScreen() {
 
             dispatch(setUserPreSignup({ user: { username: state.username, email: state.email, password: state.password, confirmPassword: state.confirmPassword, has_consent: state.has_consent } }));
 
-            // unwrap sert à gérer les erreurs et les success et les pending et les fulfilled et les rejected et les pending et les fulfilled et les rejected
-            // const response = await dispatch(preSignupUser({ username: state.username, email: state.email, password: state.password, confirmPassword: state.confirmPassword, has_consent: state.has_consent })).unwrap();
-
-            // Gérer ça dans le useEffect specifiquement au pre signup en séparant aussi le pre signin dans un successSignin
-
-
             dispatchState({ type: 'TOGGLE_SIGNUP_MODAL' });
             dispatchState({ type: 'RESET_FIELDS' });
 
             navigation.navigate('CharacterCreation');
         } catch (error) {
             console.log('Error with preSignUp =>', error);
+        } finally {
+            setLoading(false);
         }
     };
 
     // Connexion utilisateur
     const signInWithId = async () => {
+        if (!state.username || !state.password) return false;
+
         try {
-            if (!state.username || !state.password) {
-                return false;
-            }
+            setLoading(true);
 
             const response = await axiosInstance.post(`/users/signin`, { username: state.username, password: state.password });
 
             const { user, accessToken, refreshToken } = response.data;
-            dispatch(setUserSignin({ user, accessToken, refreshToken }));
+            dispatch(setUserSignin({ user }));
+
+            dispatchState({ type: 'RESET_FIELDS' });
 
             await SecureStore.setItemAsync('accessToken', accessToken);
             await SecureStore.setItemAsync('refreshToken', refreshToken);
-
-            navigation.replace('TabNavigator');
-            // dispatch(signinUser({ username: state.username, password: state.password }));
         } catch (error) {
             if (!error.response.data.success) {
                 setError(error.response.data.message);
             }
 
             console.error('Error with signInWithId =>', error);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -138,9 +123,16 @@ export default function SignInScreen() {
     // Si on ne met pas safeAreaProvider, le contenu de l'application ne sera pas visible dans la zone sécurisée de l'appareil
     return (
         <>
-            <SafeAreaProvider>
-                <SafeAreaView style={styles.container} edges={['left', 'right']}>
-                    <ImageBackground source={require('../../../assets/background/background.png')} style={styles.backgroundImage}>
+            <ImageBackground source={require('../../../assets/background/background.png')} style={styles.backgroundImage}>
+                <SafeAreaProvider>
+                    <SafeAreaView style={styles.container} edges={['top', 'left']}>
+                        {loading && (
+                            <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1000, flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                                <BlurView intensity={20} tint="dark" style={StyleSheet.absoluteFill} />
+                                {/* <ActivityIndicator size="large" color="#0000ff" /> */}
+                                {/* <Text style={{ color: theme.colors.veryLightBrown, fontSize: 24, fontWeight: 'bold' }}>loading...</Text> */}
+                            </View>
+                        )}
                         <View style={styles.signInBox}>
                             {/* SECTION LOGO */}
                             <View style={styles.logoSection}>
@@ -149,36 +141,38 @@ export default function SignInScreen() {
                             </View>
 
                             {/* SECTION GUEST MODE */}
-                            <View style={[styles.invitedSection, { marginBottom: 20 }]}>
+                            <View style={[styles.buttonSection, { marginBottom: 20 }]}>
                                 <Text style={[styles.text, { fontWeight: 'bold', color: theme.colors.darkBrown }]}>You don't have time?</Text>
                                 <TouchableOpacity style={[styles.guestBtn, styles.button]} onPress={guestMode}>
-                                    <Text style={styles.textGuestBtn}>GUEST MODE</Text>
+                                    <Text style={styles.textGuestBtn}>guest mode</Text>
                                 </TouchableOpacity>
                             </View>
 
+                            <Text style={[styles.text, { color: theme.colors.darkBrown, marginBottom: 20 }]}>or</Text>
 
-                            <View style={[styles.signUpSection, { marginBottom: 20 }]}>
-                                <Text style={[styles.text, { color: theme.colors.darkBrown }]}>Don't have an account yet ?</Text>
-                                <TouchableOpacity
-                                    style={[styles.signUpBtn, styles.button]}
-                                    onPress={() => dispatchState({ type: 'TOGGLE_SIGNUP_MODAL' })}>
-                                    <Text style={styles.textBtn}>Create an account</Text>
-                                </TouchableOpacity>
-                            </View>
-
-
-                            <View style={styles.signInSection}>
-                                <Text style={[styles.text, { color: theme.colors.darkBrown }]}>Already have an account?</Text>
+                            {/* SECTION SIGNIN */}
+                            <View style={styles.buttonSection}>
+                                {/* <Text style={[styles.text, { color: theme.colors.darkBrown }]}>Already have an account?</Text> */}
                                 <TouchableOpacity
                                     style={[styles.signInWithIdBtn, styles.button]}
                                     onPress={() => dispatchState({ type: 'TOGGLE_SIGNIN_MODAL' })}>
                                     <Text style={styles.textBtn}>Sign in</Text>
                                 </TouchableOpacity>
                             </View>
+
+                            {/* SECTION SIGNUP */}
+                            <View style={[styles.buttonSection, { marginBottom: 20 }]}>
+                                {/* <Text style={[styles.text, { color: theme.colors.darkBrown }]}>Don't have an account yet ?</Text> */}
+                                <TouchableOpacity
+                                    style={[styles.signUpBtn, styles.button]}
+                                    onPress={() => dispatchState({ type: 'TOGGLE_SIGNUP_MODAL' })}>
+                                    <Text style={styles.textBtn}>Create an account</Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
-                    </ImageBackground>
-                </SafeAreaView>
-            </SafeAreaProvider>
+                    </SafeAreaView>
+                </SafeAreaProvider>
+            </ImageBackground>
             {/* SECTION SIGNUP */}
             <AuthModal
                 title="Subscribe"
@@ -257,14 +251,15 @@ const styles = StyleSheet.create({
     backgroundImage: { flex: 1, width: '100%', height: '100%', resizeMode: 'cover' },
     signInBox: { flex: 1, alignItems: 'center', padding: 20, alignItems: 'center', justifyContent: 'center' },
     logoSection: { alignItems: 'center', justifyContent: 'center', marginBottom: 20 },
-    title: { fontSize: 42, fontWeight: 'bold' },
+    title: { fontSize: 42, fontWeight: 'bold', color: theme.colors.darkBrown },
+    buttonSection: { width: 250, alignItems: 'center', justifyContent: 'center', marginBottom: 20 },
     text: { fontSize: 16, color: theme.colors.white, fontWeight: 'bold', marginBottom: 5, alignSelf: 'center' },
-    guestBtn: { paddingHorizontal: 40, backgroundColor: theme.colors.green, height: 55, },
+    guestBtn: { backgroundColor: theme.colors.green },
     signUpBtn: { backgroundColor: theme.colors.blue, height: 45, },
-    textGuestBtn: { color: theme.colors.white, fontSize: 22, fontWeight: 'bold' },
+    textGuestBtn: { color: theme.colors.white, fontSize: 18, fontWeight: 'bold' },
     textBtn: { color: theme.colors.white, fontSize: 18, fontWeight: 'bold' },
     signInWithIdBtn: { backgroundColor: theme.colors.lightBrown, height: 45, },
-    button: { borderRadius: 99, padding: 10, alignItems: 'center', justifyContent: 'center' },
+    button: { width: '100%', borderRadius: 99, height: 45, padding: 10, alignItems: 'center', justifyContent: 'center' },
     btnModal: { flexDirection: 'row', justifyContent: 'space-between', width: '100%' },
     buttonClose: { backgroundColor: 'red', width: '45%', alignItems: 'center' },
     buttonValidation: { backgroundColor: 'green', width: '45%', alignItems: 'center' },
