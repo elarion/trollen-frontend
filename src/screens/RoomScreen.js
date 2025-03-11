@@ -27,8 +27,6 @@ export default function RoomScreen({ navigation, route }) {
     //MODALSPELL
     const [modalSpellVisible, setModalSpellVisible] = useState(false);
 
-
-
     return (
         <SafeAreaProvider>
             <SafeAreaView style={styles.container} edges={['left', 'right']}>
