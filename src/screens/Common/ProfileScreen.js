@@ -12,33 +12,24 @@ import * as SecureStore from 'expo-secure-store';
 import { setUser } from "../../store/authSlice";
 
 export default function ProfileScreen({ navigation }) {
-    const [state, dispatchState] = useReducer(reducer, initialState);
     const {user} = useSelector((state) => state.auth)
+    const [username, setUsername] = useState(user.username);
     console.log('user', user)
 
     const initialState = {
         username:'',
     };
 
-    const reducer = (state,action) => {
-        switch(action.type) {
-            case 'UPDATE_FIELD':
-                return { ...state, [action.field]: action.value };
-            default: 
-                return state
-            }
-    }
-    console.log('reducer', reducer)
     const dispatch = useDispatch()
 
     const [characterData, setCharacterData] = useState([]);
-    console.log(characterData)
+
     useEffect(() => {
         (async () => {
             const response = await axiosInstance.get(`/characters/${user._id}`)
             setCharacterData(response.data.character)
-        })()
-    }, [])
+        })();
+    }, [user])
 
     //Logout
     const handleLogout = async () => {
@@ -59,13 +50,11 @@ export default function ProfileScreen({ navigation }) {
     };
 
     //Modifier le username
-    const [updatingUsername, setUpdatingUsername] = useState(user.username)
-    console.log('username updated : ', updatingUsername)
     const updateUsername = async () => {
         try {
            // dispatch(setUpdatingUsername(updatingUsername))
 
-            const response = await axiosInstance.put(`/users/modify-profile`, {username: updatingUsername/*updatingUsername*/} )
+            const response = await axiosInstance.put(`/users/modify-profile`, {username} )
 
             const {user} = response.data;
             dispatch(setUser({user}))
@@ -88,12 +77,9 @@ export default function ProfileScreen({ navigation }) {
                             <Avatar avatar={characterData?.race?.avatar ?? 'defaultAvatar'} />
                             </View>
                             <View style={styles.topRight}>
-                                <TextInput  value={characterData.username} 
-                                            onChangeText={value => setUpdatingUsername(value)}
-                                            setField={(field, value) => dispatchState({ type: 'UPDATE_FIELD', field, value})}
-                                            onConfirm = {updateUsername}
+                                <TextInput  value={username} 
+                                            onChangeText={setUsername}
                                             >
-                                            {characterData.user?.username}
                                 </TextInput>
                                 <Text>{characterData.race?.name}</Text>
                                 <Text>LEVEL:</Text>
@@ -113,7 +99,7 @@ export default function ProfileScreen({ navigation }) {
                             <TouchableOpacity style={styles.logOutButton} onPress={() => handleLogout()}>
                                 <FontAwesome name='cog' size={40} color='rgb(195, 157, 136)'/>
                             </TouchableOpacity>
-                            <TouchableOpacity style={styles.renameButton} onPress={() => updateUsername({updatingUsername})}>
+                            <TouchableOpacity style={styles.renameButton} onPress={() => updateUsername()}>
                                 <Text style={styles.renameTextButton}>Rename</Text>
                             </TouchableOpacity>     
                         </View>
