@@ -101,16 +101,18 @@ export default function RoomScreen({ navigation, route }) {
                                     </TextInput>
                                 </View>
                             </View>
+
+                            <View style={styles.buttons}>
+                                <TouchableOpacity style={styles.placeholderButton}>
+                                    <Text style={styles.placeholderButtonText}>Envoyer message</Text>
+                                    <FontAwesome name='send-o' size={15} color='rgb(239, 233, 225)' marginHorizontal={'13%'} />
+                                </TouchableOpacity>
+                                <TouchableOpacity style={styles.spellModal} onPress={() => setModalSpellVisible(true)} >
+                                    <FontAwesome name='fire' size={30} color='rgb(239, 233, 225)' />
+                                </TouchableOpacity>
+                            </View>
                         </View>
-                        <View style={styles.buttons}>
-                            <TouchableOpacity style={styles.placeholderButton}>
-                                <Text style={styles.placeholderButtonText}>Envoyer message</Text>
-                                <FontAwesome name='send-o' size={15} color='rgb(239, 233, 225)' marginHorizontal={'13%'} />
-                            </TouchableOpacity>
-                            <TouchableOpacity style={styles.spellModal} onPress={() => setModalSpellVisible(true)} >
-                                <FontAwesome name='fire' size={30} color='rgb(239, 233, 225)' />
-                            </TouchableOpacity>
-                        </View>
+
                         <Modal
                             height={0.2}
                             width={1}
@@ -258,14 +260,14 @@ const styles = StyleSheet.create({
     underMessageBox: {
         //backgroundColor: 'green', 
         width: '100%',
-        flexDirection: 'column',
+        flexDirection: 'row',
         //alignItems: 'flex-end',
         //justifyContent: 'space-around',
         //marginBottom: 15,
         marginTop: '2%'
     },
     placeholder: {
-        height: 88,
+        height: 50,
         //backgroundColor: 'purple',
         width: '100%',
         borderRadius: 10,
@@ -275,7 +277,7 @@ const styles = StyleSheet.create({
         //opacity:0.1,
     },
     placeholderText: {
-        height: '100%',//84px
+        height: '100%',
         marginBottom: '1%',
         //backgroundColor: 'yellow'
         //opacity:0.1,
