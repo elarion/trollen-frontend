@@ -43,11 +43,11 @@ export default function LobbyScreen({ navigation }) {
             if (!socket) return;
 
             return () => {
-                console.log("Déconnexion du socket");
+                console.log("❌ Déconnexion du socket via le LOBBY =>", socket.id);
                 socket.disconnect();
             };
         })();
-    }, [])
+    }, []);
 
     const handleCreateRoom = async (roomData) => {
         try {
@@ -55,6 +55,7 @@ export default function LobbyScreen({ navigation }) {
                 room_socket_id: 'a',
                 name: roomData.roomname,
                 tags: roomData.tag,
+                // 
                 settings: { max: roomData.capacityValue, is_safe: roomData.isSafe, is_: roomData.is_, password: roomData.password }
             });
 

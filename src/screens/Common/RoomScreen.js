@@ -1,36 +1,97 @@
+// Import Components
 import { StyleSheet, Text, View, TouchableOpacity, Image, ImageBackground, Alert, KeyboardAvoidingView, TextInput, FlatList } from "react-native"
 import { Modal, SlideAnimation, ModalContent, ModalTitle, ModalFooter } from 'react-native-modals'
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { Header } from 'react-native-elements';
 import TopHeader from "@components/TopHeader";
+
+// Import Services
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { useSelector } from "react-redux";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { connectSocket } from "@services/socketService";
 import { loadUserData } from "@store/authSlice";
 import { useDispatch } from "react-redux";
+import { useIsFocused, useFocusEffect } from '@react-navigation/native';
+import { AppState } from 'react-native';
+
+// Import Components
 import UsersModal from '@components/modals/UsersModal';
+
+// Import Services
 import { getSocket } from "@services/socketService";
 import theme from '@theme';
 
 export default function RoomScreen({ navigation, route }) {
-    const [socket, setSocket] = useState(null);
+    // const [socket, setSocket] = useState(null);
     const { roomId } = route.params;
     const { user } = useSelector(state => state.auth);
-    const [content, setContent] = useState([]);
+    const [content, setContent] = useState('');
     const [roomInfo, setRoomInfo] = useState([]);
     const [messages, setMessages] = useState([]);
     const [modalUserListVisible, setModalUserListVisible] = useState(false);
     const [spelled, setSpelled] = useState(false);
+
+    // const isFocused = useIsFocused();
+    const socket = getSocket();
+
+    useFocusEffect(
+        useCallback(() => {
+
+            // console.log(`✅ Rejoint la room ${roomId}`);
+            // socket.emit("joinRoom", { roomId });
+
+            socket.emit("joinRoom", { roomId, username: user.username }, (response) => {
+                if (!response.success) {
+                    console.error("Erreur de connexion à la room :", response.error);
+                }
+            });
+
+            // // Charger les messages
+            socket.emit("loadMessages", { roomId }, (loadedMessages) => {
+                setMessages(loadedMessages);
+            });
+
+            socket.on("roomInfo", (data) => {
+                // console.log('roomInfo =>', data.room.participants);
+                setRoomInfo(data.room);
+            });
+
+            // // Écouter les nouveaux messages
+            socket.on("roomMessage", (response) => {
+                setMessages(prev => [response.message, ...prev]);
+            })
+
+            return () => {
+                if (socket) {
+                    socket.emit("leaveRoom", { roomId, username: user.username }, (response) => {
+                        console.log('leaveRoom =>', response);
+                    });
+                    socket.off("roomInfo");
+                    socket.off("roomMessage");
+                }
+            };
+        }, [roomId])
+    );
+
+    // if (isFocused && socket) {
+    //     socket.emit("joinRoom", { roomId, username: user.username }, (response) => {
+    //         if (!response.success) {
+    //             console.error("Erreur de connexion à la room :", response.error);
+    //         }
+    //     });
+    // }
 
     const goToSettings = () => {
         navigation.navigate('Settings');
     }
     const goToNews = () => {
         navigation.navigate('News');
+
     }
     const goToProfile = () => {
         navigation.navigate('Profile');
+
     }
     const goToGrimoire = () => {
         navigation.navigate('Grimoire');
@@ -38,13 +99,27 @@ export default function RoomScreen({ navigation, route }) {
 
     useEffect(() => {
         (async () => {
-            const socket = getSocket();
 
-            socket.emit("joinRoom", { roomId, username: user.username }, (response) => {
-                if (!response.success) {
-                    console.error("Erreur de connexion à la room :", response.error);
+            const handleAppStateChange = (nextAppState) => {
+                if (nextAppState === "background") {
+                    console.log(`❌ L'utilisateur a mis l'app en arrière-plan, leaveRoom envoyé.`);
+                    socket.emit("leaveRoom", { roomId });
                 }
-            });
+            };
+
+            const subscription = AppState.addEventListener("change", handleAppStateChange);
+
+            return () => {
+                subscription.remove();
+            };
+
+            // const socket = getSocket();
+
+            // socket.emit("joinRoom", { roomId, username: user.username }, (response) => {
+            //     if (!response.success) {
+            //         console.error("Erreur de connexion à la room :", response.error);
+            //     }
+            // });
 
             // const newSocket = await connectSocket();
 
@@ -56,28 +131,29 @@ export default function RoomScreen({ navigation, route }) {
             // setSocket(newSocket);
 
             // // Écouter les informations de la room
-            socket.on("roomInfo", (data) => {
-                console.log('roomInfo =>', data.room.participants);
-                setRoomInfo(data.room);
-            });
+            // socket.on("roomInfo", (data) => {
+            //     console.log('roomInfo =>', data.room.participants);
+            //     setRoomInfo(data.room);
+            // });
 
-            // // Charger les messages
-            socket.emit("loadMessages", { roomId }, (loadedMessages) => {
-                setMessages(loadedMessages);
-            });
+            // // // Charger les messages
+            // socket.emit("loadMessages", { roomId }, (loadedMessages) => {
+            //     setMessages(loadedMessages);
+            // });
 
-            // // Écouter les nouveaux messages
-            socket.on("roomMessage", (response) => {
-                setMessages(prev => [response.message, ...prev]);
-            })
+            // // // Écouter les nouveaux messages
+            // socket.on("roomMessage", (response) => {
+            //     setMessages(prev => [response.message, ...prev]);
+            // })
 
-            return () => {
-                if (socket) {
-                    socket.emit("leaveRoom", { roomId, username: user.username });
-                    socket.off("roomInfo");
-                    socket.off("roomMessage");
-                }
-            };
+            // return () => {
+            //     console.log('🔄 Déconnexion du socket via la room =>', socket.id);
+            //     if (socket) {
+            //         socket.emit("leaveRoom", { roomId, username: user.username });
+            //         socket.off("roomInfo");
+            //         socket.off("roomMessage");
+            //     }
+            // };
         })()
     }, []);
 
@@ -85,6 +161,7 @@ export default function RoomScreen({ navigation, route }) {
         if (content.trim() === '') {
             Alert.alert('Please enter a message');
         }
+
         const socket = getSocket();
 
         try {
@@ -115,8 +192,8 @@ export default function RoomScreen({ navigation, route }) {
         const isMyMessage = item.user._id === user._id;
         return (
             <View style={[styles.messageContainer, isMyMessage ? styles.myMessage : styles.otherMessage]}>
-                <Text style={[styles.messageSender, isMyMessage && { textAlign: 'right', color: theme.colors.darkBrown }]}>{isMyMessage ? "Moi" : item.user.username}</Text>
-                <Text style={[styles.messageText, isMyMessage && { textAlign: 'right', color: theme.colors.darkBrown }]}>{item.content}</Text>
+                <Text style={[styles.messageSender, isMyMessage && { color: theme.colors.darkBrown }]}>{isMyMessage ? "Moi" : item.user.username}</Text>
+                <Text style={[styles.messageText, isMyMessage && { color: theme.colors.darkBrown }]}>{item.content}</Text>
             </View>
         );
     };
@@ -319,11 +396,11 @@ const styles = StyleSheet.create({
         padding: 10,
         borderRadius: 20,
         marginVertical: 5,
-        maxWidth: "100%",
+        minWidth: '50%',
+        maxWidth: "65%",
     },
     myMessage: {
-        minWidth: '50%',
-        maxWidh: '50%',
+        width: '100%',
         alignSelf: "flex-end",
         justifyContent: 'flex-start',
         backgroundColor: theme.colors.lightBrown02,
