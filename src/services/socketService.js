@@ -46,21 +46,27 @@ const connectSocket = async () => {
         return null;
     }
 
+    // Déconnecter l'ancien socket s'il existe
+    if (socket) {
+        socket.disconnect();
+        console.log("❌ Ancien socket déconnecté =>");
+    }
+
     socket = io(API_URL, {
         auth: { token: `Bearer ${token}` },
         // transports: ["websocket"],
     });
 
     socket.on("connect", () => {
-        console.log("Connecté au socket");
+        console.log("✅ Connecté au socket =>", socket.id);
     });
 
     socket.on("disconnect", () => {
-        console.log("Déconnecté du socket");
+        console.log("❌ Déconnecté du socket");
     });
 
     socket.on("connect_error", (err) => {
-        console.error("Erreur de connexion Socket.IO :", err.message);
+        console.error("❌ Erreur de connexion Socket.IO :", err.message);
     });
 
     return socket;
