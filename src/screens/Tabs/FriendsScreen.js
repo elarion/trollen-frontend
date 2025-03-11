@@ -1,8 +1,9 @@
-import { View, Text, TouchableOpacity, StyleSheet, ImageBackground, Modal, TextInput, Pressable, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ImageBackground, Modal, TextInput, Pressable, ScrollView } from 'react-native';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { useEffect, useState } from 'react';
 import TopHeader from '@components/TopHeader';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { FontAwesome } from "@expo/vector-icons";
 import axiosInstance from '@utils/axiosInstance';
 import { useSelector } from 'react-redux'
 
@@ -12,7 +13,7 @@ export default function FriendsScreen() {
     const [sendedFriendsList, setSendedFriendsList] = useState([]);
     const [receivedFriendsList, setReceivedFriendsList] = useState([]);
     const [friendsList, setFriendsList] = useState([]);
-    console.log(friendsList)
+    //console.log(friendsList)
 
     useEffect(() => {
         (async () => {
@@ -69,33 +70,41 @@ export default function FriendsScreen() {
 
     const sendedInvitation = sendedFriendsList.filter(data => data.status === 'pending').map((data, i) => {
         return (
-            <View style={styles.pendingFriendsCardBox} key={i}>
-                <Text>{data.friend.username}</Text>
-                <Text>{data.status}</Text>
+            <View style={styles.pendingSendedFriendsCardBox} key={i}>
+                <Text style={styles.textUsername} >{data.friend.username}</Text>
+                <View style={styles.status}>
+                    <Text style={styles.textStatus}>{data.status}</Text>
+                </View>
             </View>
         );
     });
 
     const receivedInvitation = receivedFriendsList.filter(data => data.status === 'pending').map((data, i) => {
         return (
-            <View style={styles.pendingFriendsCardBox} key={i}>
-                <Text>{data.user_2.username}</Text>
-                <Text>{data.status}</Text>
-                <TouchableOpacity onPress={() => accept(data._id)}>
-                    <MaterialCommunityIcons name="check" size={28} color='green' />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => reject(data._id)}>
-                    <MaterialCommunityIcons name="delete" size={28} color='red' />
-                </TouchableOpacity>
+            <View style={styles.pendingReceivedFriendsCardBox} key={i}>
+                <View style={styles.left}>
+                    <Text style={styles.textUsername}>{data.user_2.username}</Text>
+                </View>
+                <View style={styles.right}>
+                    <View style={styles.status}>
+                        <Text style={styles.textStatus}>{data.status}</Text>
+                    </View>
+                    <TouchableOpacity onPress={() => accept(data._id)}>
+                        <MaterialCommunityIcons name="check" size={40} color='#899E6A' />
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => reject(data._id)}>
+                        <MaterialCommunityIcons name="close" size={40} color='#F65959' />
+                    </TouchableOpacity>
+                </View>
             </View>
         );
     });
 
     const friends = friendsList.map((data, i) => (
         <View style={styles.friendsCardBox} key={i}>
-            <Text>{data.username}</Text>
+            <Text style={styles.textUsername}>{data.username}</Text>
             <TouchableOpacity onPress={() => removeFromFriends(data._id)}>
-                <MaterialCommunityIcons name="delete" size={28} color='red' />
+                <MaterialCommunityIcons name="delete-circle" size={40} color='#F65959' />
             </TouchableOpacity>
         </View>
     ));
@@ -106,21 +115,21 @@ export default function FriendsScreen() {
                 <SafeAreaView style={styles.container} edges={['top', 'left']}>
                     <TopHeader />
                     <View style={styles.friendsBox}>
-                        <View style={styles.pendingFriendsBox}>
-                            <View>
-                                <Text>Pending :</Text>
+                        <ScrollView contentContainerStyle={styles.itemsContainer}>
+                            <View style={styles.pendingFriendsBox}>
+                                <View>
+                                    <Text style={styles.textPendingFriends}>Pending :</Text>
+                                </View>
+                                {sendedInvitation}
+                                {receivedInvitation}
                             </View>
-                            {sendedInvitation}
-                            {receivedInvitation}
-                        </View>
-                        <View style={styles.friendsListBox}>
-                            <View>
-                                <Text>My Friends :</Text>
+                            <View style={styles.friendsListBox}>
+                                <View>
+                                    <Text style={styles.textMyFriends}>My Friends :</Text>
+                                </View>
+                                {friends}
                             </View>
-
-                            {friends}
-
-                        </View>
+                        </ScrollView>
                     </View>
                 </SafeAreaView>
             </SafeAreaProvider>
@@ -143,31 +152,97 @@ const styles = StyleSheet.create({
         width: '100%',
         paddingVertical: 10,
     },
-    pendingFriendsBox: {
-        //justifyContent: 'center',
-        alignItems: 'center',
-        //height:'50%'
+    itemsContainer: {
+        height: '100%'
     },
-    pendingFriendsCardBox: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        alignItems: 'center',
+    textUsername: {
+        fontSize: 15,
+        fontWeight: 800,
+    },
+    status: {
         borderWidth: 2,
+        borderColor: 'rgb(74, 52, 57)',
+        width: 100,
+        height: 40,
+        justifyContent: 'center',
+        alignItems: 'center',
         borderRadius: 20,
+        backgroundColor: 'rgb(188, 118, 26)'
+    },
+    textStatus: {
+        color: 'white',
+        fontSize: 15,
+        fontWeight: 800,
+    },
+    textPendingFriends: {
+        marginTop: 20,
+        color: 'rgb(188, 118, 26)',
+        fontSize: 20,
+        fontWeight: 800,
+        marginBottom:10
+    },
+    pendingFriendsBox: {
+        alignItems: 'center',
+        gap: 7
+    },
+    pendingSendedFriendsCardBox: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        padding: 15,
+        alignItems: 'center',
+        borderWidth: 3,
+        borderColor: 'rgb(74, 52, 57)',
+        borderRadius: 15,
         height: 60,
-        width: '95%'
+        width: '95%',
+    },
+    pendingReceivedFriendsCardBox: {
+        flexDirection: 'row',
+        borderWidth: 3,
+        borderRadius: 15,
+        height: 60,
+        width: '95%',
+        borderColor: 'rgb(74, 52, 57)',
+    },
+    left: {
+        paddingLeft: 15,
+        //borderWidth:2,
+        height:'100%',
+        width:'45%',
+        alignItems: 'flex-start',
+        justifyContent: 'center',
+    },
+    right: {
+        flexDirection: 'row',
+        paddingRight: 13,
+        //borderWidth:2,
+        height:'100%',
+        width:'55%',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    textMyFriends: {
+        marginTop: 20,
+        color: 'rgb(188, 118, 26)',
+        fontSize: 20,
+        fontWeight: 800,
+        marginBottom:10
     },
     friendsListBox: {
         //justifyContent: 'center',
         alignItems: 'center',
+        gap: 5
     },
     friendsCardBox: {
         flexDirection: 'row',
-        justifyContent: 'space-around',
+        justifyContent: 'space-between',
+        paddingRight: 15,
+        paddingLeft: 15,
         alignItems: 'center',
-        borderWidth: 2,
-        borderRadius: 20,
+        borderWidth: 3,
+        borderRadius: 15,
         height: 60,
-        width: '95%'
+        width: '95%',
+        borderColor: 'rgb(74, 52, 57)',
     },
 });
