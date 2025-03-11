@@ -13,6 +13,7 @@ import CreatePartyModal from '@components/modals/CreatePartyModal';
 import JoinPartyModal from '@components/modals/JoinPartyModal';
 import { Portal } from '@components/Portal';
 import TopHeader from '@components/TopHeader';
+import { Image } from 'expo-image';
 
 // Imports Store
 import { logout } from '@store/authSlice';
@@ -174,13 +175,28 @@ export default function LobbyScreen({ navigation }) {
                             <Portal portal="portal-2" />
                             <Portal portal="portal-3" />
                         </View>
+                        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                            <Image
+                                source={require('@assets/portals/vortex-7.gif')}
+                                style={{ width: 400, height: 400 }}
+                                
+                            />
+                        </View>
+                        
 
                         <TouchableOpacity style={[styles.createRoomBtn, styles.button]} onPress={() => setModalCreateRoomVisible(true)}>
                             <Text style={styles.textCreateBtn}>Create ROOM</Text>
                         </TouchableOpacity>
-
+                      
                         <TouchableOpacity style={[styles.createRoomBtn, styles.button]} onPress={() => setModalJoinRoomVisible(true)}>
                             <Text style={styles.textCreateBtn}>Join Room</Text>
+                            {/* <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}> */}
+                            <Image
+                                source={require('@assets/portals/vortex-8.gif')}
+                                style={{ width: 400, height: 400 }}
+                                
+                            />
+                        {/* </View> */}
                         </TouchableOpacity>
 
                         <TouchableOpacity style={[styles.createRoomBtn, styles.button]} onPress={() => setModalCreateRoomVisible(true)}>
@@ -243,10 +259,10 @@ const styles = StyleSheet.create({
         marginTop: 20, alignItems: 'center', height: '50%'
     },
     createRoomBtn: {
-        backgroundColor: '#e8be4b', padding: 10, borderRadius: 10, width: '40%', alignItems: 'center'
+       padding: 10, borderRadius: 10, width: '40%', alignItems: 'center'
     },
     textCreateBtn: { color: 'white' },
     button: {
-        backgroundColor: '#e8be4b', padding: 10, borderRadius: 100, width: '40%', alignItems: 'center', marginBottom: 10,
+     padding: 10, borderRadius: 100, width: '40%', alignItems: 'center', marginBottom: 10,
     },
 });
