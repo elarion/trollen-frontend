@@ -16,14 +16,28 @@ export default function FriendsScreen() {
     //console.log(friendsList)
 
     useEffect(() => {
-        (async () => {
-            const response1 = await axiosInstance.get(`/users_friends/sended/${user_id}`)
-            setSendedFriendsList(response1.data.sended)
-            const response3 = await axiosInstance.get(`/users_friends/friends/${user_id}`)
-            setFriendsList(response3.data.friends)
-            const response2 = await axiosInstance.get(`/users_friends/received/${user_id}`)
-            setReceivedFriendsList(response2.data.received)
-        })()
+        const fetchData = async () => {
+            try {
+                const response1 = await axiosInstance.get(`/users_friends/sended/${user_id}`)
+                setSendedFriendsList(response1.data.sended || [])
+            } catch(error){
+                /* console.error("error axios sent friends request", error) */
+            }
+            try {
+                const response2 = await axiosInstance.get(`/users_friends/received/${user_id}`)
+                setReceivedFriendsList(response2.data.received || [])
+            } catch(error) {
+                /* console.error("error axios received friends request", error) */
+            }
+            try {
+                const response3 = await axiosInstance.get(`/users_friends/friends/${user_id}`)
+                setFriendsList(response3.data.friends || [])
+            } catch(error) {
+                /* console.error("error axios received friends List", error) */
+            }
+        }
+        fetchData()
+        const interval = setInterval(fetchData,10000)
     }, []);
 
     const accept = async (requestId) => {
