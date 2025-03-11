@@ -77,7 +77,7 @@ export default function SignInScreen() {
                 console.log('Error with preSignUp =>', response.data.error);
             }
 
-            dispatch(setUserPreSignup({ user: { username: state.username, email: state.email, password: state.password, confirmPassword: state.confirmPassword, has_consent: state.has_consent } }));
+            dispatch(setUserPreSignup({ presignup: true, user: { username: state.username, email: state.email, password: state.password, confirmPassword: state.confirmPassword, has_consent: state.has_consent } }));
 
             dispatchState({ type: 'TOGGLE_SIGNUP_MODAL' });
             dispatchState({ type: 'RESET_FIELDS' });
@@ -100,7 +100,7 @@ export default function SignInScreen() {
             const response = await axiosInstance.post(`/users/signin`, { username: state.username, password: state.password });
 
             const { user, accessToken, refreshToken } = response.data;
-            dispatch(setUserSignin({ user }));
+            dispatch(setUserSignin({ presignup: false, user }));
 
             dispatchState({ type: 'RESET_FIELDS' });
 

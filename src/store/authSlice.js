@@ -19,6 +19,7 @@ const authSlice = createSlice({
         user: null,
         loading: false,
         error: null,
+        presignup: false,
     },
     reducers: {
         resetState: (state) => {
@@ -31,9 +32,16 @@ const authSlice = createSlice({
         },
         setUserPreSignup: (state, action) => {
             state.user = action.payload.user;
+            state.presignup = action.payload.presignup;
+        },
+        setUserSignup: (state, action) => {
+            console.log('in redux', action.payload.user, action.payload.presignup);
+            state.user = action.payload.user;
+            state.presignup = action.payload.presignup;
         },
         setUserSignin: (state, action) => {
             state.user = action.payload.user;
+            state.presignup = action.payload.presignup;
         },
         setUser: (state, action) => {
             state.user = action.payload.user;
@@ -64,5 +72,5 @@ const authSlice = createSlice({
 });
 
 // export const { resetState, updateAccessToken, setUserPreSignup, setUserSignin, setUser, logout } = authSlice.actions;
-export const { setUserPreSignup, setUserSignin, setUser, logout } = authSlice.actions;
+export const { setUserPreSignup, setUserSignin, setUser, setUserSignup, logout } = authSlice.actions;
 export default authSlice.reducer;
