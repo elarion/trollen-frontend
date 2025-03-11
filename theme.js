@@ -5,6 +5,8 @@ export default {
         background: 'rgb(74, 52, 57)',
         green: 'rgba(137, 158, 106, 1)',
         darkBrown: 'rgba(85, 69, 63, 1)',
+        darkBrown05: 'rgba(85, 69, 63, 0.5)',
+        darkBrown08: 'rgba(85, 69, 63, 0.8)',
         blue: 'rgba(115, 145, 201, 1)',
         lightBrown: 'rgba(195, 157, 136, 1)',
         lightBrown02: 'rgba(195, 157, 136, 0.2)',
