@@ -8,7 +8,7 @@ import UserReportModal from "./UserReportModal";
 
 import theme from '@theme';
 
-const UsersModal = ({ modalUserRoomVisible, setModalUserRoomVisible, participants = [] }) => {
+const UsersModal = ({ modalUserRoomVisible, setModalUserRoomVisible, participants }) => {
     const { user } = useSelector(state => state.auth);
     const [modalReportVisible, setModalReportVisible] = useState(false);
     const [userToReport, setUserToReport] = useState(null);
@@ -64,7 +64,7 @@ const UsersModal = ({ modalUserRoomVisible, setModalUserRoomVisible, participant
 
 
                 <FlatList
-                    data={sortedParticipants}
+                    data={participants}
                     keyExtractor={(item) => item._id}
                     renderItem={({ item }) => (
                         item.user._id !== user._id && (
