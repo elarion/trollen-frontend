@@ -37,10 +37,6 @@ export default function RoomScreen({ navigation, route }) {
 
     useFocusEffect(
         useCallback(() => {
-
-            // console.log(`✅ Rejoint la room ${roomId}`);
-            // socket.emit("joinRoom", { roomId });
-
             socket.emit("joinRoom", { roomId, username: user.username }, (response) => {
                 if (!response.success) {
                     console.error("Erreur de connexion à la room :", response.error);
@@ -53,16 +49,35 @@ export default function RoomScreen({ navigation, route }) {
             });
 
             socket.on("roomInfo", (data) => {
-                // console.log('roomInfo =>', data.room.participants);
                 setRoomInfo(data.room);
             });
 
             // // Écouter les nouveaux messages
             socket.on("roomMessage", (response) => {
                 setMessages(prev => [response.message, ...prev]);
-            })
+            });
+
+            // Utile par exemple pour mettre a jour un statut utilisateur genre afk
+            // const handleAppStateChange = (nextAppState) => {
+            //     console.log('nextAppState =>', nextAppState);
+            //     if (nextAppState === "background") {
+            //         console.log(`❌ L'utilisateur a mis l'app en arrière-plan, leaveRoom envoyé.`);
+            //         socket.emit("leaveRoom", { roomId, username: user.username });
+            //     } else if (nextAppState === "active") {
+            //         console.log(`✅ L'utilisateur a remis l'app en avant-plan, joinRoom envoyé.`);
+            //         socket.emit("joinRoom", { roomId, username: user.username }, (response) => {
+            //             if (!response.success) {
+            //                 console.error("Erreur de connexion à la room :", response.error);
+            //             }
+            //         });
+            //     }
+            // };
+
+            // const subscription = AppState.addEventListener("change", handleAppStateChange);
 
             return () => {
+                // subscription.remove();
+
                 if (socket) {
                     socket.emit("leaveRoom", { roomId, username: user.username }, (response) => {
                         console.log('leaveRoom =>', response);
@@ -74,88 +89,6 @@ export default function RoomScreen({ navigation, route }) {
         }, [roomId])
     );
 
-    // if (isFocused && socket) {
-    //     socket.emit("joinRoom", { roomId, username: user.username }, (response) => {
-    //         if (!response.success) {
-    //             console.error("Erreur de connexion à la room :", response.error);
-    //         }
-    //     });
-    // }
-
-    const goToSettings = () => {
-        navigation.navigate('Settings');
-    }
-    const goToNews = () => {
-        navigation.navigate('News');
-
-    }
-    const goToProfile = () => {
-        navigation.navigate('Profile');
-
-    }
-    const goToGrimoire = () => {
-        navigation.navigate('Grimoire');
-    }
-
-    useEffect(() => {
-        (async () => {
-
-            const handleAppStateChange = (nextAppState) => {
-                if (nextAppState === "background") {
-                    console.log(`❌ L'utilisateur a mis l'app en arrière-plan, leaveRoom envoyé.`);
-                    socket.emit("leaveRoom", { roomId });
-                }
-            };
-
-            const subscription = AppState.addEventListener("change", handleAppStateChange);
-
-            return () => {
-                subscription.remove();
-            };
-
-            // const socket = getSocket();
-
-            // socket.emit("joinRoom", { roomId, username: user.username }, (response) => {
-            //     if (!response.success) {
-            //         console.error("Erreur de connexion à la room :", response.error);
-            //     }
-            // });
-
-            // const newSocket = await connectSocket();
-
-            // if (!newSocket) {
-            //     console.error("Impossible de se connecter à WebSocket");
-            //     return;
-            // }
-
-            // setSocket(newSocket);
-
-            // // Écouter les informations de la room
-            // socket.on("roomInfo", (data) => {
-            //     console.log('roomInfo =>', data.room.participants);
-            //     setRoomInfo(data.room);
-            // });
-
-            // // // Charger les messages
-            // socket.emit("loadMessages", { roomId }, (loadedMessages) => {
-            //     setMessages(loadedMessages);
-            // });
-
-            // // // Écouter les nouveaux messages
-            // socket.on("roomMessage", (response) => {
-            //     setMessages(prev => [response.message, ...prev]);
-            // })
-
-            // return () => {
-            //     console.log('🔄 Déconnexion du socket via la room =>', socket.id);
-            //     if (socket) {
-            //         socket.emit("leaveRoom", { roomId, username: user.username });
-            //         socket.off("roomInfo");
-            //         socket.off("roomMessage");
-            //     }
-            // };
-        })()
-    }, []);
 
     const handleMessage = () => {
         if (content.trim() === '') {
