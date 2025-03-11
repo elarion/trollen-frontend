@@ -28,7 +28,6 @@ import theme from '@theme';
 export default function CharactereCreationScreen({ navigation }) {
     const dispatch = useDispatch();
     const { user } = useSelector((state) => state.auth);
-    console.log('In character creation screen user =>', user);
 
     // États pour stocker les données
     const [races, setRaces] = useState([]);
@@ -69,12 +68,6 @@ export default function CharactereCreationScreen({ navigation }) {
         })();
     }, []);
 
-    // Gestion du succès
-    // useEffect(() => {
-    //     dispatch(resetState());
-    //     success && navigation.replace('TabNavigator');
-    // }, [success, navigation, dispatch]);
-
     // Navigation Race & Genre
     const changeRace = useCallback((direction) => {
         setRaceIndex(prev => (prev + direction + races.length) % races.length);
@@ -86,23 +79,16 @@ export default function CharactereCreationScreen({ navigation }) {
 
     // Validation et envoi des données
     const goToLobby = async () => {
-        console.log('Go to lobby')
         try {
-            console.log('In go yo lobby user =>', user);
             const response = await axiosInstance.post(`/users/signup`, { ...user, gender: genres[genreIndex], avatar: races[raceIndex]?.avatar, race: races[raceIndex]?._id });
             const { user: userResponse, accessToken, refreshToken } = response.data;
 
-            dispatch(setUserSignup({ user: userResponse, accessToken, refreshToken }));
+            dispatch(setUserSignup({ user: userResponse, presignup: false }));
 
-            console.log('After dispatch =>', userResponse, accessToken, refreshToken);
             await SecureStore.setItemAsync('accessToken', accessToken);
             await SecureStore.setItemAsync('refreshToken', refreshToken);
-
-            console.log('After Setitem =>', userResponse, accessToken, refreshToken);
-
-            navigation.replace('TabNavigator');
         } catch (error) {
-            console.log('User in error =>', user);
+            console.log('User in error =>', user, error);
             if (!error.response.data.success) {
                 console.log(error.response.data)
                 setError(error.response.data.message);

@@ -12,7 +12,7 @@ import * as SecureStore from "expo-secure-store";
 const Stack = createNativeStackNavigator();
 
 const RootNavigator = () => {
-    const { user } = useSelector(state => state.auth);
+    const { user, presignup } = useSelector(state => state.auth);
     // const [loading, setLoading] = useState(true);
 
     // useEffect(() => {
@@ -35,7 +35,7 @@ const RootNavigator = () => {
             <Stack.Navigator screenOptions={{ headerShown: false }}>
                 {/* <Stack.Screen name="TabNavigator" component={TabNavigator} /> */}
 
-                {user ? (
+                {user && !presignup ? (
                     <Stack.Screen name="TabNavigator" component={TabNavigator} />
                 ) : (
                     <Stack.Screen name="Auth" component={AuthStack} />
