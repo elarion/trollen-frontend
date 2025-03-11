@@ -21,6 +21,8 @@ import { useDispatch } from 'react-redux';
 // Imports Axios
 import axiosInstance from '@utils/axiosInstance';
 
+import { useSelector } from 'react-redux';
+
 // Imports Theme
 import theme from '@theme';
 
@@ -35,9 +37,10 @@ export default function LobbyScreen({ navigation }) {
     const [modalHazardPartyVisible, setModalHazardPartyVisible] = useState(false);
     const [modalCreatePartyVisible, setModalCreatePartyVisible] = useState(false);
     const [modalJoinPartyVisible, setModalJoinPartyVisible] = useState(false);
-
+    const user = useSelector(state => state.auth.user);
     useEffect(() => {
         (async () => {
+            console.log('user =>', user);
             const socket = await connectSocket();
             if (!socket) return;
 

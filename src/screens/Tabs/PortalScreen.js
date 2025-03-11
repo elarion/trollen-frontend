@@ -88,7 +88,7 @@ export default function PortalScreen({ navigation }) {
             </View>
             <View style={styles.inRoomRight}>
                 <View style={styles.rightUsernameAndJoin}>
-                    <Text style={styles.username}>{item.admin?.username}</Text>
+                    <Text style={styles.username}>Crée par {item.admin?.username}</Text>
                     <TouchableOpacity style={styles.join} onPress={() => goToRoom(item._id)}>
                         <Text style={styles.textButton}>Join</Text>
                     </TouchableOpacity>
@@ -111,8 +111,8 @@ export default function PortalScreen({ navigation }) {
                             onChangeText={setTag}
                             value={tag}
                         />
-                        <TouchableOpacity style={styles.bouton} onPress={() => console.log("Recherche par tag:", tag)}>
-                            <Text>Search</Text>
+                        <TouchableOpacity style={styles.bouton} onPress={() => setTag('')}>
+                            <Text style={{ color: 'white', fontWeight: 'bold' }}>Search</Text>
                         </TouchableOpacity>
                     </View>
 
@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
         borderRadius: 30,
         width: '20%',
         height: '60%',
-        backgroundColor: 'yellow',
+        backgroundColor: theme.colors.darkBrown08,
         justifyContent: 'center',
         alignItems: 'center',
         fontweight: 'bold',
@@ -173,16 +173,16 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
         flexDirection: 'row',
         justifyContent: "space-between",
-        marginBottom: 10,
+        marginBottom: 20,
         width: '100%',
         height: 120,
         borderRadius: 10,
-        backgroundColor: "rgba(255, 255, 255, 0.5)",
+        padding: 10,
+        backgroundColor: theme.colors.lightBrown02,
     },
     inRoomLeft: {
         flexDirection: 'column',
         justifyContent: "space-around",
-        marginLeft: '2%',
         //backgroundColor: 'blue'
         width: '50%',
     },
@@ -200,7 +200,6 @@ const styles = StyleSheet.create({
         //backgroundColor: 'orange',
         width: '46%',
         height: '100%',
-        marginRight: '2%',
         justifyContent: 'flex-end',
     },
     leftFavButtonContainer: {
@@ -212,25 +211,26 @@ const styles = StyleSheet.create({
     rightUsernameAndJoin: {
         flexDirection: 'column',
         //backgroundColor: 'green',
+
         width: '80%',
         alignItems: 'flex-end',
         justifyContent: 'space-around',
     },
     username: {
         //backgroundColor:'orange',
-        margin: 10,
+        fontWeight: 'bold',
     },
     join: {
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'brown',
-        height: '30%',
+        backgroundColor: theme.colors.green,
+        height: 40,
         width: '70%',
         borderRadius: 30,
     },
     textButton: {
-        color: 'white'
-
+        color: 'white',
+        fontWeight: 'bold',
     }
 
 })
