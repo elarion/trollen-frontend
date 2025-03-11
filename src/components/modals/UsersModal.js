@@ -57,7 +57,7 @@ const UsersModal = ({ modalUserRoomVisible, setModalUserRoomVisible, participant
             modalStyle={{ backgroundColor: "transparent" }}
         >
             <View style={styles.modalContainer}>
-                <TouchableOpacity onPress={() => setModalUserRoomVisible(false)} style={styles.closeButton}>
+                <TouchableOpacity onPress={() => setModalUserRoomVisible(false)} style={[styles.closeButton, { position: 'absolute', top: 20, right: 20, zIndex: 1000 }]}>
                     <FontAwesome name="times" size={24} color={theme.colors.darkBrown} />
                 </TouchableOpacity>
                 <Text style={styles.modalTitle}>Users</Text>
@@ -86,19 +86,21 @@ const UsersModal = ({ modalUserRoomVisible, setModalUserRoomVisible, participant
                     ListEmptyComponent={<Text style={styles.emptyText}>No users in this room</Text>}
                 />
             </View>
-            {userToReport && (
-                <UserReportModal
+            {
+                userToReport && (
+                    <UserReportModal
 
-                    visible={modalReportVisible}
-                    onClose={() => setModalReportVisible(false)}
-                    userToReport={userToReport}
-                    onReport={(user) => {
-                        console.log("Utilisateur signalé:", user);
-                        setModalReportVisible(false);
-                    }}
-                />
-            )}
-        </Modal>
+                        visible={modalReportVisible}
+                        onClose={() => setModalReportVisible(false)}
+                        userToReport={userToReport}
+                        onReport={(user) => {
+                            console.log("Utilisateur signalé:", user);
+                            setModalReportVisible(false);
+                        }}
+                    />
+                )
+            }
+        </Modal >
     );
 };
 
@@ -127,10 +129,12 @@ const styles = {
         marginBottom: 20,
     },
     modalTitle: {
+        // alignSelf: "flex-end",
         fontSize: 20,
         fontWeight: "bold",
         color: "#55453F",
         marginBottom: 20,
+        // marginLeft: 4,
     },
     inputSection: {
         padding: 12,
