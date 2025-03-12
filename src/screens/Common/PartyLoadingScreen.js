@@ -8,7 +8,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { useEffect } from 'react';
 
 export default function PartyLoadingScreen({ navigation, route }) {
-    const [player, setPlayer] = useState([1, 2,]); // A modifier
+    const [player, setPlayer] = useState([1, 2]); // A modifier
 
     const { party_id } = route.params;
     if (player.length >= 3) {
@@ -26,7 +26,7 @@ export default function PartyLoadingScreen({ navigation, route }) {
                             <Text>The Game Will Begin Soon:</Text>
                             <CountdownCircleTimer
                                 isPlaying
-                                duration={30}
+                                duration={15}
                                 colors={['#004777', '#F7B801', '#A30000', '#A30000']}
                                 colorsTime={[7, 5, 2, 0]}
                                 onComplete={() => {
