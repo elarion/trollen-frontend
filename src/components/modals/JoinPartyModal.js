@@ -5,8 +5,8 @@ import { useSelector } from "react-redux";
 import { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, ImageBackground, Modal, TextInput, Pressable, Alert } from 'react-native';
 
-const JoinRoomModal = ({ visible, onClose, onConfirm }) => {
-    const [roomname, setRoomname] = useState('');
+const JoinPartyModal = ({ visible, onClose, onConfirm }) => {
+    const [join_id, setJoin_id] = useState('');
     const [password, setPassword] = useState('');
 
     return (
@@ -22,7 +22,7 @@ const JoinRoomModal = ({ visible, onClose, onConfirm }) => {
                     <Text style={styles.modalTitle}>Join an existing party</Text>
                     <View style={styles.inputSection}>
                         <Text>Party name</Text>
-                        <TextInput autoCapitalize="none" style={styles.input} placeholder="Room name" onChangeText={value => setRoomname(value)} value={roomname} />
+                        <TextInput autoCapitalize="none" style={styles.input} placeholder="Room name" onChangeText={value => setJoin_id(value)} value={join_id} />
                         <Text>Password (optional)</Text>
                         <TextInput autoCapitalize="none" style={styles.input} placeholder="Password" onChangeText={value => setPassword(value)} value={password} secureTextEntry={true} />
                     </View>
@@ -34,7 +34,7 @@ const JoinRoomModal = ({ visible, onClose, onConfirm }) => {
                         </Pressable>
                         <Pressable
                             style={[styles.button, styles.buttonValidation]}
-                            onPress={() => onConfirm({ roomname, password })}>
+                            onPress={() => onConfirm({ join_id, password })}>
                             <Text style={styles.textStyle}>join</Text>
                         </Pressable>
                     </View>
@@ -126,4 +126,4 @@ const styles = StyleSheet.create({
     textStyle: { color: 'white', fontWeight: 'bold', textAlign: 'center' },
 });
 
-export default JoinRoomModal;
+export default JoinPartyModal;
