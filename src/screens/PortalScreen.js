@@ -20,6 +20,7 @@ export default function PortalScreen({ navigation }) {
     const fetchRooms = useCallback(async () => {
         if (loading || !hasMore) return;
 
+
         setLoading(true);
 
         try {

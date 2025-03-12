@@ -7,108 +7,136 @@ import { StyleSheet, Platform, View, Text, Image } from 'react-native';
 import TopHeader from '@components/TopHeader';
 const Tab = createBottomTabNavigator();
 import { BlurView } from 'expo-blur';
+import { useNavigationState } from '@react-navigation/native';
 
-export default function TabNavigator() {
+export default function TabNavigator({ navigation }) {
+    // React.useEffect(() => {
+    //     const unsubscribe = navigation.addListener('tabPress', (e) => {
+    //         console.log('tabPress', e);
+    //         // Vérifie si l’utilisateur est déjà sur l’écran "RoomsList"
+    //         const state = navigation.getState();
+    //         const isAlreadyOnRoomsList = state.routes[state.index].name === 'Room';
+
+    //         if (isAlreadyOnRoomsList) {
+    //             // Reset uniquement si on est déjà sur la tab
+    //             navigation.reset({
+    //                 index: 0,
+    //                 routes: [{ name: 'RoomsList' }],
+    //             });
+    //         }
+    //     });
+
+    //     return unsubscribe;
+    // }, [navigation]);
+
     return (
         <Tab.Navigator
-            screenOptions={({ route }) => ({
-                // tabBarIcon: ({ color, size }) => {
-                //     const icons = {
-                //         Lobby: 'home',
-                //         Portal: 'connectdevelop',
-                //         Friends: 'handshake-o',
-                //     };
-                //     return <FontAwesome name={icons[route.name]} size={25} color={color} />;
-                // },
-                tabBarIcon: ({ focused }) => {
-                    let iconSource;
+            screenOptions={({ route }) => {
+                //get the current screen name
+                // How to get the current screen name ?
+                const state = useNavigationState(state => state);
+                const currentScreen = state?.routes[state.index]?.state?.routes?.at(-1)?.name;
 
-                    if (route.name === 'Lobby') {
-                        iconSource = focused
-                            ? require('@assets/lobby.png')  // Icône sélectionnée
-                            : require('@assets/lobby.png');        // Icône non sélectionnée
-                    } else if (route.name === 'Portal') {
-                        iconSource = focused
-                            ? require('@assets/vortex.png')
-                            : require('@assets/vortex.png');
-                    } else if (route.name === 'Friends') {
-                        iconSource = focused
-                            ? require('@assets/friends2.png')
-                            : require('@assets/friends2.png');
-                    }
+                return {
+                    // tabBarIcon: ({ color, size }) => {
+                    //     const icons = {
+                    //         Lobby: 'home',
+                    //         Portal: 'connectdevelop',
+                    //         Friends: 'handshake-o',
+                    //     };
+                    //     return <FontAwesome name={icons[route.name]} size={25} color={color} />;
+                    // },
+                    tabBarIcon: ({ focused }) => {
+                        let iconSource;
 
-                    return (
-                        <Image
-                            source={iconSource}
-                            style={{
-                                width: 30, // Ajuste la taille selon tes besoins
-                                height: 30,
-                                tintColor: focused ? theme.colors.darkBrown : theme.colors.darkBrown, // Optionnel : change la couleur si besoin
-                            }}
-                            resizeMode="cover"
-                        />
-                    );
-                },
-                tabBarShowLabel: false,
+                        if (route.name === 'Lobby') {
+                            iconSource = focused
+                                ? require('@assets/lobby.png')  // Icône sélectionnée
+                                : require('@assets/lobby.png');        // Icône non sélectionnée
+                        } else if (route.name === 'Portal') {
+                            iconSource = focused
+                                ? require('@assets/vortex.png')
+                                : require('@assets/vortex.png');
+                        } else if (route.name === 'Friends') {
+                            iconSource = focused
+                                ? require('@assets/friends2.png')
+                                : require('@assets/friends2.png');
+                        }
 
-                tabBarStyle: {
-                    height: 70,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    alignSelf: 'center',
-                    // position: 'absolute',
-                    // left: "50%",
-                    // left: 0,
-                    // right: 0,
-                    // bottom: 0,
-                    backgroundColor: 'rgba(255, 255, 255, 1)',
-                    paddingTop: 15,
-                    borderTopWidth: 0,
-                    elevation: 0,
-                    // borderRadius: 100,
-                    borderTopLeftRadius: 30,
-                    borderTopRightRadius: 30,
-                },
-                // tabBarBackground: () => (
-                //     Platform.OS === 'ios'
-                //         ? <View style={{ flex: 1, backgroundColor: 'transparent' }} />
-                //         // ? <BlurView intensity={5} tint={theme.colors.lightBrown02} style={{ flex: 1 }} />
-                //         : <View style={{ flex: 1, backgroundColor: 'transparent' }} />
-                // ),
-                tabBarLabelStyle: {
-                    // fontSize: 12,
-                    // fontWeight: 'bold',
-                    // backgroundColor: 'red',
-                },
-                tabBarBadgeStyle: {
-                    // height: 20,
-                    // width: 20,
-                    // backgroundColor: 'red',
-                    // color: theme.colors.secondary,
-                },
-                tabBarIconStyle: {
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    // height: 40,
-                    // width: 40,
-                    borderRadius: 100,
-                    // backgroundColor: theme.colors.lightBrown05,
-                },
-                // tabBarItemStyle: {
-                //     backgroundColor: 'green',
-                // },
-                // tabBarAccessibilityLabel: 'test',
-                tabBarHideOnKeyboard: true,
+                        return (
+                            <Image
+                                source={iconSource}
+                                style={{
+                                    width: 30, // Ajuste la taille selon tes besoins
+                                    height: 30,
+                                    tintColor: focused ? theme.colors.darkBrown : theme.colors.lightBrown, // Optionnel : change la couleur si besoin
+                                }}
+                                resizeMode="cover"
+                            />
+                        );
+                    },
+                    tabBarShowLabel: false,
 
-                // tabBarActiveBackgroundColor: theme.colors.lightBrown02,
-                // tabBarActiveIconStyle: {
-                //     backgroundColor: theme.colors.darkBrown,
-                // },
-                tabBarActiveTintColor: theme.colors.darkBrown,
-                tabBarInactiveTintColor: theme.colors.darkBrown05,
-                headerShown: false, // On désactive les headers internes
-                // header: TopHeader,
-            })}
+                    tabBarStyle: {
+                        // display: ["Room", "Portal"].includes(state.routes[state.index].name) ? "none" : "flex",
+                        height: 70,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        alignSelf: 'center',
+                        // position: 'absolute',
+                        // left: "50%",
+                        // left: 0,
+                        // right: 0,
+                        // bottom: 0,
+                        backgroundColor: 'rgba(255, 255, 255, 1)',
+                        paddingTop: 15,
+                        borderTopWidth: 0,
+                        elevation: 0,
+                        // borderRadius: 100,
+                        borderTopLeftRadius: 30,
+                        borderTopRightRadius: 30,
+                    },
+                    // tabBarBackground: () => (
+                    //     Platform.OS === 'ios'
+                    //         ? <View style={{ flex: 1, backgroundColor: 'transparent' }} />
+                    //         // ? <BlurView intensity={5} tint={theme.colors.lightBrown02} style={{ flex: 1 }} />
+                    //         : <View style={{ flex: 1, backgroundColor: 'transparent' }} />
+                    // ),
+                    tabBarLabelStyle: {
+                        // fontSize: 12,
+                        // fontWeight: 'bold',
+                        // backgroundColor: 'red',
+                    },
+                    tabBarBadgeStyle: {
+                        // height: 20,
+                        // width: 20,
+                        // backgroundColor: 'red',
+                        // color: theme.colors.secondary,
+                    },
+                    tabBarIconStyle: {
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        // height: 40,
+                        // width: 40,
+                        borderRadius: 100,
+                        // backgroundColor: theme.colors.lightBrown05,
+                    },
+                    // tabBarItemStyle: {
+                    //     backgroundColor: 'green',
+                    // },
+                    // tabBarAccessibilityLabel: 'test',
+                    tabBarHideOnKeyboard: true,
+
+                    // tabBarActiveBackgroundColor: theme.colors.lightBrown02,
+                    // tabBarActiveIconStyle: {
+                    //     backgroundColor: theme.colors.darkBrown,
+                    // },
+                    tabBarActiveTintColor: theme.colors.darkBrown,
+                    tabBarInactiveTintColor: theme.colors.darkBrown05,
+                    headerShown: false, // On désactive les headers internes
+                    // header: TopHeader,
+                }
+            }}
         >
             <Tab.Screen name="Lobby" component={MainStack} initialParams={{ initialRoute: "LOBBY" }} listeners={({ navigation }) => ({
                 tabPress: (e) => {
@@ -117,7 +145,10 @@ export default function TabNavigator() {
             })} />
             <Tab.Screen name="Portal" component={MainStack} initialParams={{ initialRoute: "PORTAL" }} listeners={({ navigation }) => ({
                 tabPress: (e) => {
-                    navigation.navigate('Portal');
+                    const state = navigation.getState();
+                    if (state.routes[state.index].name === 'Portal') {
+                        navigation.navigate('Portal');
+                    }
                 },
             })} />
             <Tab.Screen name="Friends" component={MainStack} initialParams={{ initialRoute: "FRIENDS" }} listeners={({ navigation }) => ({
