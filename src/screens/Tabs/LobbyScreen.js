@@ -1,229 +1,195 @@
-// Imports Hooks
-import React, { useState } from 'react';
-
+import React, { useState, useEffect, useRef } from 'react';
 import * as SecureStore from 'expo-secure-store';
-
-// Imports Components
-import { View, Text, TouchableOpacity, StyleSheet, ImageBackground, Modal, TextInput, Pressable, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ImageBackground, Dimensions, PanResponder } from 'react-native';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
-import CreateRoomModal from '@components/modals/CreateRoomModal';
-import JoinRoomModal from '@components/modals/JoinRoomModal';
-import HazardPartyModal from '@components/modals/HazardPartyModal';
-import CreatePartyModal from '@components/modals/CreatePartyModal';
-import JoinPartyModal from '@components/modals/JoinPartyModal';
-import { Portal } from '@components/Portal';
-import TopHeader from '@components/TopHeader';
-
-// Imports Store
-import { logout } from '@store/authSlice';
+import { Gyroscope } from 'expo-sensors';
 import { useDispatch } from 'react-redux';
+import { logout } from '@store/authSlice';
+const { width, height } = Dimensions.get('window');
+import { Image } from 'react-native';
 
-// Imports Axios
-import axiosInstance from '@utils/axiosInstance';
+// Composant joystick
+const CustomJoystick = ({ onMove }) => {
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const maxDistance = 40; 
 
-// Imports Theme
-import theme from '@theme';
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderMove: (_, gesture) => {
+        let dx = gesture.dx;
+        let dy = gesture.dy;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance > maxDistance) {
+          dx = (dx / distance) * maxDistance;
+          dy = (dy / distance) * maxDistance;
+        }
+
+        setPosition({ x: dx, y: dy });
+
+        onMove({
+          angle: Math.atan2(dy, dx) * (180 / Math.PI),
+          distance: (distance / maxDistance) * 100,
+        });
+      },
+      onPanResponderRelease: () => {
+        setPosition({ x: 0, y: 0 });
+        onMove({ angle: 0, distance: 0 });
+      },
+    })
+  ).current;
+
+  return (
+    <View style={styles.joystickBase}>
+      <View {...panResponder.panHandlers} style={[styles.joystickStick, { transform: [{ translateX: position.x }, { translateY: position.y }] }]} />
+    </View>
+  );
+};
 
 export default function LobbyScreen({ navigation }) {
     const dispatch = useDispatch();
-    const [modalCreateRoomVisible, setModalCreateRoomVisible] = useState(false);
-    const [modalJoinRoomVisible, setModalJoinRoomVisible] = useState(false);
-    const [modalHazardPartyVisible, setModalHazardPartyVisible] = useState(false);
-    const [modalCreatePartyVisible, setModalCreatePartyVisible] = useState(false);
-    const [modalJoinPartyVisible, setModalJoinPartyVisible] = useState(false);
-
-    const handleCreateRoom = async (roomData) => {
-        try {
-            const response = await axiosInstance.post(`/rooms/create`, {
-                room_socket_id: 'a',
-                name: roomData.roomname,
-                tags: roomData.tag,
-                settings: { max: roomData.capacityValue, is_safe: roomData.isSafe, is_: roomData.is_, password: roomData.password }
-            });
-
-            const data = response.data;
-
-            if (data) {
-                setModalCreateRoomVisible(!modalCreateRoomVisible);
-                navigation.navigate('Room', { roomId: data.room._id });
-            }
-        } catch (error) {
-            console.error("Error with room creation =>", error.response.data.success);
-        }
-    };
-
-    const handleJoinRoom = async ({ roomname, password }) => {
-        try {
-            if (roomname === '') return;
-
-            const roomToJoin = await axiosInstance.put(`/rooms/join-by-name/${roomname}`, {
-                password: password
-            });
-
-            if (!roomToJoin.data.success) return;
-
-            setModalJoinRoomVisible(!modalJoinRoomVisible);
-            navigation.navigate('Room', { roomId: roomToJoin.data.room._id });
-        } catch (error) {
-            if (!error.response.data.success)
-                console.log("Error with room creation =>", error.response.data.message);
-        } finally {
-            console.log('In finally =>');
-        }
-    }
-
-    const handleCreateParty = async ({ partyName, game = "Motamaux" }) => {
-        try {
-            if (partyName === '') return;
-
-            const response = await axiosInstance.post(`/parties/create`, {
-                name: partyName,
-                game: game,
-            });
-
-            const data = response.data;
-
-            if (data) {
-                setModalCreatePartyVisible(!modalCreatePartyVisible);
-                navigation.navigate('Party', { party_id: data.party._id });
-            }
-        } catch (error) {
-            console.error("Erreur lors de la création :", error);
-        }
-        console.log("Selected game:", selectedCheckBoxGame);
-    }
-
-    const handleJoinParty = async () => {
-        try {
-            const response = await fetch(`${EXPO}/parties`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ user: user.tokenDecoded.id, join_id: partyName }),
-            });
-
-            const data = await response.json();
-
-            if (data) {
-                setPartyName('');
-                setModalJoinPartyVisible(!modalJoinPartyVisible);
-                navigation.navigate('Party', { party_id: data.party._id });
-            }
-
-            console.log('Party joined successfully:', data);
-        } catch (error) {
-            console.error('Error joining party:', error.message);
-        }
-    }
-
-    const handleHazardParty = async () => {
-        console.log('In handleHazardParty =>');
-    }
-
+    const [characterPosition, setCharacterPosition] = useState({ x: width / 2, y: height / 2 });
+    const [gyroData, setGyroData] = useState({ x: 0, y: 0 });
+    const [joystickData, setJoystickData] = useState({ angle: 0, distance: 0 });
+    const animationRef = useRef(null);
+  
+    const gyroSensitivity = 10;
+    const joystickSpeed = 12;
+  
+    useEffect(() => {
+      const subscription = Gyroscope.addListener((data) => {
+        setGyroData({ x: data.x, y: data.y });
+      });
+      Gyroscope.setUpdateInterval(70);
+  
+      return () => subscription.remove();
+    }, []);
+  
+    useEffect(() => {
+      const updatePosition = () => {
+        const gyroX = gyroData.y * gyroSensitivity;
+        const gyroY = gyroData.x * gyroSensitivity;
+  
+        const joystickX = Math.cos(joystickData.angle * Math.PI / 180) * joystickData.distance * joystickSpeed / 100;
+        const joystickY = Math.sin(joystickData.angle * Math.PI / 180) * joystickData.distance * joystickSpeed / 100;
+  
+        let newX = characterPosition.x + gyroX + joystickX;
+        let newY = characterPosition.y + gyroY + joystickY;
+  
+        newX = Math.max(25, Math.min(width - 25, newX));
+        newY = Math.max(25, Math.min(height - 25, newY));
+  
+        setCharacterPosition({ x: newX, y: newY });
+  
+        animationRef.current = requestAnimationFrame(updatePosition);
+      };
+  
+      animationRef.current = requestAnimationFrame(updatePosition);
+      return () => cancelAnimationFrame(animationRef.current);
+    }, [gyroData, joystickData]);
+  
     const handleLogout = async () => {
-        try {
-            dispatch(logout());
-
-            await SecureStore.deleteItemAsync('accessToken');
-            await SecureStore.deleteItemAsync('refreshToken');
-
-            // // navigation.reset sert à réinitialiser la pile de navigation pour empêcher le retour en arrière du retour en arrière
-            navigation.reset({
-                index: 0,
-                routes: [{ name: "Auth" }], // Rediriger et empêcher le retour en arrière
-            });
-        } catch (error) {
-            console.error('Error with logout =>', error);
-        }
+      try {
+        dispatch(logout());
+        await SecureStore.deleteItemAsync('accessToken');
+        await SecureStore.deleteItemAsync('refreshToken');
+  
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Auth' }],
+        });
+      } catch (error) {
+        console.error('Error with logout =>', error);
+      }
     };
-
+  
     return (
-        <ImageBackground source={require('@assets/background/background.png')} style={styles.backgroundImage}>
-            <SafeAreaProvider>
-                <SafeAreaView style={styles.container} edges={['top', 'left']}>
-                    <TopHeader />
-
-                    <View style={styles.portalBox}>
-
-                        <View style={{ flexDirection: 'row', gap: 10, marginBottom: 20 }}>
-                            <Portal portal="portal-4" />
-                            <Portal portal="portal-2" />
-                            <Portal portal="portal-3" />
-                        </View>
-
-                        <TouchableOpacity style={[styles.createRoomBtn, styles.button]} onPress={() => setModalCreateRoomVisible(true)}>
-                            <Text style={styles.textCreateBtn}>Create ROOM</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={[styles.createRoomBtn, styles.button]} onPress={() => setModalJoinRoomVisible(true)}>
-                            <Text style={styles.textCreateBtn}>Join Room</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={[styles.createRoomBtn, styles.button]} onPress={() => setModalCreateRoomVisible(true)}>
-                            <Text style={styles.textCreateBtn}>Hazard ROOM</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={[styles.createRoomBtn, styles.button]} onPress={() => setModalHazardPartyVisible(true)}>
-                            <Text style={styles.textCreateBtn}>Hazard Party</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={[styles.createRoomBtn, styles.button]} onPress={() => setModalCreatePartyVisible(true)}>
-                            <Text style={styles.textCreateBtn}>Create Party</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={[styles.createRoomBtn, styles.button]} onPress={() => setModalJoinPartyVisible(true)}>
-                            <Text style={styles.textCreateBtn}>Join Party</Text>
-                        </TouchableOpacity>
-
-                        <Text onPress={handleLogout}>logout</Text>
-
-                        {/* MODALE CREATE ROOM */}
-                        <CreateRoomModal visible={modalCreateRoomVisible} onClose={() => setModalCreateRoomVisible(false)} onConfirm={handleCreateRoom} />
-
-                        {/* MODALE JOIN  ROOM */}
-                        <JoinRoomModal visible={modalJoinRoomVisible} onClose={() => setModalJoinRoomVisible(false)} onConfirm={handleJoinRoom} />
-
-                        {/* MODALE HAZARD PARTY */}
-                        <HazardPartyModal visible={modalHazardPartyVisible} onClose={() => setModalHazardPartyVisible(false)} onConfirm={handleHazardParty} />
-
-                        {/* MODALE CREATE PARTY */}
-                        <CreatePartyModal visible={modalCreatePartyVisible} onClose={() => setModalCreatePartyVisible(false)} onConfirm={handleCreateParty} />
-
-                        {/* MODALE JOIN PARTY */}
-                        <JoinPartyModal visible={modalJoinPartyVisible} onClose={() => setModalJoinPartyVisible(false)} onConfirm={handleJoinParty} />
-                    </View>
-                </SafeAreaView>
-            </SafeAreaProvider>
-        </ImageBackground>
+      <ImageBackground source={require('@assets/background/background.png')} style={styles.backgroundImage}>
+        <SafeAreaProvider>
+          <SafeAreaView style={styles.container} edges={['top', 'left']}>
+  
+            {/* Personnage animé */}
+            <View style={[styles.character, { left: characterPosition.x - 25, top: characterPosition.y - 25 }]}>
+            <Text style={styles.characterText}>
+            <Image source={require('@assets/avatars/feles.png')} style={styles.characterImage} />
+            </Text>
+            </View>
+  
+  
+            {/* Joystick */}
+            <View style={styles.joystickContainer}>
+              <CustomJoystick onMove={setJoystickData} />
+            </View>
+  
+            {/* Debug info */}
+            <View style={styles.debugInfo}>
+              <Text style={styles.debugText}>Gyro: X: {gyroData.x.toFixed(2)}, Y: {gyroData.y.toFixed(2)}</Text>
+              <Text style={styles.debugText}>Joystick: Angle: {joystickData.angle.toFixed(2)}°, Distance: {joystickData.distance.toFixed(2)}%</Text>
+            </View>
+  
+          </SafeAreaView>
+        </SafeAreaProvider>
+      </ImageBackground>
     );
-}
-
-const styles = StyleSheet.create({
-    centeredView: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    backgroundImage: {
-        flex: 1, resizeMode: 'cover',
-    },
+  }
+  
+  const styles = StyleSheet.create({
     container: {
-        flex: 1,
-        height: '100%',
-        width: '100%',
-        paddingVertical: 10,
-        // position: 'relative',
-        // paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+      flex: 1,
     },
-    portalBox: {
-        marginTop: 20, alignItems: 'center', height: '50%'
+    character: {
+      position: 'absolute',
+      width: 50,  
+      height: 50, 
+      justifyContent: 'center',
+      alignItems: 'center',
+      zIndex: 1, 
     },
-    createRoomBtn: {
-        backgroundColor: '#e8be4b', padding: 10, borderRadius: 10, width: '40%', alignItems: 'center'
+    vortexContainer: {
+      position: 'absolute',
+      top: height / 3, 
+      left: width / 2 - 50, 
+      zIndex: 0, 
     },
-    textCreateBtn: { color: 'white' },
-    button: {
-        backgroundColor: '#e8be4b', padding: 10, borderRadius: 100, width: '40%', alignItems: 'center', marginBottom: 10,
+    joystickContainer: {
+      top: 500,
+      left: '50%',
+      transform: [{ translateX: -50 }],
+      width: 120,
+      height: 120,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderRadius: 60,
     },
-});
+    joystickBase: {
+      width: 100,
+      height: 100,
+      borderRadius: 500,
+      backgroundColor: 'rgba(0,0,0,0.1)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    joystickStick: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: 'black',
+      position: 'absolute',
+      zIndex: 0, 
+    },
+    debugInfo: {
+      position: 'absolute',
+      top: 50,
+      left: 20,
+      right: 20,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      padding: 10,
+      borderRadius: 5,
+    },
+    debugText: {
+      color: 'white',
+      fontSize: 12,
+    },
+  });
