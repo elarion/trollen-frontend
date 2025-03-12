@@ -21,11 +21,9 @@ import { useDispatch, useSelector } from 'react-redux';
 // Imports Axios
 import axiosInstance from '@utils/axiosInstance';
 
-import { useSelector } from 'react-redux';
-
 // Imports Theme
-import theme from '@theme';
-
+/* import theme from '@theme';
+ */
 // Imports Socket
 import { connectSocket, getSocket } from "@services/socketService";
 
