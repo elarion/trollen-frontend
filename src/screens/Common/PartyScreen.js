@@ -4,7 +4,9 @@ import {
 } from "react-native";
 import { Modal, SlideAnimation } from 'react-native-modals';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
+import { useSelector } from "react-redux";
 import axiosInstance from '@utils/axiosInstance';
 import theme from '@theme';
 import { Dimensions } from 'react-native';
@@ -13,11 +15,13 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { CountdownCircleTimer } from 'react-native-countdown-circle-timer'
 import { getSocket } from "@services/socketService"
 import UsersModal from '@components/modals/UsersModal'
+import { AppState, Alert} from "react-native";
+
 
 const { width, height } = Dimensions.get("window"); // Obtenir les dimensions de l'écran
 
 export default function PartyScreen({ navigation, route }) {
-    const { party_id } = route.params;
+    const { party_id } = route.params || {};
     const [partyInfo, setPartyInfo] = useState([]);
 
 
@@ -40,76 +44,61 @@ export default function PartyScreen({ navigation, route }) {
     const [spelled, setSpelled] = useState(false);
 
     // const isFocused = useIsFocused();
-    const socket = getSocket();
+    // const socket = getSocket();
 
-    useFocusEffect(
-        useCallback(() => {
+    // useFocusEffect(
+        // useCallback(() => {
 
             // console.log(`✅ Rejoint la party ${partyId}`);
-            // socket.emit("joinRoom", { partyId });
+            // socket.emit("joinParty", { partyId });
 
-            socket.emit("joinParty", { party_id, username: user.username }, (response) => {
-                if (!response.success) {
-                    console.error("Erreur de connexion à la party :", response.error);
-                }
-            });
+            // socket.emit("joinParty", { party_id, username: user.username }, (response) => {
+            //     if (!response.success) {
+            //         console.error("Erreur de connexion à la party :", response.error);
+            //     }
+            // });
 
-            // // Charger les messages
-            socket.emit("loadMessages", { party_id }, (loadedMessages) => {
-                setMessages(loadedMessages);
-            });
+            // // // Charger les messages
+            // socket.emit("loadMessages", { party_id }, (loadedMessages) => {
+            //     setMessages(loadedMessages);
+            // });
 
-            socket.on("partyInfo", (data) => {
-                // console.log('partyInfo =>', data.party.participants);
-                setRoomInfo(data.party);
-            });
+            // socket.on("partyInfo", (data) => {
+            //     // console.log('partyInfo =>', data.party.participants);
+            //     setPartyInfo(data.party);
+            // });
 
-            // // Écouter les nouveaux messages
-            socket.on("partyMessage", (response) => {
-                setMessages(prev => [response.message, ...prev]);
-            })
+            // // // Écouter les nouveaux messages
+            // socket.on("partyMessage", (response) => {
+            //     setMessages(prev => [response.message, ...prev]);
+            // })
 
-            return () => {
-                if (socket) {
-                    socket.emit("leaveParty", { party_id, username: user.username }, (response) => {
-                        console.log('leaveParty =>', response);
-                    });
-                    socket.off("partyInfo");
-                    socket.off("partyMessage");
-                }
-            };
-        }, [party_id])
-    );
+            // return () => {
+            //     if (socket) {
+            //         socket.emit("leaveParty", { party_id, username: user.username }, (response) => {
+            //             console.log('leaveParty =>', response);
+            //         });
+            //         socket.off("partyInfo");
+            //         socket.off("partyMessage");
+            //     }
+            // };
+        // }, [party_id])
+    // );
 
-    useEffect(() => {
-        (async () => {
+    // First word
+    const [startingWord, setStartingWord] = useState('');
+    // //Last Word submitted
+    const [lastWord, setLastWord] = useState('');
 
-            const handleAppStateChange = (nextAppState) => {
-                if (nextAppState === "background") {
-                    console.log(`❌ L'utilisateur a mis l'app en arrière-plan, leaveRoom envoyé.`);
-                    socket.emit("leaveRoom", { roomId });
-                }
-            };
-
-            const subscription = AppState.addEventListener("change", handleAppStateChange);
-
-            return () => {
-                subscription.remove();
-            };
-        })()
-    }, []);
-
-
-    const [startingWord, setStartingWord] = useEffect('')
     const letStart = () => {
-        if (user.join_id === undefined || null) {
+        if (user._id === partyInfo.admin._id) {
             return <Modal
                 animationType="slide"
                 transparent={true}
                 visible={visible}
             >
                 <View style={styles.centeredView}>
-                    <View style={styles.modalViewJoinRoom}>
+                    <View style={styles.modalViewJoinParty}>
                         <Text style={styles.modalTitle}>Choose your words</Text>
                         <View style={styles.inputSection}>
                             <Text>Starting word</Text>
@@ -117,7 +106,7 @@ export default function PartyScreen({ navigation, route }) {
                             <Text>Mystery word</Text>
                             <TextInput autoCapitalize="none" style={styles.input} placeholder="Ending word" onChangeText={value => setWordToBeFind(value)} value={wordToBeFind} />
                         </View>
-                        <View style={styles.btnModalJoinRoom}>
+                        <View style={styles.btnModalJoinParty}>
                             <Pressable
                                 style={[styles.button, styles.buttonClose]}
                                 onPress={onClose}>
@@ -135,12 +124,10 @@ export default function PartyScreen({ navigation, route }) {
         }
     }
 
-    //Last Word submitted
-    const [lastWord, setLastWord] = useEffect(startingWord)
 
 
-    //Word to be found
-    const [wordToBeFind, setWordToBeFind] = useEffect('')
+    // //Word to be found
+    const [wordToBeFind, setWordToBeFind] = useState('')
 
     const checkWin = () => {
         if (lastWord == wordToBeFind) {
@@ -202,7 +189,7 @@ export default function PartyScreen({ navigation, route }) {
     };
 
     //Timer
-    const [isTimeStarting, setIsTimeStarting] = useEffect(false)
+    const [isTimeStarting, setIsTimeStarting] = useState(false)
 
 
     const timeStart = () => {
@@ -224,12 +211,12 @@ export default function PartyScreen({ navigation, route }) {
 
                             {/* HEADER */}
                             <View style={styles.underheaderContainer}>
-                                <TouchableOpacity style={styles.roomSettings}>
+                                <TouchableOpacity style={styles.partySettings}>
                                     <FontAwesome name='cog' size={20} color={theme.colors.darkBrown} />
                                 </TouchableOpacity>
-                                <View style={styles.roomInfos}>
-                                    {partyInfo.admin && <Text style={styles.creatorRoomName}>{partyInfo.admin.username}</Text>}
-                                    <Text style={styles.roomName}>{partyInfo.name}</Text>
+                                <View style={styles.partyInfos}>
+                                    {partyInfo.admin && <Text style={styles.creatorPartyName}>{partyInfo.admin.username}</Text>}
+                                    <Text style={styles.partyName}>{partyInfo.name}</Text>
                                     <Text style={styles.numberOfParticipants}>
                                         {partyInfo.participants?.length} participant{partyInfo.participants?.length > 1 && `s`}
                                     </Text>
@@ -264,7 +251,7 @@ export default function PartyScreen({ navigation, route }) {
                                     keyExtractor={(item) => item._id.toString()}
                                     contentContainerStyle={styles.messageList}
                                     inverted
-                                // onEndReached={ } // Charge plus de rooms quand on atteint la fin
+                                // onEndReached={ } // Charge plus de parties quand on atteint la fin
                                 // onEndReachedThreshold={0.5} // Déclenche le chargement quand on est à 50% du bas
                                 // ListFooterComponent={loading && <ActivityIndicator size="small" color="white" />} // Affiche un loader en bas de la liste
                                 />
@@ -296,7 +283,7 @@ export default function PartyScreen({ navigation, route }) {
             <UsersModal
                 modalUserRoomVisible={modalUserRoomVisible}
                 setModalUserRoomVisible={setModalUserRoomVisible}
-                participants={roomInfo.participants}
+                participants={partyInfo.participants}
             >
             </UsersModal>
             {/* MODAL SPELL */}
@@ -318,7 +305,7 @@ export default function PartyScreen({ navigation, route }) {
                     <Text style={styles.modalTitle}>Choose a target</Text>
                     <FlatList
                         contentContainerStyle={{}}
-                        data={roomInfo.participants}
+                        data={partyInfo.participants}
                         renderItem={({ item }) => (item.user._id !== user._id && <Text style={{ width: '100%', backgroundColor: theme.colors.lightBrown05, padding: 10, marginBottom: 10, borderRadius: 10 }} onPress={() => handleSpell(item.user._id)}>{item.user.username}</Text>)}
                         keyExtractor={(item) => item._id.toString()}
                     />
@@ -379,7 +366,7 @@ const styles = StyleSheet.create({
         padding: 15,
         backgroundColor: 'red',
     },
-    roomSettings: {
+    partySettings: {
         width: 40,
         height: 40,
         justifyContent: 'center',
@@ -387,13 +374,13 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         backgroundColor: theme.colors.lightBrown02,
     },
-    roomInfos: {
+    partyInfos: {
         alignItems: 'center',
     },
-    creatorRoomName: {
+    creatorPartyName: {
         color: theme.colors.darkBrown,
     },
-    roomName: {
+    partyName: {
         fontSize: 16,
         fontWeight: 'bold',
         color: theme.colors.darkBrown,
