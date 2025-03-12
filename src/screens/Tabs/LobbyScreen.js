@@ -21,6 +21,8 @@ import { useDispatch, useSelector } from 'react-redux';
 // Imports Axios
 import axiosInstance from '@utils/axiosInstance';
 
+import { useSelector } from 'react-redux';
+
 // Imports Theme
 import theme from '@theme';
 
@@ -113,25 +115,38 @@ export default function LobbyScreen({ navigation }) {
         }
     }
 
-    const handleJoinParty = async () => {
+    const handleJoinParty = async ({ join_id, password }) => {
         try {
-            const response = await axiosInstance.put('/parties', {
-                user: user.tokenDecoded.id, join_id: partyName,
-            });
+            const response = await axiosInstance.put(`/parties/join-by-id`, { join_id, password });
 
-            const data = await response.json();
+            const data = response.data;
 
             if (data) {
-                setPartyName('');
                 setModalJoinPartyVisible(!modalJoinPartyVisible);
                 navigation.navigate('Party', { party_id: data.party._id });
             }
-
-            console.log('Party joined successfully:', data);
         } catch (error) {
             console.error('Error joining party:', error.message);
         }
     }
+
+    // const handleRandomJoinParty = async () => {
+    //     try {
+    //         const response = await axiosInstance.put(`/parties/join-by-id`, { games: ['67d149bfe1078aeb70a3d7d8'] });
+
+    //         const data = response.data;
+
+    //         if (data) {
+    //             setPartyName('');
+    //             setModalJoinPartyVisible(!modalJoinPartyVisible);
+    //             navigation.navigate('Party', { party_id: data.party._id });
+    //         }
+
+    //         console.log('Party joined successfully:', data);
+    //     } catch (error) {
+    //         console.error('Error joining party:', error.message);
+    //     }
+    // }
 
     const handleHazardParty = async () => {
         console.log('In handleHazardParty =>');

@@ -24,8 +24,6 @@ const ModalContainer = ({ children }) => {
                 setModalSpellVisible(visible = false);
             }}>
             {children}
-
-            
         </Modal>
     );
 };

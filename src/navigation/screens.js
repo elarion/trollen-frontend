@@ -7,7 +7,7 @@ import FriendsScreen from '../screens/Tabs/FriendsScreen';
 
 import SettingsScreen from '../screens/Common/SettingsScreen';
 import ProfileScreen from '../screens/Common/ProfileScreen';
-import NewsScreen from '../screens/Common/NewsScreen';
+// import NewsScreen from '../screens/Common/NewsScreen';
 import GrimoireScreen from '../screens/Common/GrimoireScreen';
 import RoomScreen from '../screens/Common/RoomScreen';
 import PartyScreen from '../screens/Common/PartyScreen';
@@ -26,7 +26,7 @@ export const SCREENS = {
     COMMON: {
         SETTINGS: { name: "Settings", component: SettingsScreen },
         PROFILE: { name: "Profile", component: ProfileScreen },
-        NEWS: { name: "News", component: NewsScreen },
+        // NEWS: { name: "News", component: NewsScreen },
         GRIMOIRE: { name: "Grimoire", component: GrimoireScreen },
         ROOM: { name: "Room", component: RoomScreen },
         PARTY: { name: "Party", component: PartyScreen },

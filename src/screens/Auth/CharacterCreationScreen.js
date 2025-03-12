@@ -112,11 +112,11 @@ export default function CharactereCreationScreen({ navigation }) {
             <SafeAreaView style={styles.container} edges={['left', 'right']}>
                 <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
 
-                    <ImageBackground source={require('../../../assets/background/background.png')} style={styles.backgroundImage}>
+                    <ImageBackground source={require('@assets/background/background.png')} style={styles.backgroundImage}>
                         {/* LOGO */}
                         <View style={styles.logoSection}>
                             <Text style={styles.title}>TROLLEN</Text>
-                            <Image style={styles.logo} source={require('../../../assets/logo.png')} />
+                            <Image style={styles.logo} source={require('@assets/logo.png')} />
                         </View>
 
                         <View style={styles.characterBox}>
@@ -154,7 +154,7 @@ export default function CharactereCreationScreen({ navigation }) {
 
                                 <View style={styles.spells}>
                                     <View style={styles.passifSpellBox}>
-                                        <Text style={styles.passifSpellText}>Sort Passif</Text>
+                                        <Text style={styles.passifSpellText}>Passive Spell</Text>
                                         <View style={styles.passifSpellTitle}>
                                             <View style={styles.shield}>
                                                 <FontAwesome name='shield' size={20} color='rgb(239, 233, 225)' />
@@ -167,7 +167,7 @@ export default function CharactereCreationScreen({ navigation }) {
                                         </View>
                                     </View>
                                     <View style={styles.actifSpellBox}>
-                                        <Text style={styles.actifSpellText}>Sorts Actifs</Text>
+                                        <Text style={styles.actifSpellText}>Active Spells</Text>
                                         <View style={styles.actifSpell}>
                                             {[spells.spell1, spells.spell2, spells.spell3].map((spell, index) => (
                                                 <View key={index} style={styles.spell}>
