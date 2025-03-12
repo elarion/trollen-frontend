@@ -1,97 +1,140 @@
 import {
     StyleSheet, Text, View, ImageBackground, TextInput, TouchableOpacity,
-    KeyboardAvoidingView
+    KeyboardAvoidingView, FlatList, Image, Pressable
 } from "react-native";
-import { Modal, SlideAnimation } from 'react-native-modals';
+import { Modal, ModalContent, SlideAnimation } from 'react-native-modals';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { useState, useEffect, useCallback } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import { useSelector } from "react-redux";
 import axiosInstance from '@utils/axiosInstance';
-import theme from '@theme';
 import { Dimensions } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 import { CountdownCircleTimer } from 'react-native-countdown-circle-timer'
-import { getSocket } from "@services/socketService"
 import UsersModal from '@components/modals/UsersModal'
-import { AppState, Alert} from "react-native";
+import { AppState, Alert } from "react-native";
 
+import { getSocket } from "@services/socketService";
+import theme from '@theme';
+import { spells } from '@configs/spells';
+import { slugify } from '@utils/slugify';
 
-const { width, height } = Dimensions.get("window"); // Obtenir les dimensions de l'écran
+const spellImages = [
+    require('@assets/spells/spell-1.png'),
+    require('@assets/spells/spell-2.png'),
+    require('@assets/spells/spell-3.png'),
+];
 
 export default function PartyScreen({ navigation, route }) {
+    ;
+    // const isFocused = useIsFocused();
+    const socket = getSocket();
+
+    const [visible, setVisible] = useState(false);
+    const [modalUserRoomVisible, setModalUserRoomVisible] = useState(false);
+    const [modalSpellVisible, setModalSpellVisible] = useState(false);
     const { party_id } = route.params || {};
-    const [partyInfo, setPartyInfo] = useState([]);
-
-
-    useEffect(() => {
-        (async () => {
-            try {
-                const response = await axiosInstance.get(`/parties/${party_id}`);
-                setPartyInfo(response.data.party);
-            } catch (error) {
-                console.error("Error fetching party info:", error);
-            }
-        })();
-    }, []);
-
+    const [partyInfo, setPartyInfo] = useState([])
+    console.log('partyInfo :', partyInfo)
     const { user } = useSelector(state => state.auth);
     const [content, setContent] = useState('');
-
     const [messages, setMessages] = useState([]);
     const [modalUserListVisible, setModalUserListVisible] = useState(false);
     const [spelled, setSpelled] = useState(false);
+    const [selectedSpell, setSelectedSpell] = useState(null);
 
-    // const isFocused = useIsFocused();
-    // const socket = getSocket();
-
-    // useFocusEffect(
-        // useCallback(() => {
-
-            // console.log(`✅ Rejoint la party ${partyId}`);
-            // socket.emit("joinParty", { partyId });
-
-            // socket.emit("joinParty", { party_id, username: user.username }, (response) => {
-            //     if (!response.success) {
-            //         console.error("Erreur de connexion à la party :", response.error);
-            //     }
-            // });
-
-            // // // Charger les messages
-            // socket.emit("loadMessages", { party_id }, (loadedMessages) => {
-            //     setMessages(loadedMessages);
-            // });
-
-            // socket.on("partyInfo", (data) => {
-            //     // console.log('partyInfo =>', data.party.participants);
-            //     setPartyInfo(data.party);
-            // });
-
-            // // // Écouter les nouveaux messages
-            // socket.on("partyMessage", (response) => {
-            //     setMessages(prev => [response.message, ...prev]);
-            // })
-
-            // return () => {
-            //     if (socket) {
-            //         socket.emit("leaveParty", { party_id, username: user.username }, (response) => {
-            //             console.log('leaveParty =>', response);
-            //         });
-            //         socket.off("partyInfo");
-            //         socket.off("partyMessage");
-            //     }
-            // };
-        // }, [party_id])
-    // );
 
     // First word
     const [startingWord, setStartingWord] = useState('');
     // //Last Word submitted
     const [lastWord, setLastWord] = useState('');
 
+    useFocusEffect(
+        useCallback(() => {
+            try {
+                socket.emit("joinParty", { party_id, username: user.username }, (response) => {
+                    if (!response.success) {
+                        console.error("Erreur de connexion à la party :", response.error);
+                    }
+                });
+            } catch (error) {
+                console.error("Erreur de connexion à la party :", error);
+            }
+
+            (async () => {
+                try {
+
+                    const loadedPartyInfo = await axiosInstance.get(`/parties/${party_id}`);
+                    setPartyInfo(loadedPartyInfo.data.party)
+                    // if (messages.length === 0) {
+                } catch (error) {
+
+                } try { //const loadedMessages = await axiosInstance.get(`/messages-parties/get-all-by-party/${party_id}`);
+                    //setMessages(loadedMessages.data.messages);
+
+                    // } else {
+                    //     const lastMessage = messages[0];
+                    //     const loadedMessages = await axiosInstance.get(`/messages-parties/get-by-last-message/${party_id}/${lastMessage._id}`);
+                    //     setMessages(prev => [...loadedMessages.data.messages, ...prev]);
+                    // }
+                } catch (error) {
+                    console.error("Erreur lors du chargement des messages :", error);
+                }
+            })();
+
+            socket.on("partyInfo", (data) => {
+                setPartyInfo(data.party);
+            });
+            socket.on("partyMessage", (response) => {
+                setMessages(prev => [response.message, ...prev]);
+            });
+            socket.on("spelledInParty", (response) => {
+                console.log('spelledInParty =>', response);
+                // setSpelled(true);
+            });
+
+            // Utile par exemple pour mettre a jour un statut utilisateur genre afk
+            // const handleAppStateChange = (nextAppState) => {
+            //     console.log('nextAppState =>', nextAppState);
+            //     if (nextAppState === "background") {
+            //         console.log(`❌ L'utilisateur a mis l'app en arrière-plan, leaveParty envoyé.`);
+            //         socket.emit("leaveParty", { party_id, username: user.username });
+            //     } else if (nextAppState === "active") {
+            //         console.log(`✅ L'utilisateur a remis l'app en avant-plan, joinParty envoyé.`);
+            //         socket.emit("joinParty", { party_id, username: user.username }, (response) => {
+            //             if (!response.success) {
+            //                 console.error("Erreur de connexion à la party :", response.error);
+            //             }
+            //         });
+            //     }
+            // };
+
+            // const subscription = AppState.addEventListener("change", handleAppStateChange);
+            const interval = setInterval(() => {
+                socket.emit("reconnectToParty", { party_id, userId: user._id }, (response) => {
+                    // console.log(`response ${user.username} =>`, response);
+                });
+            }, 5000);
+
+            return () => {
+                // subscription.remove();
+
+                clearInterval(interval);
+
+                if (socket) {
+                    socket.emit("leaveParty", { party_id, username: user.username }, (response) => {
+                        console.log(`User ${user.username} leaved party`);
+                    });
+                    socket.off("partyInfo");
+                    socket.off("partyMessage");
+                }
+            };
+        }, [party_id])
+    );
+
     const letStart = () => {
-        if (user._id === partyInfo.admin._id) {
+        if (user._id === partyInfo.admin?._id) {
             return <Modal
                 animationType="slide"
                 transparent={true}
@@ -109,7 +152,7 @@ export default function PartyScreen({ navigation, route }) {
                         <View style={styles.btnModalJoinParty}>
                             <Pressable
                                 style={[styles.button, styles.buttonClose]}
-                                onPress={onClose}>
+                            >
                                 <Text style={styles.textStyle}>Cancel</Text>
                             </Pressable>
                             <Pressable
@@ -122,9 +165,8 @@ export default function PartyScreen({ navigation, route }) {
                 </View>
             </Modal>
         }
+
     }
-
-
 
     // //Word to be found
     const [wordToBeFind, setWordToBeFind] = useState('')
@@ -140,18 +182,16 @@ export default function PartyScreen({ navigation, route }) {
             Alert.alert('Please enter a message');
         }
 
-        const socket = getSocket();
-
         try {
             setLastWord(content)
             if (checkWin() === true) {
                 return <Modal
-                            animationType="slide"
-                            transparent={true}
-                            visible={visible}
-                            >
-                            <Text>Yep ! The mystery word was {wordToBeFind}, {user.username} has won !</Text>
-                        </Modal>
+                    animationType="slide"
+                    transparent={true}
+                    visible={visible}
+                >
+                    <Text>Yep ! The mystery word was {wordToBeFind}, {user.username} has won !</Text>
+                </Modal>
             }
             setContent('');
             socket.emit("sendMessage", { party_id, content, username: user?.username, spelled: spelled }, (response) => {
@@ -164,27 +204,38 @@ export default function PartyScreen({ navigation, route }) {
     }
 
     const handleSpell = (targetId) => {
-        const socket = getSocket();
-
-        socket.emit("spelled", { targetId, party_id }, (response) => {
+        socket.emit("launchSpell", { targetId, party_id, spell: selectedSpell }, (response) => {
             setModalSpellVisible(false);
             setModalUserListVisible(false);
-            console.log('spelled and I am =>', response, user.username);
+            console.log('I have spell some magic', response, user.username);
         });
     }
 
-    //modaluser
-    const [modalUserRoomVisible, setModalUserRoomVisible] = useState(false);
-    //MODALSPELL
-    const [modalSpellVisible, setModalSpellVisible] = useState(false);
+    const handleSelectSpell = (spell) => {
+        setSelectedSpell(spell);
+        setModalUserListVisible(true);
+    }
 
     const renderMessage = ({ item }) => {
         const isMyMessage = item.user._id === user._id;
+        const hasBeenSpelled = item.spells.length > 0;
         return (
-            <View style={[styles.messageContainer, isMyMessage ? styles.myMessage : styles.otherMessage]}>
-                <Text style={[styles.messageSender, isMyMessage && { color: theme.colors.darkBrown }]}>{isMyMessage ? "Moi" : item.user.username}</Text>
-                <Text style={[styles.messageText, isMyMessage && { color: theme.colors.darkBrown }]}>{item.content}</Text>
-            </View>
+            <>
+                <View style={[styles.messageContainer, isMyMessage ? styles.myMessage : styles.otherMessage, hasBeenSpelled && { borderWidth: 3, borderColor: theme.colors.red, overflow: 'visible' }]}>
+                    <Text style={[styles.messageSender, isMyMessage && { color: theme.colors.darkBrown }]}>{isMyMessage ? "Moi" : item.user.username}</Text>
+                    <Text style={[styles.messageText, isMyMessage && { color: theme.colors.darkBrown }]}>{item.content}</Text>
+                    {hasBeenSpelled && (
+                        <>
+                            <View style={[styles.spellContainer, { position: 'absolute', bottom: -12, left: 10, zIndex: 1000 }]}>
+                                {item.spells.map((spell, index) => (
+                                    <Image key={spell._id} source={spells[slugify(spell.spell.name, true)]} style={[styles.spellImageMessage, { tintColor: theme.colors.red }]} />
+                                ))}
+                            </View>
+                        </>
+                    )}
+                </View >
+
+            </>
         );
     };
 
@@ -196,10 +247,24 @@ export default function PartyScreen({ navigation, route }) {
         setIsTimeStarting(true)
     };
 
+    const [turnCount, setTurnCount] = useState(0);
+
+    const maxTurns = partyInfo.game.duration; // Définissez le nombre maximum de tours
+    console.log("max turns :", partyInfo.game.duration);
+    console.log(maxTurns)
+    //const maxTurns = 5;
+
     const nextTurn = () => {
-        setIsTimeStarting(false)
-        timeStart()
-    }
+        if (turnCount < maxTurns) {
+            setTurnCount(turnCount + 1);
+            setIsTimeStarting(false);
+            timeStart();
+        } else {
+            console.log("Maximum number of turns reached");
+        }
+    };
+
+
     letStart()
 
     return (
@@ -228,7 +293,7 @@ export default function PartyScreen({ navigation, route }) {
                             {/* PARTY HEADER */}
                             <View style={styles.partyHeader}>
                                 <Text>The last submitted word is : {lastWord} </Text>
-                                <Text style={turnText}>That's Bidule's Turn !</Text>
+                                <Text style={styles.turnText}>That's Bidule's Turn !</Text>
                                 <CountdownCircleTimer
                                     isPlaying
                                     duration={7}
@@ -302,6 +367,8 @@ export default function PartyScreen({ navigation, route }) {
                 visible={modalUserListVisible}
             >
                 <ModalContent style={[styles.modalContent, { backgroundColor: theme.colors.lightBrown02, width: '100%' }]}>
+                    <Text style={[styles.modalTitle, { marginBottom: 5 }]}>{selectedSpell?.spell.name}</Text>
+                    <Text style={{ textAlign: 'center', marginBottom: 10 }}>{selectedSpell?.spell.description}</Text>
                     <Text style={styles.modalTitle}>Choose a target</Text>
                     <FlatList
                         contentContainerStyle={{}}
@@ -311,7 +378,7 @@ export default function PartyScreen({ navigation, route }) {
                     />
 
                     <TouchableOpacity style={styles.closeButton} onPress={() => setModalUserListVisible(false)}>
-                        <Text style={styles.closeButtonText}>cancel</Text>
+                        <Text style={styles.closeButtonText}>Cancel</Text>
                     </TouchableOpacity>
                 </ModalContent>
             </Modal>
@@ -334,9 +401,9 @@ export default function PartyScreen({ navigation, route }) {
                     <Text style={styles.modalTitle}>Choose a spell</Text>
                     {/* <ModalTitle style={{ backgroundColor: theme.colors.darkBrown }} title={'Choisissez un sort'}></ModalTitle> */}
                     <View style={styles.spellContainer}>
-                        <TouchableOpacity onPress={() => setModalUserListVisible(true)} style={styles.spell}><Image style={[styles.spellImage, { tintColor: theme.colors.darkBrown }]} source={require('@assets/spells/spell-1.png')} /></TouchableOpacity>
-                        <TouchableOpacity onPress={() => setModalUserListVisible(true)} style={styles.spell}><Image style={[styles.spellImage, { tintColor: theme.colors.darkBrown }]} source={require('@assets/spells/spell-2.png')} /></TouchableOpacity>
-                        <TouchableOpacity onPress={() => setModalUserListVisible(true)} style={styles.spell}><Image style={[styles.spellImage, { tintColor: theme.colors.darkBrown }]} source={require('@assets/spells/spell-3.png')} /></TouchableOpacity>
+                        {user.selected_character.spells.filter(spells => spells.spell.category === 'active').map((spell, index) => (
+                            <TouchableOpacity key={spell._id} onPress={() => handleSelectSpell(spell)} style={styles.spell}><Image style={[styles.spellImage, { tintColor: theme.colors.darkBrown }]} source={spells[slugify(spell.spell.name, true)]} /></TouchableOpacity>
+                        ))}
                     </View>
                     <TouchableOpacity style={styles.closeButton} onPress={() => setModalSpellVisible(false)}>
                         <Text style={styles.closeButtonText}>cancel</Text>

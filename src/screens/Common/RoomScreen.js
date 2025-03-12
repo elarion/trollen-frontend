@@ -283,7 +283,7 @@ export default function RoomScreen({ navigation, route }) {
                     />
 
                     <TouchableOpacity style={styles.closeButton} onPress={() => setModalUserListVisible(false)}>
-                        <Text style={styles.closeButtonText}>cancel</Text>
+                        <Text style={styles.closeButtonText}>Cancel</Text>
                     </TouchableOpacity>
                 </ModalContent>
             </Modal>
