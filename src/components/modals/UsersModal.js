@@ -10,9 +10,24 @@ import theme from '@theme';
 
 const UsersModal = ({ modalUserRoomVisible, setModalUserRoomVisible, participants }) => {
     const { user } = useSelector(state => state.auth);
+    const user_id = user._id
     const [modalReportVisible, setModalReportVisible] = useState(false);
     const [userToReport, setUserToReport] = useState(null);
     const [sortedParticipants, setSortedParticipants] = useState(participants);
+    const [friendsList, setFriendsList] = useState([]);
+    console.log(friendsList)
+
+    useEffect(() => {
+        const fetchFriendList = async () => {
+            try {
+                const response3 = await axiosInstance.get(`/users_friends/friends/${user_id}`)
+                setFriendsList(response3.data.friends || [])
+            } catch (error) {
+                /* console.error("error axios received friends List", error) */
+            }
+        }
+        fetchFriendList();
+    }, []);
 
     // useEffect(() => {
     //     if (participants) {
@@ -30,9 +45,14 @@ const UsersModal = ({ modalUserRoomVisible, setModalUserRoomVisible, participant
                 targetUserId: item.user._id,
             });
             console.log("Friends added", response.data);
+            setFriendsList([...friendsList, item.user]);
         } catch (error) {
             console.error("Error with adding friends:", error);
         }
+    };
+
+    const isFriend = (participant) => {
+        return friendsList.some(friend => friend._id === participant.user._id);
     };
 
     const handleReportFriend = (item) => {
@@ -72,9 +92,11 @@ const UsersModal = ({ modalUserRoomVisible, setModalUserRoomVisible, participant
                                 <View style={styles.username}><View style={[styles.statusIndicator, { backgroundColor: item.user.socket_id ? theme.colors.green : theme.colors.red }]} /><Text>{item.user.username}</Text></View>
 
                                 <View style={styles.actions}>
-                                    <TouchableOpacity onPress={() => handleAddFriend(item)} style={styles.addButton}>
-                                        <FontAwesome name="user-plus" size={20} color="#7391C9" />
-                                    </TouchableOpacity>
+                                    {!isFriend(item) && (
+                                        <TouchableOpacity onPress={() => handleAddFriend(item)} style={styles.addButton}>
+                                            <FontAwesome name="user-plus" size={20} color="#7391C9" />
+                                        </TouchableOpacity>
+                                    )}
                                     <TouchableOpacity onPress={() => handleReportFriend(item)} style={styles.reportButton}>
                                         <FontAwesome name="flag" size={15} color="#F65959" />
                                     </TouchableOpacity>
