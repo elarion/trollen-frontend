@@ -15,15 +15,27 @@ import { useDispatch } from "react-redux";
 import { useIsFocused, useFocusEffect } from '@react-navigation/native';
 import { AppState } from 'react-native';
 
+import axiosInstance from "@utils/axiosInstance";
+
 // Import Components
 import UsersModal from '@components/modals/UsersModal';
 
 // Import Services
 import { getSocket } from "@services/socketService";
 import theme from '@theme';
+import { spells } from '@configs/spells';
+import { slugify } from '@utils/slugify';
+
+const spellImages = [
+    require('@assets/spells/spell-1.png'),
+    require('@assets/spells/spell-2.png'),
+    require('@assets/spells/spell-3.png'),
+];
 
 export default function RoomScreen({ navigation, route }) {
     // const [socket, setSocket] = useState(null);
+    const [modalUserRoomVisible, setModalUserRoomVisible] = useState(false);
+    const [modalSpellVisible, setModalSpellVisible] = useState(false);
     const { roomId } = route.params;
     const { user } = useSelector(state => state.auth);
     const [content, setContent] = useState('');
@@ -31,30 +43,47 @@ export default function RoomScreen({ navigation, route }) {
     const [messages, setMessages] = useState([]);
     const [modalUserListVisible, setModalUserListVisible] = useState(false);
     const [spelled, setSpelled] = useState(false);
+    const [selectedSpell, setSelectedSpell] = useState(null);
 
-    // const isFocused = useIsFocused();
     const socket = getSocket();
 
     useFocusEffect(
         useCallback(() => {
-            socket.emit("joinRoom", { roomId, username: user.username }, (response) => {
-                if (!response.success) {
-                    console.error("Erreur de connexion à la room :", response.error);
-                }
-            });
+            try {
+                socket.emit("joinRoom", { roomId, username: user.username }, (response) => {
+                    if (!response.success) {
+                        console.error("Erreur de connexion à la room :", response.error);
+                    }
+                });
+            } catch (error) {
+                console.error("Erreur de connexion à la room :", error);
+            }
 
-            // // Charger les messages
-            socket.emit("loadMessages", { roomId }, (loadedMessages) => {
-                setMessages(loadedMessages);
-            });
+            (async () => {
+                try {
+                    // if (messages.length === 0) {
+                    const loadedMessages = await axiosInstance.get(`/messages-rooms/get-all-by-room/${roomId}`);
+                    setMessages(loadedMessages.data.messages);
+
+                    // } else {
+                    //     const lastMessage = messages[0];
+                    //     const loadedMessages = await axiosInstance.get(`/messages-rooms/get-by-last-message/${roomId}/${lastMessage._id}`);
+                    //     setMessages(prev => [...loadedMessages.data.messages, ...prev]);
+                    // }
+                } catch (error) {
+                    console.error("Erreur lors du chargement des messages :", error);
+                }
+            })();
 
             socket.on("roomInfo", (data) => {
                 setRoomInfo(data.room);
             });
-
-            // // Écouter les nouveaux messages
             socket.on("roomMessage", (response) => {
                 setMessages(prev => [response.message, ...prev]);
+            });
+            socket.on("spelledInRoom", (response) => {
+                console.log('spelledInRoom =>', response);
+                // setSpelled(true);
             });
 
             // Utile par exemple pour mettre a jour un statut utilisateur genre afk
@@ -74,13 +103,20 @@ export default function RoomScreen({ navigation, route }) {
             // };
 
             // const subscription = AppState.addEventListener("change", handleAppStateChange);
+            const interval = setInterval(() => {
+                socket.emit("reconnectToRoom", { roomId, userId: user._id }, (response) => {
+                    // console.log(`response ${user.username} =>`, response);
+                });
+            }, 5000);
 
             return () => {
                 // subscription.remove();
 
+                clearInterval(interval);
+
                 if (socket) {
                     socket.emit("leaveRoom", { roomId, username: user.username }, (response) => {
-                        console.log('leaveRoom =>', response);
+                        console.log(`User ${user.username} leaved room`);
                     });
                     socket.off("roomInfo");
                     socket.off("roomMessage");
@@ -89,18 +125,27 @@ export default function RoomScreen({ navigation, route }) {
         }, [roomId])
     );
 
+    // useEffect(() => {
+    //     (async () => {
+    //         //         try {
+    //         //             const loadedMessages = await axiosInstance.get(`/messages-rooms/get-all-by-room/${roomId}`);
+    //         //             setMessages(loadedMessages.data.messages);
+    //         //         } catch (error) {
+    //         //             console.error("Erreur lors du chargement des messages :", error);
+    //         //         }
+    //     })();
+    // }, [navigation]);
 
-    const handleMessage = () => {
+    const handleMessage = async () => {
         if (content.trim() === '') {
             Alert.alert('Please enter a message');
         }
 
-        const socket = getSocket();
-
         try {
-            setContent('');
+            // await axiosInstance.post(`/messages-rooms/create/${roomId}`, { content, spelled });
             socket.emit("sendMessage", { roomId, content, username: user?.username, spelled: spelled }, (response) => {
                 setSpelled(false);
+                setContent('');
             });
         } catch (error) {
             console.error("Erreur lors de l'envoi du message :", error);
@@ -108,26 +153,38 @@ export default function RoomScreen({ navigation, route }) {
     }
 
     const handleSpell = (targetId) => {
-        const socket = getSocket();
-
-        socket.emit("spelled", { targetId, roomId }, (response) => {
+        socket.emit("launchSpell", { targetId, roomId, spell: selectedSpell }, (response) => {
             setModalSpellVisible(false);
             setModalUserListVisible(false);
-            console.log('spelled and I am =>', response, user.username);
+            console.log('I have spell some magic', response, user.username);
         });
     }
-    //modaluser
-    const [modalUserRoomVisible, setModalUserRoomVisible] = useState(false);
-    //MODALSPELL
-    const [modalSpellVisible, setModalSpellVisible] = useState(false);
+
+    const handleSelectSpell = (spell) => {
+        setSelectedSpell(spell);
+        setModalUserListVisible(true);
+    }
 
     const renderMessage = ({ item }) => {
         const isMyMessage = item.user._id === user._id;
+        const hasBeenSpelled = item.spells.length > 0;
         return (
-            <View style={[styles.messageContainer, isMyMessage ? styles.myMessage : styles.otherMessage]}>
-                <Text style={[styles.messageSender, isMyMessage && { color: theme.colors.darkBrown }]}>{isMyMessage ? "Moi" : item.user.username}</Text>
-                <Text style={[styles.messageText, isMyMessage && { color: theme.colors.darkBrown }]}>{item.content}</Text>
-            </View>
+            <>
+                <View style={[styles.messageContainer, isMyMessage ? styles.myMessage : styles.otherMessage, hasBeenSpelled && { borderWidth: 3, borderColor: theme.colors.red, overflow: 'visible' }]}>
+                    <Text style={[styles.messageSender, isMyMessage && { color: theme.colors.darkBrown }]}>{isMyMessage ? "Moi" : item.user.username}</Text>
+                    <Text style={[styles.messageText, isMyMessage && { color: theme.colors.darkBrown }]}>{item.content}</Text>
+                    {hasBeenSpelled && (
+                        <>
+                            <View style={[styles.spellContainer, { position: 'absolute', bottom: -12, left: 10, zIndex: 1000 }]}>
+                                {item.spells.map((spell, index) => (
+                                    <Image key={spell._id} source={spells[slugify(spell.spell.name, true)]} style={[styles.spellImageMessage, { tintColor: theme.colors.red }]} />
+                                ))}
+                            </View>
+                        </>
+                    )}
+                </View >
+
+            </>
         );
     };
 
@@ -140,8 +197,8 @@ export default function RoomScreen({ navigation, route }) {
 
                             {/* HEADER */}
                             <View style={styles.underheaderContainer}>
-                                <TouchableOpacity style={styles.roomSettings}>
-                                    <FontAwesome name='cog' size={20} color={theme.colors.darkBrown} />
+                                <TouchableOpacity style={[styles.roomSettings]} onPress={() => navigation.goBack()}>
+                                    <FontAwesome name='chevron-left' size={20} color={theme.colors.darkBrown} />
                                 </TouchableOpacity>
                                 <View style={styles.roomInfos}>
                                     {roomInfo.admin && <Text style={styles.creatorRoomName}>{roomInfo.admin?.username}</Text>}
@@ -215,7 +272,9 @@ export default function RoomScreen({ navigation, route }) {
                 visible={modalUserListVisible}
             >
                 <ModalContent style={[styles.modalContent, { backgroundColor: theme.colors.lightBrown02, width: '100%' }]}>
-                    <Text style={styles.modalTitle}>Choose a target</Text>
+                    <Text style={[styles.modalTitle, { marginBottom: 5 }]}>{selectedSpell?.spell.name}</Text>
+                    <Text style={{ textAlign: 'center', marginBottom: 10 }}>{selectedSpell?.spell.description}</Text>
+                    <Text style={{ fontWeight: 'bold', marginBottom: 10 }}>Choose a target</Text>
                     <FlatList
                         contentContainerStyle={{}}
                         data={roomInfo.participants}
@@ -247,9 +306,9 @@ export default function RoomScreen({ navigation, route }) {
                     <Text style={styles.modalTitle}>Choose a spell</Text>
                     {/* <ModalTitle style={{ backgroundColor: theme.colors.darkBrown }} title={'Choisissez un sort'}></ModalTitle> */}
                     <View style={styles.spellContainer}>
-                        <TouchableOpacity onPress={() => setModalUserListVisible(true)} style={styles.spell}><Image style={[styles.spellImage, { tintColor: theme.colors.darkBrown }]} source={require('@assets/spells/spell-1.png')} /></TouchableOpacity>
-                        <TouchableOpacity onPress={() => setModalUserListVisible(true)} style={styles.spell}><Image style={[styles.spellImage, { tintColor: theme.colors.darkBrown }]} source={require('@assets/spells/spell-2.png')} /></TouchableOpacity>
-                        <TouchableOpacity onPress={() => setModalUserListVisible(true)} style={styles.spell}><Image style={[styles.spellImage, { tintColor: theme.colors.darkBrown }]} source={require('@assets/spells/spell-3.png')} /></TouchableOpacity>
+                        {user.selected_character.spells.filter(spells => spells.spell.category === 'active').map((spell, index) => (
+                            <TouchableOpacity key={spell._id} onPress={() => handleSelectSpell(spell)} style={styles.spell}><Image style={[styles.spellImage, { tintColor: theme.colors.darkBrown }]} source={spells[slugify(spell.spell.name, true)]} /></TouchableOpacity>
+                        ))}
                     </View>
                     <TouchableOpacity style={styles.closeButton} onPress={() => setModalSpellVisible(false)}>
                         <Text style={styles.closeButtonText}>cancel</Text>
@@ -353,6 +412,11 @@ const styles = StyleSheet.create({
     messageText: {
         fontSize: 14,
         color: "#fff",
+    },
+    spellImageMessage: {
+        width: 20,
+        height: 20,
+        // tintColor: 'white',
     },
 
     /* MESSAGE INPUT */
