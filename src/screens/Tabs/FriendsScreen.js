@@ -7,6 +7,7 @@ import { FontAwesome } from "@expo/vector-icons";
 import axiosInstance from '@utils/axiosInstance';
 import { useSelector } from 'react-redux'
 
+
 export default function FriendsScreen() {
     const user = useSelector((state) => state.auth)
     const user_id = user.user?._id

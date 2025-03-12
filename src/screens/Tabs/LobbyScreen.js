@@ -24,6 +24,7 @@ import axiosInstance from '@utils/axiosInstance';
 
 // Imports Theme
 import theme from '@theme';
+import VortexEffect from '../../components/vortex';
 
 // Imports Socket
 import { connectSocket, getSocket } from "@services/socketService";
@@ -176,14 +177,14 @@ export default function LobbyScreen({ navigation }) {
                             <Portal portal="portal-2" />
                             <Portal portal="portal-3" />
                         </View>
-                        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                        {/* <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                             <Image
                                 source={require('@assets/portals/vortex-7.gif')}
                                 style={{ width: 400, height: 400 }}
                                 
                             />
-                        </View>
-                        
+                        </View> */}
+                         
 
                         <TouchableOpacity style={[styles.createRoomBtn, styles.button]} onPress={() => setModalCreateRoomVisible(true)}>
                             <Text style={styles.textCreateBtn}>Create ROOM</Text>
@@ -192,11 +193,12 @@ export default function LobbyScreen({ navigation }) {
                         <TouchableOpacity style={[styles.createRoomBtn, styles.button]} onPress={() => setModalJoinRoomVisible(true)}>
                             <Text style={styles.textCreateBtn}>Join Room</Text>
                             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                            <Image
+                            {/* <Image
                                 source={require('@assets/portals/vortex-8.gif')}
                                 style={{ width: 400, height: 400 }}
                                 
-                            />
+                            /> */}
+                            <VortexEffect />
                         </View>
                         </TouchableOpacity>
 
