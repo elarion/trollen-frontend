@@ -30,12 +30,12 @@ const JoinRoomModal = ({ visible, onClose, onConfirm }) => {
                         <Pressable
                             style={[styles.button, styles.buttonClose]}
                             onPress={onClose}>
-                            <Text style={styles.textStyle}>cancel</Text>
+                            <Text style={styles.textStyle}>Cancel</Text>
                         </Pressable>
                         <Pressable
                             style={[styles.button, styles.buttonValidation]}
                             onPress={() => onConfirm({ roomname, password })}>
-                            <Text style={styles.textStyle}>join</Text>
+                            <Text style={styles.textStyle}>Join</Text>
                         </Pressable>
                     </View>
                 </View>

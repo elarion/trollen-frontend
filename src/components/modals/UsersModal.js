@@ -94,7 +94,7 @@ const UsersModal = ({ modalUserRoomVisible, setModalUserRoomVisible, participant
                         onClose={() => setModalReportVisible(false)}
                         userToReport={userToReport}
                         onReport={(user) => {
-                            console.log("Utilisateur signalé:", user);
+                            console.log("User reported:", user);
                             setModalReportVisible(false);
                         }}
                     />

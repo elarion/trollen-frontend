@@ -14,7 +14,7 @@ const initialPartyForm = {
 };
 const CreateRoomModal = ({ visible, onClose, onConfirm }) => {
     const [partyForm, setPartyForm] = useState(initialPartyForm);
-    const [game, setGame] = useState('Motamaux');
+    const [game, setGame] = useState('WordToWord');
     const [partyName, setPartyName] = useState('');
 
     return (<Modal
@@ -45,7 +45,7 @@ const CreateRoomModal = ({ visible, onClose, onConfirm }) => {
                             onValueChange={setGame}
                             color={game ? '#4630EB' : undefined}
                         />
-                        <Text style={styles.checkboxTextCreateParty}>Motamaux</Text>
+                        <Text style={styles.checkboxTextCreateParty}>WordToWord</Text>
                     </View>
                 </View>
 
@@ -54,13 +54,13 @@ const CreateRoomModal = ({ visible, onClose, onConfirm }) => {
                         style={[styles.button, styles.buttonCloseCreateParty]}
                         onPress={() => onClose(false)}
                     >
-                        <Text style={styles.textStyleCreateParty}>Retour</Text>
+                        <Text style={styles.textStyleCreateParty}>Back</Text>
                     </Pressable>
                     <Pressable
                         style={[styles.button, styles.buttonValidationCreateParty]}
                         onPress={() => onConfirm({ partyName, game })}
                     >
-                        <Text style={styles.textStyleCreateParty}>Valider</Text>
+                        <Text style={styles.textStyleCreateParty}>Validate</Text>
                     </Pressable>
                 </View>
             </View>
