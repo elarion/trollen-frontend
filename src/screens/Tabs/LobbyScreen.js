@@ -16,7 +16,7 @@ import TopHeader from '@components/TopHeader';
 
 // Imports Store
 import { logout } from '@store/authSlice';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 // Imports Axios
 import axiosInstance from '@utils/axiosInstance';
@@ -35,6 +35,7 @@ export default function LobbyScreen({ navigation }) {
     const [modalHazardPartyVisible, setModalHazardPartyVisible] = useState(false);
     const [modalCreatePartyVisible, setModalCreatePartyVisible] = useState(false);
     const [modalJoinPartyVisible, setModalJoinPartyVisible] = useState(false);
+    const { user } = useSelector((state) => state.auth);
 
     useEffect(() => {
         (async () => {
@@ -89,7 +90,7 @@ export default function LobbyScreen({ navigation }) {
         }
     }
 
-    const handleCreateParty = async ({ partyName, game = "Motamaux" }) => {
+    const handleCreateParty = async ({ partyName, game = "WordToWord" }) => {
         try {
             if (partyName === '') return;
 
@@ -102,7 +103,7 @@ export default function LobbyScreen({ navigation }) {
 
             if (data) {
                 setModalCreatePartyVisible(!modalCreatePartyVisible);
-                navigation.navigate('Party', { party_id: data.party._id });
+                navigation.navigate('Partyloading', { party_id: data.party._id });
             }
         } catch (error) {
             if (!error.response.data.success) {
@@ -114,12 +115,8 @@ export default function LobbyScreen({ navigation }) {
 
     const handleJoinParty = async () => {
         try {
-            const response = await fetch(`${EXPO}/parties`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ user: user.tokenDecoded.id, join_id: partyName }),
+            const response = await axiosInstance.put('/parties', {
+                user: user.tokenDecoded.id, join_id: partyName,
             });
 
             const data = await response.json();
