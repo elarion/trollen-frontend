@@ -14,7 +14,6 @@ import CreatePartyModal from '@components/modals/CreatePartyModal';
 import JoinPartyModal from '@components/modals/JoinPartyModal';
 import { Portal } from '@components/Portal';
 import TopHeader from '@components/TopHeader';
-const { width, height } = Dimensions.get('window');
 import { Image } from 'react-native';
 import { avatars } from '@configs/avatars';
 // Imports Store
@@ -71,10 +70,10 @@ const CustomJoystick = ({ onMove }) => {
         </View>
     );
 };
-
+const { width, height } = Dimensions.get('window');
 export default function LobbyScreen({ navigation }) {
     const dispatch = useDispatch();
-    const [characterPosition, setCharacterPosition] = useState({ x: width / 2, y: height / 2 });
+    const [characterPosition, setCharacterPosition] = useState({ x: width / 2, y: height / 1.3 });
     const [gyroData, setGyroData] = useState({ x: 0, y: 0 });
     const [joystickData, setJoystickData] = useState({ angle: 0, distance: 0 });
     const animationRef = useRef(null);
@@ -87,17 +86,23 @@ export default function LobbyScreen({ navigation }) {
     const gyroSensitivity = 10;
     const joystickSpeed = 10;
     const [modalCooldown, setModalCooldown] = useState(false);
-    const portals = [
-        { id: 'portal-1', x: width * 0.2, y: height * 0.3, action: () => setModalCreateRoomVisible(true) },
-        { id: 'portal-2', x: width * 0.4, y: height * 0.3, action: () => setModalJoinRoomVisible(true) },
-        { id: 'portal-3', x: width * 0.6, y: height * 0.3, action: () => setModalCreatePartyVisible(true) },
-        { id: 'portal-4', x: width * 0.8, y: height * 0.3, action: () => setModalJoinPartyVisible(true) },
-    ];
+    const [portals, setPortals] = useState([]);
+    useEffect(() => {
     
-    const portalSize = 50; 
+        const newPortals = [
+            { id: 'portal-5', x: width * 0.2, y: height * 0.3, action: () => setModalCreateRoomVisible(true) },
+            { id: 'portal-2', x: width * 0.4, y: height * 0.3, action: () => setModalJoinRoomVisible(true) },
+            { id: 'portal-3', x: width * 0.6, y: height * 0.3, action: () => setModalCreatePartyVisible(true) },
+            { id: 'portal-4', x: width * 0.8, y: height * 0.3, action: () => setModalJoinPartyVisible(true) },
+        ];
+
+        setPortals(newPortals);
+    }, []);
+
+    const portalSize = 30;
     const triggerCooldown = () => {
         setModalCooldown(true);
-        setTimeout(() => setModalCooldown(false), 2000); 
+        setTimeout(() => setModalCooldown(false), 2000);
     };
 
     useEffect(() => {
@@ -138,16 +143,16 @@ export default function LobbyScreen({ navigation }) {
 
             setCharacterPosition({ x: newX, y: newY });
             portals.forEach(portal => {
-                if (!modalCooldown && 
+                if (!modalCooldown &&
                     newX >= portal.x - portalSize / 2 &&
                     newX <= portal.x + portalSize / 2 &&
                     newY >= portal.y - portalSize / 2 &&
                     newY <= portal.y + portalSize / 2
                 ) {
                     portal.action();
-                    setModalCooldown(true); 
-            
-                    
+                    setModalCooldown(true);
+
+
                     setTimeout(() => setModalCooldown(false), 2000);
                 }
             });
@@ -274,59 +279,42 @@ export default function LobbyScreen({ navigation }) {
                 <SafeAreaView style={styles.container} edges={['top', 'left']}>
                     <TopHeader />
 
-                    <View style={styles.portalBox}>
-                        <TouchableOpacity style={[styles.createRoomBtn, styles.button]} onPress={() => setModalCreateRoomVisible(true)}>
-                            <Portal portal="portal-4" />
-                            <Text style={styles.textCreateBtn}>Create ROOM</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={[styles.createRoomBtn, styles.button]} onPress={() => setModalJoinRoomVisible(true)}>
-                            <Portal portal="portal-2" />
-                            <Text style={styles.textCreateBtn}>Join Room</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={[styles.createRoomBtn, styles.button]} onPress={() => setModalCreateRoomVisible(true)}>
-                            <Portal portal="portal-4" />
-                            <Text style={styles.textCreateBtn}>Hazard ROOM</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={[styles.createRoomBtn, styles.button]} onPress={() => setModalHazardPartyVisible(true)}>
-                            <Portal portal="portal-4" />
-                            <Text style={styles.textCreateBtn}>Hazard Party</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={[styles.createRoomBtn, styles.button]} onPress={() => setModalCreatePartyVisible(true)}>
-                            <Portal portal="portal-3" />
-                            <Text style={styles.textCreateBtn}>Create Party</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={[styles.createRoomBtn, styles.button]} onPress={() => setModalJoinPartyVisible(true)}>
-                            <Portal portal="portal-4" />
-                            <Text style={styles.textCreateBtn}>Join Party</Text>
-                        </TouchableOpacity>
-
-                        <View style={[styles.character, { left: characterPosition.x - 25, top: characterPosition.y - 25 }]}>
-                            <Text style={styles.characterText}>{user.username}</Text>
-                            <Image source={avatars[user.selected_character.avatar]} style={styles.characterImage} />
-                        </View>
-
-                        <View style={styles.joystickContainer}>
-                            <CustomJoystick onMove={setJoystickData} />
-                        </View>
-                        {portals.map(portal => (
-    <View key={portal.id} style={[styles.portal, { left: portal.x, top: portal.y }]} />
-))} 
-                        <CreateRoomModal visible={modalCreateRoomVisible} onClose={() => setModalCreateRoomVisible(false)} onConfirm={handleCreateRoom}modalCooldown={modalCooldown} 
-    triggerCooldown={triggerCooldown}  />
-                        <JoinRoomModal visible={modalJoinRoomVisible} onClose={() => setModalJoinRoomVisible(false)} onConfirm={handleJoinRoom} modalCooldown={modalCooldown} 
-    triggerCooldown={triggerCooldown} />
-                        <HazardPartyModal visible={modalHazardPartyVisible} onClose={() => setModalHazardPartyVisible(false)} onConfirm={handleHazardParty}modalCooldown={modalCooldown} 
-    triggerCooldown={triggerCooldown}  />
-                        <CreatePartyModal visible={modalCreatePartyVisible} onClose={() => setModalCreatePartyVisible(false)} onConfirm={handleCreateParty}modalCooldown={modalCooldown} 
-    triggerCooldown={triggerCooldown}  />
-                        <JoinPartyModal visible={modalJoinPartyVisible} onClose={() => setModalJoinPartyVisible(false)} onConfirm={handleJoinParty} modalCooldown={modalCooldown} 
-    triggerCooldown={triggerCooldown}  />
+                    <View style={styles.portalTopBox}>
+                        <Portal portal="portal-4" />
+                        <Text style={styles.textCreateBtn}>Join Party</Text>
+                        <Portal portal="portal-3" />
+                        <Text style={styles.textCreateBtn}>Create Party</Text>
                     </View>
+                    <View style={styles.portalCenterBox}>
+                        <Image source={require('@assets/portals/portal-5.png')}style={styles.portalCenter} portal="portal-5" />
+                        <Text style={styles.textCreateBtn}>Create ROOM</Text>
+                    </View>
+                    <View style={styles.portalBottomBox}>
+                    <Portal portal="portal-1" />
+                    <Text style={styles.textCreateBtn}>Join Room</Text>
+                    </View>
+
+                    <View style={[styles.character, { left: characterPosition.x - 20, top: characterPosition.y - 20 }]}>
+                        <Text style={styles.characterText}>{user.username}</Text>
+                        <Image source={avatars[user.selected_character.avatar]} style={styles.characterImage} />
+                    </View>
+
+                    <View style={styles.joystickContainer}>
+                        <CustomJoystick onMove={setJoystickData} />
+                    </View>
+                    
+                    <CreateRoomModal visible={modalCreateRoomVisible} onClose={() => setModalCreateRoomVisible(false)} onConfirm={handleCreateRoom} modalCooldown={modalCooldown}
+                        triggerCooldown={triggerCooldown} />
+                    <JoinRoomModal visible={modalJoinRoomVisible} onClose={() => setModalJoinRoomVisible(false)} onConfirm={handleJoinRoom} modalCooldown={modalCooldown}
+                        triggerCooldown={triggerCooldown} />
+                    <HazardPartyModal visible={modalHazardPartyVisible} onClose={() => setModalHazardPartyVisible(false)} onConfirm={handleHazardParty} modalCooldown={modalCooldown}
+                        triggerCooldown={triggerCooldown} />
+                    <CreatePartyModal visible={modalCreatePartyVisible} onClose={() => setModalCreatePartyVisible(false)} onConfirm={handleCreateParty} modalCooldown={modalCooldown}
+                        triggerCooldown={triggerCooldown} />
+                    <JoinPartyModal visible={modalJoinPartyVisible} onClose={() => setModalJoinPartyVisible(false)} onConfirm={handleJoinParty} modalCooldown={modalCooldown}
+                        triggerCooldown={triggerCooldown} />
+
+
                 </SafeAreaView>
             </SafeAreaProvider>
         </ImageBackground >
@@ -334,51 +322,54 @@ export default function LobbyScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-    centeredView: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
     backgroundImage: {
         flex: 1,
         resizeMode: 'cover',
     },
     container: {
         flex: 1,
-        height: '100%',
         width: '100%',
         paddingVertical: 10,
     },
-    portalBox: {
-        marginTop: 60, alignItems: 'center', height: '50%',
+    portalTopBox: {
+        marginTop: 60,
+        alignItems: 'center',
         flexDirection: 'row',
-        flexWrap: 'wrap',
     },
-    createRoomBtn: {
-        backgroundColor: '#e8be4b', padding: 10, borderRadius: 10, width: '30%', alignItems: 'center'
+    portalCenterBox: {
+        top: 30,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
-    textCreateBtn: { color: 'white' },
-    button: {
-        backgroundColor: '#e8be4b', padding: 10, borderRadius: 100, width: '30%', alignItems: 'center', marginBottom: 10,
+    portalCenter: {
+        alignItems: 'center',
+        justifyContent: 'center',
     },
-  character: {
+    portalBottomBox: {
+        alignItems: 'center',
+        position: 'absolute',
+        bottom: 50,
+        left: '10%',
+    },
+    textCreateBtn: {
+        color: 'black',
+    },
+    character: {
         position: 'absolute',
         width: 50,
         height: 50,
         justifyContent: 'center',
         alignItems: 'center',
-        zIndex: 1, 
+        zIndex: 1,
     },
-    
     characterImage: {
         width: 50,
         height: 50,
-        justifyContent: 'center',
-        alignItems: 'center',
     },
-       
     joystickContainer: {
-        left: '45%',
+        position: 'absolute',
+        bottom: 20,
+        left: '80%',
         transform: [{ translateX: -50 }],
         width: 120,
         height: 120,
@@ -390,7 +381,7 @@ const styles = StyleSheet.create({
     joystickBase: {
         width: 100,
         height: 100,
-        borderRadius: 500,
+        borderRadius: 50,
         backgroundColor: 'rgba(0,0,0,0.1)',
         justifyContent: 'center',
         alignItems: 'center',
@@ -403,7 +394,6 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0,0,0,0.8)',
         position: 'absolute',
         zIndex: 1,
-
     },
     debugInfo: {
         position: 'absolute',
@@ -418,10 +408,14 @@ const styles = StyleSheet.create({
         color: 'white',
         fontSize: 12,
     },
-    characterText: {
-        color: 'black',
-        fontSize: 20,
-        fontWeight: 'inter',
-        marginTop: 5,
-    }
 });
+
+{/* <TouchableOpacity style={[styles.createRoomBtn, styles.button]} onPress={() => setModalCreateRoomVisible(true)}>
+                            <Portal portal="portal-4" />
+                            <Text style={styles.textCreateBtn}>Hazard ROOM</Text>
+                        </TouchableOpacity> */}
+
+{/* <TouchableOpacity style={[styles.createRoomBtn, styles.button]} onPress={() => setModalHazardPartyVisible(true)}>
+                            <Portal portal="portal-4" />
+                            <Text style={styles.textCreateBtn}>Hazard Party</Text>
+                        </TouchableOpacity> */}
