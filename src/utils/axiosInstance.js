@@ -10,10 +10,11 @@ const axiosInstance = axios.create({ baseURL: API_URL });
 // Ajout du token Authorization à chaque requête
 axiosInstance.interceptors.request.use(
     async (config) => {
-        const token = await SecureStore.getItemAsync("accessToken"); // 🔥 Récupération du token sécurisé
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
-        }
+
+        const token = await SecureStore.getItemAsync("accessToken"); // Récupération du token sécurisé
+
+        if (token) config.headers.Authorization = `Bearer ${token}`;
+
         return config;
     },
     (error) => Promise.reject(error)
@@ -33,7 +34,7 @@ axiosInstance.interceptors.response.use(
                 if (!refreshToken) throw new Error("Aucun refresh token trouvé");
 
                 // Demande un nouveau token
-                const res = await axios.post(`${API_URL}/refresh`, { refreshToken });
+                const res = await axios.patch(`${API_URL}/users/refresh`, { refreshToken });
 
                 if (res.status === 200) {
                     const newAccessToken = res.data.accessToken;
@@ -52,7 +53,7 @@ axiosInstance.interceptors.response.use(
             }
         }
 
-
+        // Promise.reject(error) permet de propager l'erreur à la fonction appelante
         return Promise.reject(error);
     }
 );

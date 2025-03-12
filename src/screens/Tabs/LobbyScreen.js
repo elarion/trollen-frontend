@@ -37,10 +37,9 @@ export default function LobbyScreen({ navigation }) {
     const [modalHazardPartyVisible, setModalHazardPartyVisible] = useState(false);
     const [modalCreatePartyVisible, setModalCreatePartyVisible] = useState(false);
     const [modalJoinPartyVisible, setModalJoinPartyVisible] = useState(false);
-    const user = useSelector(state => state.auth.user);
+
     useEffect(() => {
         (async () => {
-            console.log('user =>', user);
             const socket = await connectSocket();
             if (!socket) return;
 
@@ -115,29 +114,38 @@ export default function LobbyScreen({ navigation }) {
         }
     }
 
-    const handleJoinParty = async () => {
+    const handleJoinParty = async ({ join_id, password }) => {
         try {
-            const response = await fetch(`${EXPO}/parties`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ user: user.tokenDecoded.id, join_id: partyName }),
-            });
+            const response = await axiosInstance.put(`/parties/join-by-id`, { join_id, password });
 
-            const data = await response.json();
+            const data = response.data;
 
             if (data) {
-                setPartyName('');
                 setModalJoinPartyVisible(!modalJoinPartyVisible);
                 navigation.navigate('Party', { party_id: data.party._id });
             }
-
-            console.log('Party joined successfully:', data);
         } catch (error) {
             console.error('Error joining party:', error.message);
         }
     }
+
+    // const handleRandomJoinParty = async () => {
+    //     try {
+    //         const response = await axiosInstance.put(`/parties/join-by-id`, { games: ['67d149bfe1078aeb70a3d7d8'] });
+
+    //         const data = response.data;
+
+    //         if (data) {
+    //             setPartyName('');
+    //             setModalJoinPartyVisible(!modalJoinPartyVisible);
+    //             navigation.navigate('Party', { party_id: data.party._id });
+    //         }
+
+    //         console.log('Party joined successfully:', data);
+    //     } catch (error) {
+    //         console.error('Error joining party:', error.message);
+    //     }
+    // }
 
     const handleHazardParty = async () => {
         console.log('In handleHazardParty =>');
