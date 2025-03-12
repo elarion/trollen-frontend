@@ -14,7 +14,7 @@ const initialPartyForm = {
 };
 const CreateRoomModal = ({ visible, onClose, onConfirm }) => {
     const [partyForm, setPartyForm] = useState(initialPartyForm);
-    const [game, setGame] = useState('Motamaux');
+    const [game, setGame] = useState('WordToWord');
     const [partyName, setPartyName] = useState('');
 
     return (<Modal
@@ -45,7 +45,7 @@ const CreateRoomModal = ({ visible, onClose, onConfirm }) => {
                             onValueChange={setGame}
                             color={game ? '#4630EB' : undefined}
                         />
-                        <Text style={styles.checkboxTextCreateParty}>Motamaux</Text>
+                        <Text style={styles.checkboxTextCreateParty}>WordToWord</Text>
                     </View>
                 </View>
 

@@ -11,6 +11,7 @@ import NewsScreen from '../screens/Common/NewsScreen';
 import GrimoireScreen from '../screens/Common/GrimoireScreen';
 import RoomScreen from '../screens/Common/RoomScreen';
 import PartyScreen from '../screens/Common/PartyScreen';
+import PartyLoadingScreen from '../screens/Common/PartyLoadingScreen';
 
 export const SCREENS = {
     AUTH: {
@@ -29,5 +30,6 @@ export const SCREENS = {
         GRIMOIRE: { name: "Grimoire", component: GrimoireScreen },
         ROOM: { name: "Room", component: RoomScreen },
         PARTY: { name: "Party", component: PartyScreen },
+        PARTYLOADING: { name: "Partyloading", component: PartyLoadingScreen },
     },
 };
