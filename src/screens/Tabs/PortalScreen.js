@@ -88,7 +88,7 @@ export default function PortalScreen({ navigation }) {
             </View>
             <View style={styles.inRoomRight}>
                 <View style={styles.rightUsernameAndJoin}>
-                    <Text style={styles.username}>Created by {item.admin?.username}</Text>
+                    <Text>Created by</Text><Text numberOfLines={1} style={styles.username}>{item.admin?.username}</Text>
                     <Text style={styles.roomNumberOfParticipants}>{item.participants.length} Troll{item.participants.length > 1 && 's'}</Text>
                 </View>
 
@@ -195,6 +195,7 @@ const styles = StyleSheet.create({
     },
     roomTag: {
         fontStyle: 'italic',
+        textAlign: 'right',
     },
     roomNumberOfParticipants: {
     },
@@ -223,7 +224,7 @@ const styles = StyleSheet.create({
     },
     username: {
         //backgroundColor:'orange',
-        // fontWeight: 'bold',
+        fontWeight: 'bold',
     },
     join: {
         justifyContent: 'center',

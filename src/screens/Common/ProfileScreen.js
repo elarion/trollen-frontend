@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Image, TouchableOpacity, ImageBackground, Modal, TextInput } from "react-native"
+import { StyleSheet, Text, View, Image, TouchableOpacity, ImageBackground, ScrollView, Modal, TextInput } from "react-native"
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { useState, useEffect, useReducer } from "react";
 import { useSelector, useDispatch } from 'react-redux';
@@ -9,7 +9,7 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome5';
 
 import { logout } from "@store/authSlice";
 import * as SecureStore from 'expo-secure-store';
-import { setUser } from "../../store/authSlice";
+import { setUserName } from "../../store/authSlice";
 
 import theme from '@theme';
 import { spells } from '@configs/spells';
@@ -74,7 +74,7 @@ export default function ProfileScreen({ navigation }) {
             const response = await axiosInstance.put(`/users/modify-profile`, { username })
 
             const { user } = response.data;
-            dispatch(setUser({ user }))
+            dispatch(setUserName(user.username))
 
         } catch (error) {
 
@@ -140,81 +140,91 @@ export default function ProfileScreen({ navigation }) {
                 <SafeAreaProvider>
                     <SafeAreaView style={styles.container} edges={['left', 'top']}>
                         <TopHeader />
-                        <View style={styles.title}>
-                            <View style={styles.titleLeft}></View>
-                            <Text style={styles.subTitle}>PROFILE</Text>
-                            <View style={styles.titleRight}>
-                                <TouchableOpacity style={styles.logOutButton} onPress={() => handleLogout()}>
-                                    <FontAwesome name='sign-out-alt' size={25} color='rgb(188, 118, 26)' />
-                                </TouchableOpacity>
+                        <ScrollView vertical={true} horizontal={false} contentContainerStyle={{ width: '100%', flexGrow: 1 }}>
+                            <View style={styles.title}>
+                                <View style={styles.titleLeft}></View>
+                                <Text style={styles.subTitle}>PROFILE</Text>
+                                <View style={styles.titleRight}>
+                                    <TouchableOpacity style={styles.logOutButton} onPress={() => handleLogout()}>
+                                        <FontAwesome name='sign-out-alt' size={25} color='rgb(188, 118, 26)' />
+                                    </TouchableOpacity>
+                                </View>
                             </View>
-                        </View>
 
-                        <View style={styles.profileBox}>
-                            <View style={styles.top}>
-                                <View style={styles.topLeft}>
-                                    <Avatar avatar={characterData?.race?.avatar ?? 'defaultAvatar'} />
-                                </View>
-                                <View style={styles.topRight}>
-                                    <View style={styles.usernameButton}>
-                                        <TouchableOpacity style={styles.renameButton} onPress={() => updateUsername()}>
-                                            {/*<Text style={styles.renameTextButton}>Rename</Text>*/}
-                                            <FontAwesome name='feather-alt' style={{ transform: [{ rotateY: '180deg' }] }} size={18} color='rgb(85,69,63)' />
-                                        </TouchableOpacity>
+                            <View style={styles.profileBox}>
+                                <View style={styles.top}>
+                                    <View style={styles.topLeft}>
+                                        <Avatar avatar={characterData?.race?.avatar ?? 'defaultAvatar'} />
                                     </View>
-                                    <View style={styles.username}>
-                                        <TextInput
-                                            style={styles.subtitle}
-                                            value={username}
-                                            onChangeText={setUsername}
-                                        >
-                                        </TextInput>
-                                        <Text style={styles.subtitle}>{characterData.race?.name}</Text>
-                                        <Text style={styles.subtitle} >LEVEL 1</Text>
+                                    <View style={styles.topRight}>
+                                        <View style={styles.usernameButton}>
+                                            <TouchableOpacity style={styles.renameButton} onPress={() => updateUsername()}>
+                                                {/*<Text style={styles.renameTextButton}>Rename</Text>*/}
+                                                <FontAwesome name='feather-alt' style={{ transform: [{ rotateY: '180deg' }] }} size={18} color='rgb(85,69,63)' />
+                                            </TouchableOpacity>
+                                        </View>
+                                        <View style={styles.username}>
+                                            <TextInput
+                                                style={styles.subtitle}
+                                                value={username}
+                                                onChangeText={setUsername}
+                                            >
+                                            </TextInput>
+                                            <Text style={styles.subtitle}>{characterData.race?.name}</Text>
+                                            <Text style={styles.subtitle} >LEVEL 1</Text>
+                                        </View>
                                     </View>
                                 </View>
-                            </View>
-                            <View style={styles.middle1}>
-                                <Text style={styles.subtitle}>Class description :</Text>
-                                {/*<Text>{characterData.race?.description}</Text>*/}
-                                <Text>{characterData.race?.tagline}</Text>
-                            </View>
-                            <View style={styles.middle2}>
-                                <Text style={styles.subtitle}>Active spells :</Text>
-                                <View style={styles.activeSpellsContainer}>
-                                    {user.selected_character.spells.filter(spells => spells.spell.category === 'active').map((spell, index) => (
-                                        <TouchableOpacity key={spell._id} onPress={() => handleModal(spell.spell)} style={styles.spell}>
-                                            <Image style={[styles.spellImage, { tintColor: theme.colors.darkBrown }]} source={spells[slugify(spell.spell.name, true)]} />
-                                        </TouchableOpacity>
-                                    ))}</View>
-                            </View>
-                            <View style={styles.bot}>
-                                <Text style={styles.subtitle}>Unlocked Spell:</Text>
-                                <View style={styles.unlockedSpellsContainer}>
-                                    <FlatList
-                                        contentContainerStyle={{ flexDirection: 'row', gap: 10, marginBottom: 10 }} // du style
-                                        horizontal={true} // pour que les items soient alignés horizontalement
-                                        data={unlockedSpell} // les données à afficher
-                                        keyExtractor={(item) => item._id} // la clé unique pour chaque item
-                                        renderItem={({ item }) => ( // la fonction qui rend l'item
-                                            <View style={styles.inputSection}>
-                                                <TouchableOpacity key={item._id} onPress={() => handleModal(item)} style={styles.spell}>
-                                                    <Image style={[styles.spellImage, { tintColor: theme.colors.darkBrown }]} source={spells[slugify(item.name, true)]} />
-                                                    {console.log('ITEEEEM' + item)}
-                                                </TouchableOpacity>
-                                            </View>
-                                        )}
-                                    //columnWrapperStyle={{ gap: 10 }} // pour que les items aient un espace (peut etre pas utile en horizontal)
-                                    />
-                                    {/*user.selected_character.spells.filter(spells => spells.spell.category === 'active').map((spell, index) => (
-                                <TouchableOpacity key={spell._id} onPress={() => handleSpell(spell)} style={styles.spell}>
-                                    <Image style={[styles.spellImage, { tintColor: theme.colors.darkBrown }]} source={spells[slugify(spell.spell.name, true)]} />
-                                </TouchableOpacity>
-                            ))*/}
+                                <View style={styles.middle1}>
+                                    <Text style={styles.subtitle}>Class description :</Text>
+                                    {/*<Text>{characterData.race?.description}</Text>*/}
+                                    <Text>{characterData.race?.tagline}</Text>
                                 </View>
+                                <View style={styles.middle2}>
+                                    <Text style={styles.subtitle}>Active spells :</Text>
+                                    <View style={styles.activeSpellsContainer}>
+                                        <FlatList
+                                            contentContainerStyle={{ flexDirection: 'row', gap: 10, marginBottom: 10 }} // du style
+                                            horizontal={true} // pour que les items soient alignés horizontalement
+                                            data={user.selected_character.spells.filter(spells => spells.spell.category === 'active')} // les données à afficher
+                                            keyExtractor={(item) => item._id} // la clé unique pour chaque item
+                                            renderItem={({ item }) => ( // la fonction qui rend l'item
+                                                <View style={styles.inputSection}>
+                                                    <TouchableOpacity key={item._id} onPress={() => handleModal(item.spell)} style={styles.spell}>
+                                                        <Image style={[styles.spellImage, { tintColor: theme.colors.darkBrown }]} source={spells[slugify(item.spell.name, true)]} />
+                                                    </TouchableOpacity>
+                                                </View>
+                                            )} />
+                                    </View>
+                                </View>
+                                <View style={styles.bot}>
+                                    <Text style={styles.subtitle}>Unlocked Spell:</Text>
+                                    <View style={styles.unlockedSpellsContainer}>
+                                        <FlatList
+                                            contentContainerStyle={{ flexDirection: 'row', gap: 10 }} // du style
+                                            horizontal={true} // pour que les items soient alignés horizontalement
+                                            data={unlockedSpell} // les données à afficher
+                                            keyExtractor={(item) => item._id} // la clé unique pour chaque item
+                                            renderItem={({ item }) => ( // la fonction qui rend l'item
+                                                <View style={styles.inputSection}>
+                                                    <TouchableOpacity key={item._id} onPress={() => handleModal(item)} style={styles.spell}>
+                                                        <Image style={[styles.spellImage, { tintColor: theme.colors.darkBrown }]} source={spells[slugify(item.name, true)]} />
+                                                        {console.log('ITEEEEM' + item)}
+                                                    </TouchableOpacity>
+                                                </View>
+                                            )}
+                                        //columnWrapperStyle={{ gap: 10 }} // pour que les items aient un espace (peut etre pas utile en horizontal)
+                                        />
+                                        {/*user.selected_character.spells.filter(spells => spells.spell.category === 'active').map((spell, index) => (
+                                    <TouchableOpacity key={spell._id} onPress={() => handleSpell(spell)} style={styles.spell}>
+                                        <Image style={[styles.spellImage, { tintColor: theme.colors.darkBrown }]} source={spells[slugify(spell.spell.name, true)]} />
+                                    </TouchableOpacity>
+                                ))*/}
+                                    </View>
 
+                                </View>
                             </View>
-                        </View>
+                        </ScrollView>
                     </SafeAreaView>
                 </SafeAreaProvider>
             </ImageBackground>
@@ -234,7 +244,7 @@ export default function ProfileScreen({ navigation }) {
                                 <View style={styles.left}>
                                     <Text style={styles.textName}>{selectedSpell.name}</Text>
                                     <View style={styles.cercle}>
-                                        <Image style={{width: 40, height: 40, tintColor:theme.colors.darkBrown}} source={spells[slugify(selectedSpell.name, true)]}/>
+                                        <Image style={{ width: 40, height: 40, tintColor: theme.colors.darkBrown }} source={spells[slugify(selectedSpell.name, true)]} />
                                     </View>
                                 </View>
                                 <View style={styles.rightSpells}>
@@ -307,6 +317,7 @@ const styles = StyleSheet.create({
         height: 30,//'30%',//65px
         width: 30,//'18%',//65px
         borderRadius: 30 / 2,
+        flexDirection: 'row',
         //backgroundColor: 'rgb(246, 89, 89)',
         //marginBottom: '8.5%', //30px
         justifyContent: 'center',
@@ -384,7 +395,7 @@ const styles = StyleSheet.create({
         alignItems: 'flex-start',
     },
     middle2: {
-        height: '23%',
+        height: 120,
         width: '100%',
         padding: 15,
         borderRadius: 25,
@@ -393,7 +404,7 @@ const styles = StyleSheet.create({
         alignItems: 'flex-center',
     },
     bot: {
-        height: '27%',
+        height: 120,
         width: '100%',
         padding: 15,
 
@@ -412,7 +423,7 @@ const styles = StyleSheet.create({
     activeSpellsContainer: {
         flexDirection: 'row',
         gap: 20,
-        marginTop: 20,
+        // marginTop: 20,
 
     },
     spell: {
@@ -440,7 +451,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderWidth: 1,
         borderColor: theme.colors.lightBrown,
-        marginTop: 32,
+        marginTop: 12,
     },
     unlockedSpellsContainer: {
         justifyContent: 'center',
