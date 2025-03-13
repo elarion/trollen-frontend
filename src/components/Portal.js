@@ -20,7 +20,7 @@ export const Portal = ({ portal }) => {
 
 const styles = StyleSheet.create({
     portal: {
-        width: 80,
+        width: 100,
         justifyContent: 'center',
         alignItems: 'center',
         overflow: 'hidden',
