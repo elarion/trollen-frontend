@@ -252,7 +252,7 @@ export default function ProfileScreen({ navigation }) {
                                     setModalShowSpellsVisible(false);
                                     setSelectedSpell(null);
                                 }}>
-                                <Text style={styles.textStyle}>Retour</Text>
+                                <Text style={styles.textStyle}>Back</Text>
                             </TouchableOpacity>
                         </View>
                     </View>

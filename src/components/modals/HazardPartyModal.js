@@ -25,19 +25,19 @@ const HazardPartyModal = ({ visible, onClose, onConfirm }) => {
                                 onValueChange={setGame}
                                 color={game ? '#4630EB' : undefined}
                             />
-                            <Text style={styles.checkboxTextHazardParty}>Motamaux</Text>
+                            <Text style={styles.checkboxTextHazardParty}>WordToWord</Text>
                         </View>
                     </View>
                     <View style={styles.btnModalJoinRoom}>
                         <Pressable
                             style={[styles.button, styles.buttonClose]}
                             onPress={() => onClose()}>
-                            <Text style={styles.textStyle}>back</Text>
+                            <Text style={styles.textStyle}>Back</Text>
                         </Pressable>
                         <Pressable
                             style={[styles.button, styles.buttonValidation]}
                             onPress={() => onConfirm()}>
-                            <Text style={styles.textStyle}>join</Text>
+                            <Text style={styles.textStyle}>Join</Text>
                         </Pressable>
                     </View>
                 </View>

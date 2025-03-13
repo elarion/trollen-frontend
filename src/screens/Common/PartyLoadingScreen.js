@@ -58,7 +58,7 @@ export default function PartyLoadingScreen({ navigation, route }) {
                         </View>
                         <View style={styles.waitingBox}>
                             <View style={styles.message}>
-                                <Text style={styles.waitingText}>Waiting for players :</Text>
+                                <Text style={styles.waitingText}>Waiting for Trolls :</Text>
                                 <Text style={styles.number}>2/6</Text>
                             </View>
                             <View style={styles.participants}>

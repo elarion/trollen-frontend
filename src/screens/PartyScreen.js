@@ -80,7 +80,7 @@ export default function RoomScreen({ navigation, route }) {
                             <View style={styles.roomInfos}>
                                 <Text style={styles.creatorRoomName}>{partyInfo.admin?.username}</Text>
                                 <Text style={styles.roomName}>{partyInfo.name}</Text>
-                                <Text style={styles.numberOfParticipants}>{partyInfo.participants?.length} participant{partyInfo.participants?.length > 1 && `s`}</Text>
+                                <Text style={styles.numberOfParticipants}>{partyInfo.participants?.length} Trolls {partyInfo.participants?.length > 1 && `s`}</Text>
                             </View>
                             <TouchableOpacity style={styles.playerList}>
                                 <FontAwesome name='users' size={30} color='rgb(195, 157, 136)'/* 'rgb(85,69,63)'*/ />
@@ -104,7 +104,7 @@ export default function RoomScreen({ navigation, route }) {
 
                             <View style={styles.buttons}>
                                 <TouchableOpacity style={styles.placeholderButton}>
-                                    <Text style={styles.placeholderButtonText}>Envoyer message</Text>
+                                    <Text style={styles.placeholderButtonText}>Send message</Text>
                                     <FontAwesome name='send-o' size={15} color='rgb(239, 233, 225)' marginHorizontal={'13%'} />
                                 </TouchableOpacity>
                                 <TouchableOpacity style={styles.spellModal} onPress={() => setModalSpellVisible(true)} >
@@ -151,7 +151,7 @@ export default function RoomScreen({ navigation, route }) {
                                     <TouchableOpacity
                                         style={[styles.button, styles.buttonClose]}
                                         onPress={() => setModalSpellVisible(!modalSpellVisible)}>
-                                        <Text style={styles.textStyle}>Retour</Text>
+                                        <Text style={styles.textStyle}>Back</Text>
                                     </TouchableOpacity>
                                 </View>
 
