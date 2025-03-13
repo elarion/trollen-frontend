@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import { View, Text, StyleSheet, ImageBackground, Dimensions, PanResponder, Animated, Easing } from 'react-native';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
-import { Gyroscope } from 'expo-sensors';
 import CreateRoomModal from '@components/modals/CreateRoomModal';
 import JoinRoomModal from '@components/modals/JoinRoomModal';
 import HazardPartyModal from '@components/modals/HazardPartyModal';
@@ -16,7 +15,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import axiosInstance from '@utils/axiosInstance';
 import { connectSocket, getSocket } from "@services/socketService";
 import theme from '@theme';
-import { Image }  from 'react-native';
+import { Image } from 'react-native';
+
+
 
 const CustomJoystick = ({ onMove }) => {
     const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -62,7 +63,6 @@ const { width, height } = Dimensions.get('window');
 export default function LobbyScreen({ navigation }) {
     const dispatch = useDispatch();
     const [characterPosition, setCharacterPosition] = useState({ x: width / 2, y: height / 1.3 });
-    const [gyroData, setGyroData] = useState({ x: 0, y: 0 });
     const [joystickData, setJoystickData] = useState({ angle: 0, distance: 0 });
     const animationRef = useRef(null);
     const [modalCreateRoomVisible, setModalCreateRoomVisible] = useState(false);
@@ -72,11 +72,10 @@ export default function LobbyScreen({ navigation }) {
     const [modalJoinPartyVisible, setModalJoinPartyVisible] = useState(false);
     const [modalCancelled, setModalCancelled] = useState(false);
     const user = useSelector(state => state.auth.user);
-    const gyroSensitivity = 10;
     const joystickSpeed = 10;
     const [portals, setPortals] = useState([]);
     const portalSize = 50;
-    const collisionRadius = 30;
+    const collisionRadius = 25;
 
     const [activePortal, setActivePortal] = useState(null);
     const portalScales = useRef({
@@ -142,12 +141,16 @@ export default function LobbyScreen({ navigation }) {
     }, [user]);
 
     useEffect(() => {
-        const subscription = Gyroscope.addListener((data) => {
-            setGyroData({ x: data.x, y: data.y });
-        });
-        Gyroscope.setUpdateInterval(70);
+        const startAnimations = () => {
+            Object.keys(portalScales).forEach(portalId => {
+                const delay = Math.random() * 1000;
+                setTimeout(() => {
+                    pulsePortal(portalId);
+                }, delay);
+            });
+        };
 
-        return () => subscription.remove();
+        startAnimations();
     }, []);
 
     const checkCollision = (characterX, characterY, portalX, portalY, radius) => {
@@ -181,14 +184,11 @@ export default function LobbyScreen({ navigation }) {
 
     useEffect(() => {
         const updatePosition = () => {
-            const gyroX = gyroData.y * gyroSensitivity;
-            const gyroY = gyroData.x * gyroSensitivity;
-
             const joystickX = Math.cos(joystickData.angle * Math.PI / 180) * joystickData.distance * joystickSpeed / 100;
             const joystickY = Math.sin(joystickData.angle * Math.PI / 180) * joystickData.distance * joystickSpeed / 100;
 
-            let newX = characterPosition.x + gyroX + joystickX;
-            let newY = characterPosition.y + gyroY + joystickY;
+            let newX = characterPosition.x + joystickX;
+            let newY = characterPosition.y + joystickY;
 
             newX = Math.max(25, Math.min(width - 25, newX));
             newY = Math.max(25, Math.min(height - 25, newY));
@@ -225,7 +225,7 @@ export default function LobbyScreen({ navigation }) {
 
         animationRef.current = requestAnimationFrame(updatePosition);
         return () => cancelAnimationFrame(animationRef.current);
-    }, [gyroData, joystickData, portals, activePortal, modalCancelled]);
+    }, [joystickData, portals, activePortal, modalCancelled]);
 
     const handleCreateRoom = async (roomData) => {
         try {
@@ -348,16 +348,18 @@ export default function LobbyScreen({ navigation }) {
                             onLayout={updatePortalPositions}
                             style={{ transform: [{ scale: portalScales['portal-join-party'] }] }}
                         >
-                            <Portal portal="portal-4" />
-                            <Text style={styles.textCreateBtn}>Join Party</Text>
+                            <Image source={require('@assets/portals/portal-4.png')} style={styles.portalCenter} />
+                                <Text style={styles.portalText}>Join Party</Text>
                         </Animated.View>
+                    </View>
+                    <View style={styles.portalMiddleBox}>
                         <Animated.View
                             ref={portalRefs.createParty}
                             onLayout={updatePortalPositions}
                             style={{ transform: [{ scale: portalScales['portal-create-party'] }] }}
                         >
-                            <Portal portal="portal-3" />
-                            <Text style={styles.textCreateBtn}>Create Party</Text>
+                            <Image source={require('@assets/portals/portal-3.png')} style={styles.portalCenter} />
+                                <Text style={styles.portalText}>Create Party</Text>
                         </Animated.View>
                     </View>
                     <View style={styles.portalCenterBox}>
@@ -367,7 +369,7 @@ export default function LobbyScreen({ navigation }) {
                             style={{ transform: [{ scale: portalScales['portal-create-room'] }] }}
                         >
                             <Image source={require('@assets/portals/portal-5.png')} style={styles.portalCenter} />
-                            <Text style={styles.textCreateBtn}>Create ROOM</Text>
+                            <Text style={styles.portalCreateRText}>Create Room</Text>
                         </Animated.View>
                     </View>
                     <View style={styles.portalBottomBox}>
@@ -376,10 +378,11 @@ export default function LobbyScreen({ navigation }) {
                             onLayout={updatePortalPositions}
                             style={{ transform: [{ scale: portalScales['portal-join-room'] }] }}
                         >
-                            <Portal portal="portal-1" />
-                            <Text style={styles.textCreateBtn}>Join Room</Text>
+                            <Image source={require('@assets/portals/portal-1.png')} style={styles.portalCenter} />
+                                <Text style={styles.portalText}>Join Room</Text>
                         </Animated.View>
                     </View>
+
 
                     <View style={[styles.character, { left: characterPosition.x - 20, top: characterPosition.y - 20 }]}>
                         <Text style={styles.characterText}>{user.username}</Text>
@@ -412,12 +415,25 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
     },
     portalTopBox: {
-        marginTop: 60,
+        width: '30%',
+        top: '4%',
+        marginTop: '5%',
+        left: '65%',
+        alignItems: 'center',
+
+    },
+    portalMiddleBox: {
+        width: '30%',
+        bottom: '2',
+        left: '10%',
         alignItems: 'center',
         flexDirection: 'row',
+
     },
     portalCenterBox: {
-        top: 30,
+        width: '50%',
+        left: '27%',
+        bottom: '2',
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -428,11 +444,12 @@ const styles = StyleSheet.create({
     portalBottomBox: {
         alignItems: 'center',
         position: 'absolute',
-        bottom: 50,
+        bottom: 60,
         left: '10%',
     },
     textCreateBtn: {
-        color: 'black',
+        color: 'white',
+
     },
     character: {
         position: 'absolute',
@@ -480,23 +497,29 @@ const styles = StyleSheet.create({
         width: 40,
         height: 40,
         borderRadius: 20,
-        backgroundColor: 'rgba(0,0,0,0.8)',
+        backgroundColor: '#55453F',
         position: 'absolute',
         zIndex: 1,
     },
-    interactButton: {
+    portalCreateRText: {
         position: 'absolute',
-        bottom: 40,
-        right: 20,
-        backgroundColor: 'rgba(0,0,0,0.6)',
-        paddingVertical: 12,
-        paddingHorizontal: 20,
-        borderRadius: 25,
-        zIndex: 2,
-    },
-    interactButtonText: {
-        color: 'white',
-        fontWeight: 'bold',
+        top: '65%',
+        left: '70%',
+        transform: [{ translateX: -50 }, { translateY: -50 }],
+        color: 'green',
         fontSize: 16,
-    }
+        textAlign: 'center',
+        marginBottom: 2,
+        backgroundColor: 'rgba(248, 238, 238, 0.5)',
+        padding: 2,
+        borderRadius: 4,
+    },
+    portalText: {
+        color: 'green',
+        fontSize: 14,
+        textAlign: 'center',
+        backgroundColor: 'rgba(248, 238, 238, 0.8)',
+        borderRadius: 4,
+    },
+
 });
