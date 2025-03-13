@@ -4,8 +4,12 @@ import { useState, useEffect } from "react";
 import axiosInstance from '@utils/axiosInstance';
 import TopHeader from "@components/TopHeader";
 import { Avatar } from '@components/Avatar';
+import { spells } from "@configs/spells";
+import { slugify } from '@utils/slugify';
+console.log(spells)
 
 export default function GrimoireScreen({ navigation }) {
+   
     const [modalShowRacesVisible, setModalShowRacesVisible] = useState(false);
     const [modalShowSpellsVisible, setModalShowSpellsVisible] = useState(false);
     const [viewMode, setViewMode] = useState('races');
@@ -87,7 +91,7 @@ export default function GrimoireScreen({ navigation }) {
     });
 
 
-    const spells = spellsData.map((data) => {
+    const spellsRender = spellsData.map((data) => {
         return (
             <View key={data._id}>
                 <Modal
@@ -105,7 +109,7 @@ export default function GrimoireScreen({ navigation }) {
                                 <View style={styles.spellsCard}>
                                     <View style={styles.left}>
                                         <Text style={styles.textName}>{selectedSpell.name}</Text>
-                                        <Text>{selectedSpell.image}</Text>
+                                        <Image style={{width: 40, height: 40, tintColor:'red'}} source={spells[slugify(selectedSpell.name, true)]}/>
                                     </View>
                                     <View style={styles.rightSpells}>
                                         <View>
@@ -135,7 +139,7 @@ export default function GrimoireScreen({ navigation }) {
                         setModalShowSpellsVisible(true);
                     }}>
                     <Text style={styles.textBtn}>{data.name}</Text>
-                    <Text>{data.image}</Text>
+                    <Image style={{width: 40, height: 40}} source={spells[slugify(data.name, true)]}/>
                 </TouchableOpacity>
             </View>
         );
@@ -158,7 +162,7 @@ export default function GrimoireScreen({ navigation }) {
                     </View>
                     <View style={styles.grimoireContentBox}>
                         <ScrollView contentContainerStyle={styles.itemsContainer}>
-                            {viewMode === 'races' ? races : spells}
+                            {viewMode === 'races' ? races : spellsRender}
                         </ScrollView>
                     </View>
                 </SafeAreaView >
