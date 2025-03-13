@@ -159,10 +159,10 @@ export default function GrimoireScreen({ navigation }) {
                     <Text style={styles.subTitle}>GRIMOIRE</Text>
                     <View style={styles.selectCategories}>
                         <TouchableOpacity onPress={() => setViewMode('races')} >
-                            <Text style={[styles.subSubTitle, { color: viewMode === 'races' ? 'rgb(188, 118, 26)' : 'black', borderBottomWidth: viewMode === 'spells' ? '0' : '2', fontWeight: viewMode === 'spells' ? '0' : '800' }]}>Races</Text>
+                            <Text style={[styles.subSubTitle, { color: viewMode === 'races' ? 'rgb(188, 118, 26)' : 'black', borderBottomWidth: viewMode === 'spells' ? 0 : 2, fontWeight: viewMode === 'spells' ? '0' : '800' }]}>Races</Text>
                         </TouchableOpacity>
                         <TouchableOpacity onPress={() => setViewMode('spells')}>
-                            <Text style={[styles.subSubTitle, { color: viewMode === 'spells' ? 'rgb(188, 118, 26)' : 'black', borderBottomWidth: viewMode === 'spells' ? '2' : '0', fontWeight: viewMode === 'spells' ? '800' : '0' }]}>Spells</Text>
+                            <Text style={[styles.subSubTitle, { color: viewMode === 'spells' ? 'rgb(188, 118, 26)' : 'black', borderBottomWidth: viewMode === 'spells' ? 2 : 0, fontWeight: viewMode === 'spells' ? '800' : '0' }]}>Spells</Text>
                         </TouchableOpacity>
                     </View>
                     <View style={styles.grimoireContentBox}>
