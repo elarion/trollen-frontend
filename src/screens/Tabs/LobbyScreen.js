@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as SecureStore from 'expo-secure-store';
-import { View, Text, StyleSheet, ImageBackground, Dimensions, PanResponder, Animated, Easing } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ImageBackground, Dimensions, PanResponder, Animated, Easing } from 'react-native';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import CreateRoomModal from '@components/modals/CreateRoomModal';
 import JoinRoomModal from '@components/modals/JoinRoomModal';
@@ -28,7 +28,7 @@ import { Image } from 'react-native';
 
 const CustomJoystick = ({ onMove }) => {
     const [position, setPosition] = useState({ x: 0, y: 0 });
-    const maxDistance = 40;
+    const maxDistance = 40; // Permet de limiter la distance de déplacement du joystick
 
     const panResponder = useRef(
         PanResponder.create({
@@ -66,6 +66,7 @@ const CustomJoystick = ({ onMove }) => {
 };
 
 const { width, height } = Dimensions.get('window');
+const socket = getSocket();
 
 export default function LobbyScreen({ navigation }) {
     const dispatch = useDispatch();
@@ -83,6 +84,9 @@ export default function LobbyScreen({ navigation }) {
     const [portals, setPortals] = useState([]);
     const portalSize = 50;
     const collisionRadius = 25;
+    const [players, setPlayers] = useState({});
+    const socket = useRef(null);
+
 
     const [activePortal, setActivePortal] = useState(null);
     const portalScales = useRef({
@@ -136,16 +140,8 @@ export default function LobbyScreen({ navigation }) {
         };
     }, []);
 
-    useEffect(() => {
-        (async () => {
-            const socket = await connectSocket();
-            if (!socket) return;
-
-            return () => {
-                socket.disconnect();
-            };
-        })();
-    }, [user]);
+    // useEffect(() => {
+    // }, [user]);
 
     useEffect(() => {
         const startAnimations = () => {
@@ -157,7 +153,30 @@ export default function LobbyScreen({ navigation }) {
             });
         };
 
+
         startAnimations();
+
+        (async () => {
+            socket.current = await connectSocket();
+
+            if (!socket.current) return;
+
+            // Récupérer les joueurs déjà connectés
+            socket.current.emit("requestPlayers", { avatar: user.selected_character.avatar });
+
+            // Écouter les mises à jour de positions
+            socket.current.on("playersPositions", (usersPositions) => {
+                console.log('🔥 Avatar =>', usersPositions);
+                setPlayers(usersPositions);
+                // console.log('🔥 Players =>', players);
+                // console.log('🔥 Players =>', updatedPlayers);
+            });
+
+            return () => {
+                socket.current.disconnect();
+                // socket.current.off("playersPositions");
+            };
+        })();
     }, []);
 
     const checkCollision = (characterX, characterY, portalX, portalY, radius) => {
@@ -205,6 +224,7 @@ export default function LobbyScreen({ navigation }) {
             let foundPortal = false;
             let portalToActivate = null;
 
+
             portals.forEach(portal => {
                 if (checkCollision(newX, newY, portal.x, portal.y, collisionRadius * 1.5)) {
                     foundPortal = true;
@@ -227,11 +247,19 @@ export default function LobbyScreen({ navigation }) {
                 setModalCancelled(false);
             }
 
+            if (socket.current) {
+                socket.current.emit("updatePosition", { x: newX, y: newY, avatar: user.selected_character.avatar });
+            }
+
             animationRef.current = requestAnimationFrame(updatePosition);
         };
 
         animationRef.current = requestAnimationFrame(updatePosition);
-        return () => cancelAnimationFrame(animationRef.current);
+
+
+        return () => {
+            cancelAnimationFrame(animationRef.current);
+        };
     }, [joystickData, portals, activePortal, modalCancelled]);
 
     const handleCreateRoom = async (roomData) => {
@@ -375,28 +403,41 @@ export default function LobbyScreen({ navigation }) {
                             onLayout={updatePortalPositions}
                             style={{ transform: [{ scale: portalScales['portal-join-party'] }] }}
                         >
-                            <Image source={require('@assets/portals/portal-4.png')} style={styles.portalCenter} />
+                            <TouchableOpacity onPress={() => setModalJoinPartyVisible(true)}>
+                                <Image source={require('@assets/portals/portal-4.png')} style={styles.portalCenter} />
                                 <Text style={styles.portalText}>Join Party</Text>
+                            </TouchableOpacity>
                         </Animated.View>
                     </View>
-                    <View style={styles.portalMiddleBox}>
+                    <View style={[styles.portalMiddleBox, { top: -100, zIndex: 1000 }]}>
                         <Animated.View
                             ref={portalRefs.createParty}
                             onLayout={updatePortalPositions}
                             style={{ transform: [{ scale: portalScales['portal-create-party'] }] }}
                         >
-                            <Image source={require('@assets/portals/portal-3.png')} style={styles.portalCenter} />
+                            <TouchableOpacity onPress={() => setModalCreatePartyVisible(true)}>
+                                <Image source={require('@assets/portals/portal-3.png')} style={styles.portalCenter} />
                                 <Text style={styles.portalText}>Create Party</Text>
+                            </TouchableOpacity>
                         </Animated.View>
                     </View>
                     <View style={styles.portalCenterBox}>
                         <Animated.View
                             ref={portalRefs.createRoom}
                             onLayout={updatePortalPositions}
-                            style={{ transform: [{ scale: portalScales['portal-create-room'] }] }}
+                            style={{ alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%', transform: [{ scale: portalScales['portal-create-room'] }], }}
                         >
-                            <Image source={require('@assets/portals/portal-5.png')} style={styles.portalCenter} />
-                            <Text style={styles.portalCreateRText}>Create Room</Text>
+                            <TouchableOpacity onPress={() => setModalCreateRoomVisible(true)}>
+                                <Image source={require('@assets/portals/portal-5.png')} style={[styles.portalCenter, {
+                                    // width: 220,
+                                    // height: 220
+                                }]} />
+                            </TouchableOpacity>
+                            <View style={styles.portalCreateRTextContainer
+                            } >
+                                <Text style={styles.portalCreateRText} onPress={() => setModalCreateRoomVisible(true)}>Create Room</Text>
+                            </View>
+
                         </Animated.View>
                     </View>
                     <View style={styles.portalBottomBox}>
@@ -405,16 +446,29 @@ export default function LobbyScreen({ navigation }) {
                             onLayout={updatePortalPositions}
                             style={{ transform: [{ scale: portalScales['portal-join-room'] }] }}
                         >
-                            <Image source={require('@assets/portals/portal-1.png')} style={styles.portalCenter} />
+                            <TouchableOpacity onPress={() => setModalJoinRoomVisible(true)}>
+                                <Image source={require('@assets/portals/portal-1.png')} style={styles.portalCenter} />
                                 <Text style={styles.portalText}>Join Room</Text>
+                            </TouchableOpacity>
                         </Animated.View>
                     </View>
 
 
-                    <View style={[styles.character, { left: characterPosition.x - 20, top: characterPosition.y - 20 }]}>
+                    {/* <View style={[styles.character, { left: characterPosition.x - 20, top: characterPosition.y - 20, zIndex: 1001 }]}>
                         <Text style={styles.characterText}>{user.username}</Text>
                         <Image source={avatars[user.selected_character.avatar]} style={styles.characterImage} />
-                    </View>
+                    </View> */}
+
+                    {Object.keys(players).map((playerId) => {
+                        const player = players[playerId];
+                        // console.log('🔥 Player =>', player);
+                        return (
+                            <View key={playerId} style={{ position: "absolute", top: player.y, left: player.x }}>
+                                <Text>{player.username}</Text>
+                                <Image source={avatars[player.avatar]} style={{ width: 50, height: 50 }} />
+                            </View>
+                        );
+                    })}
 
                     <View style={styles.joystickContainer}>
                         <CustomJoystick onMove={setJoystickData} />
@@ -426,8 +480,8 @@ export default function LobbyScreen({ navigation }) {
                     <CreatePartyModal visible={modalCreatePartyVisible} onClose={() => setModalCreatePartyVisible(false)} onConfirm={handleCreateParty} />
                     <JoinPartyModal visible={modalJoinPartyVisible} onClose={() => setModalJoinPartyVisible(false)} onConfirm={handleJoinParty} />
                 </SafeAreaView>
-            </SafeAreaProvider>
-        </ImageBackground>
+            </SafeAreaProvider >
+        </ImageBackground >
     );
 }
 
@@ -444,6 +498,7 @@ const styles = StyleSheet.create({
     portalTopBox: {
         width: '30%',
         top: '4%',
+        zIndex: 1000,
         marginTop: '5%',
         left: '65%',
         alignItems: 'center',
@@ -455,12 +510,13 @@ const styles = StyleSheet.create({
         left: '10%',
         alignItems: 'center',
         flexDirection: 'row',
-
     },
     portalCenterBox: {
-        width: '50%',
-        left: '27%',
-        bottom: '2',
+        position: 'absolute',
+        top: 40,
+        flex: 1,
+        height: '100%',
+        width: '100%',
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -528,18 +584,26 @@ const styles = StyleSheet.create({
         position: 'absolute',
         zIndex: 1,
     },
-    portalCreateRText: {
+    portalCreateRTextContainer: {
         position: 'absolute',
-        top: '65%',
-        left: '70%',
-        transform: [{ translateX: -50 }, { translateY: -50 }],
+        height: '100%',
+        width: '100%',
+        // position: 'absolute',
+        // left: Dimensions.get('window').width / 11,
+        alignItems: 'center',
+        justifyContent: 'center',
+        // backgroundColor: 'rgba(248, 238, 238, 0.7)',
+    },
+    portalCreateRText: {
+        // width: '100%',
+        fontWeight: 'bold',
         color: 'green',
         fontSize: 16,
         textAlign: 'center',
-        marginBottom: 2,
-        backgroundColor: 'rgba(248, 238, 238, 0.5)',
-        padding: 2,
-        borderRadius: 4,
+        backgroundColor: 'rgba(248, 238, 238, 0.7)',
+        borderRadius: 90,
+        paddingHorizontal: 8,
+        paddingVertical: 4,
     },
     portalText: {
         color: 'green',

@@ -125,7 +125,7 @@ export default function PortalScreen({ navigation }) {
                             keyExtractor={(item) => item._id}
                             onEndReached={fetchRooms} // Charge plus de rooms quand on atteint la fin
                             onEndReachedThreshold={0.5} // Déclenche le chargement quand on est à 50% du bas
-                            ListFooterComponent={loading && <ActivityIndicator size="small" color="white" />} // Affiche un loader en bas de la liste
+                            ListFooterComponent={loading && <ActivityIndicator size="small" color={theme.colors.darkBrown} />} // Affiche un loader en bas de la liste
                         />
                     </View>
                 </SafeAreaView>

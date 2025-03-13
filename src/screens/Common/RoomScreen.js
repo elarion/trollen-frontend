@@ -282,12 +282,14 @@ export default function RoomScreen({ navigation, route }) {
                     <Text style={{ textAlign: 'center', marginBottom: 10 }}>{selectedSpell?.spell.description}</Text>
                     <Text style={{ fontWeight: 'bold', marginBottom: 10 }}>Choose a target</Text>
                     <FlatList
-                        contentContainerStyle={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, alignItems: 'center', justifyContent: 'center' }}
+                        contentContainerStyle={{ gap: 10, alignItems: 'center', marginBottom: 10, justifyContent: 'center' }}
                         data={roomInfo.participants}
+                        numColumns={2}
+                        columnWrapperStyle={{ gap: 10 }}
                         renderItem={({ item, index }) => {
                             return item.user._id !== user._id && <Text style={{ width: 120, backgroundColor: theme.colors.lightBrown05, padding: 10, borderRadius: 10 }} onPress={() => handleSpell(item.user._id)}>{item.user.username}</Text>
                         }}
-                        keyExtractor={(item) => item._id.toString()}
+                        keyExtractor={(item) => item._id}
                     />
 
                     <TouchableOpacity style={styles.closeButton} onPress={() => setModalUserListVisible(false)}>
