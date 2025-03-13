@@ -5,6 +5,8 @@ import { useSelector } from "react-redux";
 import { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, ImageBackground, Modal, TextInput, Pressable, Alert } from 'react-native';
 
+import theme from '@theme';
+
 const JoinPartyModal = ({ visible, onClose, onConfirm }) => {
     const [join_id, setJoin_id] = useState('');
     const [password, setPassword] = useState('');
@@ -18,8 +20,8 @@ const JoinPartyModal = ({ visible, onClose, onConfirm }) => {
                 onClose();
             }}>
             <View style={styles.centeredView}>
-                <View style={styles.modalViewJoinRoom}>
-                    <Text style={styles.modalTitle}>Join an existing party</Text>
+                <View style={styles.modalViewJoinParty}>
+                    <Text style={styles.modalTitle}>Join a party</Text>
                     <View style={styles.inputSection}>
                         <Text>Party name</Text>
                         <TextInput autoCapitalize="none" style={styles.input} placeholder="Room name" onChangeText={value => setJoin_id(value)} value={join_id} />
@@ -54,21 +56,13 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         width: '90%',
     },
-    modalViewJoinRoom: {
+    modalViewJoinParty: {
+        width: '90%',
         margin: 20,
-        backgroundColor: 'white',
+        backgroundColor: theme.colors.veryLightBrown,
         borderRadius: 20,
         padding: 35,
         alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-        elevation: 5,
-        width: '90%',
     },
     button: {
         borderRadius: 20,
@@ -121,8 +115,8 @@ const styles = StyleSheet.create({
     checkbox: { marginRight: 10 },
     btnModal: { flexDirection: 'row', justifyContent: 'space-between', width: '100%', marginTop: 20 },
     button: { borderRadius: 99, padding: 10 },
-    buttonClose: { backgroundColor: 'red', width: '45%', alignItems: 'center' },
-    buttonValidation: { backgroundColor: 'green', width: '45%', alignItems: 'center' },
+    buttonClose: { backgroundColor: theme.colors.red, width: '45%', alignItems: 'center' },
+    buttonValidation: { backgroundColor: theme.colors.green, width: '45%', alignItems: 'center' },
     textStyle: { color: 'white', fontWeight: 'bold', textAlign: 'center' },
 });
 
