@@ -18,7 +18,7 @@ const refreshToken = async () => {
         const refreshToken = await SecureStore.getItemAsync("refreshToken");
         if (!refreshToken) throw new Error("Aucun refresh token trouvé");
 
-        const res = await axiosInstance.post(`${API_URL}/users/refresh`, { refreshToken });
+        const res = await axiosInstance.post(`/users/refresh`, { refreshToken });
 
         if (res.status === 200) {
             const newAccessToken = res.data.accessToken;
@@ -54,6 +54,9 @@ const connectSocket = async () => {
 
     socket = io(API_URL, {
         auth: { token: `Bearer ${token}` },
+        reconnection: true,
+        reconnectionAttempts: 10,
+        reconnectionDelay: 3000,
         // transports: ["websocket"],
     });
 
@@ -61,12 +64,16 @@ const connectSocket = async () => {
         console.log("✅ Connecté au socket =>", socket.id);
     });
 
+    setInterval(() => {
+        socket.emit("pingServer");
+    }, 25000);
+
     socket.on("disconnect", () => {
         console.log("❌ Déconnecté du socket");
     });
 
     socket.on("connect_error", (err) => {
-        console.log("❌ Erreur de connexion Socket.IO :", err.code, err.message, err);
+        console.log("❌ Erreur de connexion Socket.IO :", err.code, err.message, { ...err });
     });
 
     return socket;

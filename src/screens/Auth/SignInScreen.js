@@ -58,32 +58,29 @@ export default function SignInScreen() {
 
     // Mode invité
     const guestMode = () => {
-        Alert.alert('Guest mode', 'Not working yet... but have been');
+        Alert.alert('Guest mode', 'COMMING SOON!');
         dispatchState({ type: 'RESET_FIELDS' });
-
-        // navigation.navigate('TabNavigator');
     };
 
     // Inscription utilisateur
     const preSignUp = async () => {
         if (!state.has_consent) return false;
-
         try {
             setLoading(true);
 
+            dispatchState({ type: 'TOGGLE_SIGNUP_MODAL' });
             const response = await axiosInstance.post(`/users/pre-signup`, { username: state.username, email: state.email, password: state.password, confirmPassword: state.confirmPassword, has_consent: state.has_consent });
 
-            if (!response.data.success) {
-                console.log('Error with preSignUp =>', response.data.error);
-            }
-
             dispatch(setUserPreSignup({ presignup: true, user: { username: state.username, email: state.email, password: state.password, confirmPassword: state.confirmPassword, has_consent: state.has_consent } }));
-
-            dispatchState({ type: 'TOGGLE_SIGNUP_MODAL' });
             dispatchState({ type: 'RESET_FIELDS' });
 
             navigation.navigate('CharacterCreation');
         } catch (error) {
+            dispatchState({ type: 'TOGGLE_SIGNUP_MODAL' });
+            if (!error.response.data.success) {
+                setError(error.response.data.message);
+            }
+
             console.log('Error with preSignUp =>', error);
         } finally {
             setLoading(false);
@@ -97,16 +94,18 @@ export default function SignInScreen() {
         try {
             setLoading(true);
 
+            dispatchState({ type: 'TOGGLE_SIGNIN_MODAL' });
             const response = await axiosInstance.post(`/users/signin`, { username: state.username, password: state.password });
 
             const { user, accessToken, refreshToken } = response.data;
             dispatch(setUserSignin({ presignup: false, user }));
-
             dispatchState({ type: 'RESET_FIELDS' });
 
             await SecureStore.setItemAsync('accessToken', accessToken);
             await SecureStore.setItemAsync('refreshToken', refreshToken);
         } catch (error) {
+            dispatchState({ type: 'TOGGLE_SIGNIN_MODAL' });
+
             if (!error.response.data.success) {
                 setError(error.response.data.message);
             }

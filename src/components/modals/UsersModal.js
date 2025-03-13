@@ -10,24 +10,25 @@ import theme from '@theme';
 
 const UsersModal = ({ modalUserRoomVisible, setModalUserRoomVisible, participants }) => {
     const { user } = useSelector(state => state.auth);
-    const user_id = user._id
     const [modalReportVisible, setModalReportVisible] = useState(false);
     const [userToReport, setUserToReport] = useState(null);
     const [sortedParticipants, setSortedParticipants] = useState(participants);
     const [friendsList, setFriendsList] = useState([]);
-    console.log(friendsList)
 
     useEffect(() => {
         const fetchFriendList = async () => {
             try {
-                const response3 = await axiosInstance.get(`/users_friends/friends/${user_id}`)
-                setFriendsList(response3.data.friends || [])
+                const response = await axiosInstance.get(`/users_friends/friends/${user._id}`)
+                setFriendsList(response.data.friends || []);
             } catch (error) {
-                /* console.error("error axios received friends List", error) */
+                console.error("error axios received friends List", error);
             }
         }
-        fetchFriendList();
-    }, []);
+
+        if (modalUserRoomVisible) {
+            fetchFriendList();
+        }
+    }, [modalUserRoomVisible]);
 
     // useEffect(() => {
     //     if (participants) {
@@ -80,18 +81,18 @@ const UsersModal = ({ modalUserRoomVisible, setModalUserRoomVisible, participant
                 <TouchableOpacity onPress={() => setModalUserRoomVisible(false)} style={[styles.closeButton, { position: 'absolute', top: 20, right: 20, zIndex: 1000 }]}>
                     <FontAwesome name="times" size={24} color={theme.colors.darkBrown} />
                 </TouchableOpacity>
-                <Text style={styles.modalTitle}>Users</Text>
+                <Text style={styles.modalTitle}>{participants.length} members</Text>
 
 
                 <FlatList
                     data={participants}
                     keyExtractor={(item) => item._id}
                     renderItem={({ item }) => (
-                        item.user._id !== user._id && (
+                        (
                             <View style={styles.inputSection}>
-                                <View style={styles.username}><View style={[styles.statusIndicator, { backgroundColor: item.user.socket_id ? theme.colors.green : theme.colors.red }]} /><Text>{item.user.username}</Text></View>
+                                <View style={styles.username}><View style={[styles.statusIndicator, { backgroundColor: item.user.socket_id ? theme.colors.green : theme.colors.red }]} /><Text>{item.user.username === user.username ? 'You' : item.user.username}</Text></View>
 
-                                <View style={styles.actions}>
+                                {item.user._id !== user._id && <View style={styles.actions}>
                                     {!isFriend(item) && (
                                         <TouchableOpacity onPress={() => handleAddFriend(item)} style={styles.addButton}>
                                             <FontAwesome name="user-plus" size={20} color="#7391C9" />
@@ -100,7 +101,7 @@ const UsersModal = ({ modalUserRoomVisible, setModalUserRoomVisible, participant
                                     <TouchableOpacity onPress={() => handleReportFriend(item)} style={styles.reportButton}>
                                         <FontAwesome name="flag" size={15} color="#F65959" />
                                     </TouchableOpacity>
-                                </View>
+                                </View>}
                             </View>
                         )
                     )}

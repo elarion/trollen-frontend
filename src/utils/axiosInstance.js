@@ -1,11 +1,12 @@
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
-// import { store } from "../configs/redux";
-// import { logout, updateAccessToken } from "../store/authSlice";
+import { Alert } from "react-native";
+import { store } from "../configs/redux";
+import { logout } from "../store/authSlice";
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
-const axiosInstance = axios.create({ baseURL: API_URL });
+const axiosInstance = axios.create({ baseURL: API_URL, timeout: 10000, headers: { "Content-Type": "application/json" } });
 
 // Ajout du token Authorization à chaque requête
 axiosInstance.interceptors.request.use(
@@ -47,9 +48,10 @@ axiosInstance.interceptors.response.use(
                     return axiosInstance(originalRequest);
                 }
             } catch (refreshError) {
-                // Si le refresh échoue, on supprime les tokens
+                Alert.alert("Session expired", "please login again");
                 await SecureStore.deleteItemAsync("accessToken");
                 await SecureStore.deleteItemAsync("refreshToken");
+                store.dispatch(logout());
             }
         }
 
