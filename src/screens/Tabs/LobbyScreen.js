@@ -1,10 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-
-// Imports Hooks
 import * as SecureStore from 'expo-secure-store';
-
-// Imports Components
-import { View, Text, TouchableOpacity, StyleSheet, ImageBackground, Dimensions, PanResponder } from 'react-native';
+import { View, Text, StyleSheet, ImageBackground, Dimensions, PanResponder, Animated, Easing } from 'react-native';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { Gyroscope } from 'expo-sensors';
 import CreateRoomModal from '@components/modals/CreateRoomModal';
@@ -14,24 +10,14 @@ import CreatePartyModal from '@components/modals/CreatePartyModal';
 import JoinPartyModal from '@components/modals/JoinPartyModal';
 import { Portal } from '@components/Portal';
 import TopHeader from '@components/TopHeader';
-import { Image } from 'react-native';
 import { avatars } from '@configs/avatars';
-// Imports Store
 import { logout } from '@store/authSlice';
-import { useDispatch } from 'react-redux';
-
-// Imports Axios
+import { useDispatch, useSelector } from 'react-redux';
 import axiosInstance from '@utils/axiosInstance';
-
-import { useSelector } from 'react-redux';
-
-// Imports Theme
-import theme from '@theme';
-
-// Imports Socket
 import { connectSocket, getSocket } from "@services/socketService";
+import theme from '@theme';
+import { Image }  from 'react-native';
 
-// Composant Joystick
 const CustomJoystick = ({ onMove }) => {
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const maxDistance = 40;
@@ -70,7 +56,9 @@ const CustomJoystick = ({ onMove }) => {
         </View>
     );
 };
+
 const { width, height } = Dimensions.get('window');
+
 export default function LobbyScreen({ navigation }) {
     const dispatch = useDispatch();
     const [characterPosition, setCharacterPosition] = useState({ x: width / 2, y: height / 1.3 });
@@ -82,41 +70,76 @@ export default function LobbyScreen({ navigation }) {
     const [modalHazardPartyVisible, setModalHazardPartyVisible] = useState(false);
     const [modalCreatePartyVisible, setModalCreatePartyVisible] = useState(false);
     const [modalJoinPartyVisible, setModalJoinPartyVisible] = useState(false);
+    const [modalCancelled, setModalCancelled] = useState(false);
     const user = useSelector(state => state.auth.user);
     const gyroSensitivity = 10;
     const joystickSpeed = 10;
-    const [modalCooldown, setModalCooldown] = useState(false);
     const [portals, setPortals] = useState([]);
-    useEffect(() => {
-    
-        const newPortals = [
-            { id: 'portal-5', x: width * 0.2, y: height * 0.3, action: () => setModalCreateRoomVisible(true) },
-            { id: 'portal-2', x: width * 0.4, y: height * 0.3, action: () => setModalJoinRoomVisible(true) },
-            { id: 'portal-3', x: width * 0.6, y: height * 0.3, action: () => setModalCreatePartyVisible(true) },
-            { id: 'portal-4', x: width * 0.8, y: height * 0.3, action: () => setModalJoinPartyVisible(true) },
-        ];
+    const portalSize = 50;
+    const collisionRadius = 30;
 
-        setPortals(newPortals);
-    }, []);
+    const [activePortal, setActivePortal] = useState(null);
+    const portalScales = useRef({
+        'portal-create-room': new Animated.Value(1),
+        'portal-join-room': new Animated.Value(1),
+        'portal-create-party': new Animated.Value(1),
+        'portal-join-party': new Animated.Value(1)
+    }).current;
 
-    const portalSize = 30;
-    const triggerCooldown = () => {
-        setModalCooldown(true);
-        setTimeout(() => setModalCooldown(false), 2000);
+    const portalRefs = {
+        createRoom: useRef(null),
+        joinRoom: useRef(null),
+        createParty: useRef(null),
+        joinParty: useRef(null),
+    };
+
+    const updatePortalPositions = () => {
+        const updatedPortals = [];
+
+        const measurePortal = (ref, id, name, action) => {
+            if (ref.current) {
+                ref.current.measure((x, y, width, height, pageX, pageY) => {
+                    updatedPortals.push({
+                        id,
+                        x: pageX + width / 2,
+                        y: pageY + height / 2,
+                        name,
+                        action,
+                    });
+                });
+            }
+        };
+
+        measurePortal(portalRefs.createRoom, 'portal-create-room', "Create Room", () => setModalCreateRoomVisible(true));
+        measurePortal(portalRefs.joinRoom, 'portal-join-room', "Join Room", () => setModalJoinRoomVisible(true));
+        measurePortal(portalRefs.createParty, 'portal-create-party', "Create Party", () => setModalCreatePartyVisible(true));
+        measurePortal(portalRefs.joinParty, 'portal-join-party', "Join Party", () => setModalJoinPartyVisible(true));
+
+        if (updatedPortals.length > 0) {
+            setPortals(updatedPortals);
+        }
     };
 
     useEffect(() => {
+        const timer = setTimeout(updatePortalPositions, 500);
+        const dimensionsHandler = Dimensions.addEventListener('change', updatePortalPositions);
+
+        return () => {
+            clearTimeout(timer);
+            dimensionsHandler.remove();
+        };
+    }, []);
+
+    useEffect(() => {
         (async () => {
-            console.log('user =>', user);
             const socket = await connectSocket();
             if (!socket) return;
 
             return () => {
-                console.log("❌ Déconnexion du socket via le LOBBY =>", socket.id);
                 socket.disconnect();
             };
         })();
-    }, []);
+    }, [user]);
 
     useEffect(() => {
         const subscription = Gyroscope.addListener((data) => {
@@ -126,6 +149,35 @@ export default function LobbyScreen({ navigation }) {
 
         return () => subscription.remove();
     }, []);
+
+    const checkCollision = (characterX, characterY, portalX, portalY, radius) => {
+        const distance = Math.sqrt(
+            Math.pow(characterX - portalX, 2) +
+            Math.pow(characterY - portalY, 2)
+        );
+        return distance < radius;
+    };
+
+    const pulsePortal = (portalId) => {
+        if (!portalScales[portalId]) return;
+
+        Animated.loop(
+            Animated.sequence([
+                Animated.timing(portalScales[portalId], {
+                    toValue: 1.1,
+                    duration: 1000,
+                    easing: Easing.inOut(Easing.quad),
+                    useNativeDriver: true,
+                }),
+                Animated.timing(portalScales[portalId], {
+                    toValue: 1,
+                    duration: 1000,
+                    easing: Easing.inOut(Easing.quad),
+                    useNativeDriver: true,
+                }),
+            ])
+        ).start();
+    };
 
     useEffect(() => {
         const updatePosition = () => {
@@ -142,27 +194,38 @@ export default function LobbyScreen({ navigation }) {
             newY = Math.max(25, Math.min(height - 25, newY));
 
             setCharacterPosition({ x: newX, y: newY });
+
+            let foundPortal = false;
+            let portalToActivate = null;
+
             portals.forEach(portal => {
-                if (!modalCooldown &&
-                    newX >= portal.x - portalSize / 2 &&
-                    newX <= portal.x + portalSize / 2 &&
-                    newY >= portal.y - portalSize / 2 &&
-                    newY <= portal.y + portalSize / 2
-                ) {
-                    portal.action();
-                    setModalCooldown(true);
+                if (checkCollision(newX, newY, portal.x, portal.y, collisionRadius * 1.5)) {
+                    foundPortal = true;
+                    portalToActivate = portal;
 
+                    if (activePortal?.id !== portal.id) {
+                        setActivePortal(portal);
+                        pulsePortal(portal.id);
+                    }
 
-                    setTimeout(() => setModalCooldown(false), 2000);
+                    if (!modalCancelled) {
+                        portal.action();
+                        setModalCancelled(true);
+                    }
                 }
             });
+
+            if (!foundPortal && activePortal) {
+                setActivePortal(null);
+                setModalCancelled(false);
+            }
 
             animationRef.current = requestAnimationFrame(updatePosition);
         };
 
         animationRef.current = requestAnimationFrame(updatePosition);
         return () => cancelAnimationFrame(animationRef.current);
-    }, [gyroData, joystickData]);
+    }, [gyroData, joystickData, portals, activePortal, modalCancelled]);
 
     const handleCreateRoom = async (roomData) => {
         try {
@@ -280,18 +343,42 @@ export default function LobbyScreen({ navigation }) {
                     <TopHeader />
 
                     <View style={styles.portalTopBox}>
-                        <Portal portal="portal-4" />
-                        <Text style={styles.textCreateBtn}>Join Party</Text>
-                        <Portal portal="portal-3" />
-                        <Text style={styles.textCreateBtn}>Create Party</Text>
+                        <Animated.View
+                            ref={portalRefs.joinParty}
+                            onLayout={updatePortalPositions}
+                            style={{ transform: [{ scale: portalScales['portal-join-party'] }] }}
+                        >
+                            <Portal portal="portal-4" />
+                            <Text style={styles.textCreateBtn}>Join Party</Text>
+                        </Animated.View>
+                        <Animated.View
+                            ref={portalRefs.createParty}
+                            onLayout={updatePortalPositions}
+                            style={{ transform: [{ scale: portalScales['portal-create-party'] }] }}
+                        >
+                            <Portal portal="portal-3" />
+                            <Text style={styles.textCreateBtn}>Create Party</Text>
+                        </Animated.View>
                     </View>
                     <View style={styles.portalCenterBox}>
-                        <Image source={require('@assets/portals/portal-5.png')}style={styles.portalCenter} portal="portal-5" />
-                        <Text style={styles.textCreateBtn}>Create ROOM</Text>
+                        <Animated.View
+                            ref={portalRefs.createRoom}
+                            onLayout={updatePortalPositions}
+                            style={{ transform: [{ scale: portalScales['portal-create-room'] }] }}
+                        >
+                            <Image source={require('@assets/portals/portal-5.png')} style={styles.portalCenter} />
+                            <Text style={styles.textCreateBtn}>Create ROOM</Text>
+                        </Animated.View>
                     </View>
                     <View style={styles.portalBottomBox}>
-                    <Portal portal="portal-1" />
-                    <Text style={styles.textCreateBtn}>Join Room</Text>
+                        <Animated.View
+                            ref={portalRefs.joinRoom}
+                            onLayout={updatePortalPositions}
+                            style={{ transform: [{ scale: portalScales['portal-join-room'] }] }}
+                        >
+                            <Portal portal="portal-1" />
+                            <Text style={styles.textCreateBtn}>Join Room</Text>
+                        </Animated.View>
                     </View>
 
                     <View style={[styles.character, { left: characterPosition.x - 20, top: characterPosition.y - 20 }]}>
@@ -302,22 +389,15 @@ export default function LobbyScreen({ navigation }) {
                     <View style={styles.joystickContainer}>
                         <CustomJoystick onMove={setJoystickData} />
                     </View>
-                    
-                    <CreateRoomModal visible={modalCreateRoomVisible} onClose={() => setModalCreateRoomVisible(false)} onConfirm={handleCreateRoom} modalCooldown={modalCooldown}
-                        triggerCooldown={triggerCooldown} />
-                    <JoinRoomModal visible={modalJoinRoomVisible} onClose={() => setModalJoinRoomVisible(false)} onConfirm={handleJoinRoom} modalCooldown={modalCooldown}
-                        triggerCooldown={triggerCooldown} />
-                    <HazardPartyModal visible={modalHazardPartyVisible} onClose={() => setModalHazardPartyVisible(false)} onConfirm={handleHazardParty} modalCooldown={modalCooldown}
-                        triggerCooldown={triggerCooldown} />
-                    <CreatePartyModal visible={modalCreatePartyVisible} onClose={() => setModalCreatePartyVisible(false)} onConfirm={handleCreateParty} modalCooldown={modalCooldown}
-                        triggerCooldown={triggerCooldown} />
-                    <JoinPartyModal visible={modalJoinPartyVisible} onClose={() => setModalJoinPartyVisible(false)} onConfirm={handleJoinParty} modalCooldown={modalCooldown}
-                        triggerCooldown={triggerCooldown} />
 
-
+                    <CreateRoomModal visible={modalCreateRoomVisible} onClose={() => setModalCreateRoomVisible(false)} onConfirm={handleCreateRoom} />
+                    <JoinRoomModal visible={modalJoinRoomVisible} onClose={() => setModalJoinRoomVisible(false)} onConfirm={handleJoinRoom} />
+                    <HazardPartyModal visible={modalHazardPartyVisible} onClose={() => setModalHazardPartyVisible(false)} onConfirm={handleHazardParty} />
+                    <CreatePartyModal visible={modalCreatePartyVisible} onClose={() => setModalCreatePartyVisible(false)} onConfirm={handleCreateParty} />
+                    <JoinPartyModal visible={modalJoinPartyVisible} onClose={() => setModalJoinPartyVisible(false)} onConfirm={handleJoinParty} />
                 </SafeAreaView>
             </SafeAreaProvider>
-        </ImageBackground >
+        </ImageBackground>
     );
 }
 
@@ -366,6 +446,15 @@ const styles = StyleSheet.create({
         width: 50,
         height: 50,
     },
+    characterText: {
+        color: 'white',
+        fontSize: 12,
+        textAlign: 'center',
+        marginBottom: 2,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        padding: 2,
+        borderRadius: 4,
+    },
     joystickContainer: {
         position: 'absolute',
         bottom: 20,
@@ -395,27 +484,19 @@ const styles = StyleSheet.create({
         position: 'absolute',
         zIndex: 1,
     },
-    debugInfo: {
+    interactButton: {
         position: 'absolute',
-        top: 50,
-        left: 20,
+        bottom: 40,
         right: 20,
-        backgroundColor: 'rgba(0,0,0,0.5)',
-        padding: 10,
-        borderRadius: 5,
+        backgroundColor: 'rgba(0,0,0,0.6)',
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderRadius: 25,
+        zIndex: 2,
     },
-    debugText: {
+    interactButtonText: {
         color: 'white',
-        fontSize: 12,
-    },
+        fontWeight: 'bold',
+        fontSize: 16,
+    }
 });
-
-{/* <TouchableOpacity style={[styles.createRoomBtn, styles.button]} onPress={() => setModalCreateRoomVisible(true)}>
-                            <Portal portal="portal-4" />
-                            <Text style={styles.textCreateBtn}>Hazard ROOM</Text>
-                        </TouchableOpacity> */}
-
-{/* <TouchableOpacity style={[styles.createRoomBtn, styles.button]} onPress={() => setModalHazardPartyVisible(true)}>
-                            <Portal portal="portal-4" />
-                            <Text style={styles.textCreateBtn}>Hazard Party</Text>
-                        </TouchableOpacity> */}
