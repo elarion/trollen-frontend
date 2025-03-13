@@ -85,11 +85,11 @@ export default function RoomScreen({ navigation, route }) {
             });
 
             socket.on("userJoined", (response) => {
-                setMessages(prev => [{ content: `${response.username} has joined the room!`, has_joined: true, is_info: true, _id: randomString() }, ...prev]);
+                setMessages(prev => [{ content: `${response.username} has joined the room!`, has_joined: true, is_info: true, _id: randomString(24) }, ...prev]);
             });
             socket.on("userLeft", (response) => {
                 console.log('userLeft =>', response);
-                setMessages(prev => [{ content: `${response.username} has left the room!`, has_left: true, is_info: true, _id: randomString() }, ...prev]);
+                setMessages(prev => [{ content: `${response.username} has left the room!`, has_left: true, is_info: true, _id: randomString(24) }, ...prev]);
             });
 
             // Utile par exemple pour mettre a jour un statut utilisateur genre afk
@@ -166,7 +166,7 @@ export default function RoomScreen({ navigation, route }) {
         const isMyMessage = !item.is_info && item.user._id === user._id;
         const hasBeenSpelled = !item.is_info && item.spells.length > 0;
         return (
-            <>
+            <View>
                 {!item.is_info && (<View style={[styles.messageContainer, isMyMessage ? styles.myMessage : styles.otherMessage, hasBeenSpelled && { borderWidth: 3, borderColor: theme.colors.red, overflow: 'visible' }]}>
                     <Text style={[styles.messageSender, isMyMessage && { color: theme.colors.darkBrown }]}>{isMyMessage ? "Moi" : item.user.username}</Text>
                     <Text style={[styles.messageText, isMyMessage && { color: theme.colors.darkBrown }]}>{item.content}</Text>
@@ -186,7 +186,7 @@ export default function RoomScreen({ navigation, route }) {
                 {(item.is_info && item.has_left) && (
                     <Text style={{ color: theme.colors.red, fontSize: 12, textAlign: 'center' }}>{item.content}</Text>
                 )}
-            </>
+            </View>
         );
     };
 
@@ -222,7 +222,7 @@ export default function RoomScreen({ navigation, route }) {
                                 <FlatList
                                     data={messages}
                                     renderItem={renderMessage}
-                                    keyExtractor={(item) => item._id.toString()}
+                                    keyExtractor={(item) => item._id}
                                     contentContainerStyle={styles.messageList}
                                     inverted
                                 // onEndReached={ } // Charge plus de rooms quand on atteint la fin
@@ -289,7 +289,7 @@ export default function RoomScreen({ navigation, route }) {
                         renderItem={({ item, index }) => {
                             return item.user._id !== user._id && <Text style={{ width: 120, backgroundColor: theme.colors.lightBrown05, padding: 10, borderRadius: 10 }} onPress={() => handleSpell(item.user._id)}>{item.user.username}</Text>
                         }}
-                        keyExtractor={(item) => item._id}
+                        keyExtractor={(item) => item._id.toString()}
                     />
 
                     <TouchableOpacity style={styles.closeButton} onPress={() => setModalUserListVisible(false)}>
