@@ -18,60 +18,28 @@ const TopHeader = () => {
     const route = useRoute();
 
     return (
-        // <Header
-        //     containerStyle={styles.header}
-        //     leftComponent={
-        //         <View style={styles.headerButtons}>
-        //             <TouchableOpacity onPress={() => navigation.navigate('Settings')}>
-        //                 <FontAwesome name='cog' size={30} color='rgb(239, 233, 225)' />
-        //             </TouchableOpacity>
-        //             <TouchableOpacity onPress={() => navigation.navigate('News')}>
-        //                 <FontAwesome name='newspaper-o' size={30} color='rgb(239, 233, 225)' />
-        //             </TouchableOpacity>
-        //         </View>
-        //     }
-        //     centerComponent={
-        //         <View>
-        //             <Text style={styles.title}>Trollen</Text>
-        //         </View>
-        //     }
-        //     rightComponent={
-        //         <View style={styles.headerButtons}>
-        //             <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
-        //                 <FontAwesome name='user' size={30} color='rgb(239, 233, 225)' />
-        //             </TouchableOpacity>
-        //             <TouchableOpacity onPress={() => navigation.navigate('Grimoire')}>
-        //                 <FontAwesome name='book' size={30} color='rgb(239, 233, 225)' />
-        //             </TouchableOpacity>
-        //         </View>
-        //     }
-        // />
         <View style={styles.headerContainer}>
             <View style={styles.header}>
                 {/* LEFT SIDE */}
                 <View style={styles.headerButtons}>
-                    {/*  <TouchableOpacity onPress={() => navigation.navigate('Settings')}>
-                        <MaterialCommunityIcons name="cog-outline" size={28} color={theme.colors.darkBrown} />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => navigation.navigate('News')}>
-                        <MaterialCommunityIcons name="newspaper-variant-outline" size={28} color={theme.colors.darkBrown} />
-                    </TouchableOpacity> */}
                     <TouchableOpacity onPress={() => navigation.navigate('Grimoire')}>
-                        <Image source={require('@assets/grimoire.png')} color={theme.colors.darkBrown} style={[styles.headerIcon, { width: 28, height: 28, tintColor: theme.colors.darkBrown }]} />
+                        <Image source={require('@assets/grimoire.png')} style={[styles.headerIcon, { width: 22, height: 22, tintColor: theme.colors.darkBrown }]} />
                         {/* <MaterialCommunityIcons name="book-outline" size={28} color={theme.colors.darkBrown} /> */}
                     </TouchableOpacity>
                 </View>
 
                 {/* CENTER */}
-                <Text style={styles.title} onPress={() => navigation.navigate(route.name)}>Trollen</Text>
+                <View style={{ alignItems: 'center' }}>
+                    {/* <Image source={require('@assets/logo.png')} style={{ width: 40, height: 40, tintColor: theme.colors.darkBrown }} /> */}
+                    <Text style={styles.title} onPress={() => navigation.navigate(route.name)}>Trollen</Text>
+                    {/* <Image source={require('@assets/logo.png')} style={{ width: 40, height: 40, tintColor: theme.colors.darkBrown }} /> */}
+                </View>
 
                 {/* RIGHT SIDE */}
                 <View style={styles.headerButtons}>
                     <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
-                        <Image source={require('@assets/profile.png')} color={theme.colors.darkBrown} style={[styles.headerIcon, { width: 28, height: 28, tintColor: theme.colors.darkBrown }]} />
-                        {/* <MaterialCommunityIcons name="account-outline" size={28} color={theme.colors.darkBrown} /> */}
+                        <Image source={require('@assets/profile.png')} style={[styles.headerIcon, { width: 22, height: 22, tintColor: theme.colors.darkBrown }]} />
                     </TouchableOpacity>
-
                 </View>
             </View>
         </View>
@@ -93,7 +61,7 @@ const styles = StyleSheet.create({
     },
     header: {
         width: '100%',
-        height: 60,
+        height: 40,
         alignItems: 'center',
         flexDirection: 'row',
         justifyContent: 'space-around',

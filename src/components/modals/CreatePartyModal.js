@@ -4,6 +4,8 @@ import Checkbox from 'expo-checkbox';
 import { Dropdown } from 'react-native-element-dropdown';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 
+import theme from '@theme';
+
 const initialPartyForm = {
     roomname: '',
     tag: '',
@@ -25,7 +27,7 @@ const CreateRoomModal = ({ visible, onClose, onConfirm }) => {
     >
         <View style={styles.centeredView}>
             <View style={styles.modalViewCreateParty}>
-                <Text style={styles.modalTitle}>CREATE A PARTY</Text>
+                <Text style={styles.modalTitle}>Create a party</Text>
 
 
                 <View style={styles.inputSectionCreateParty}>
@@ -77,24 +79,9 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         alignItems: 'center',
         width: '90%',
-        maxHeight: '80%', 
+        maxHeight: '80%',
     },
-    modalViewCreateParty: {
-        margin: 20,
-        backgroundColor: 'white',
-        borderRadius: 20,
-        padding: 35,
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-        elevation: 5,
-        width: '90%',
-    },
+
     button: {
         borderRadius: 20,
         padding: 10,
@@ -126,10 +113,6 @@ const styles = StyleSheet.create({
         marginBottom: 15,
         textAlign: 'center',
     },
-    modalTitle: {
-        fontSize: 20,
-        fontWeight: 800,
-    },
     inputSection: {
         height: '60%',
         marginTop: '10%',
@@ -145,15 +128,10 @@ const styles = StyleSheet.create({
     },
     modalViewCreateParty: {
         width: '90%',
-        backgroundColor: '#F0E9E0',
+        backgroundColor: theme.colors.veryLightBrown,
         borderRadius: 20,
         padding: 20,
         alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-        elevation: 5,
     },
     inputSectionCreateParty: {
         width: '100%',
@@ -181,7 +159,7 @@ const styles = StyleSheet.create({
         marginTop: 20,
     },
     buttonCreateParty: {
-        backgroundColor: '#e8be4b',
+        backgroundColor: theme.colors.green,
         padding: 10,
         borderRadius: 10,
         width: '40%',
@@ -189,7 +167,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     buttonCloseCreateParty: {
-        backgroundColor: '#F65959',
+        backgroundColor: theme.colors.red,
         width: '45%',
         alignItems: 'center',
     },
@@ -210,8 +188,8 @@ const styles = StyleSheet.create({
     checkbox: { marginRight: 10 },
     btnModal: { flexDirection: 'row', justifyContent: 'space-between', width: '100%', marginTop: 20 },
     button: { borderRadius: 99, padding: 10 },
-    buttonClose: { backgroundColor: 'red', width: '45%', alignItems: 'center' },
-    buttonValidation: { backgroundColor: 'green', width: '45%', alignItems: 'center' },
+    buttonClose: { backgroundColor: theme.colors.red, width: '45%', alignItems: 'center' },
+    buttonValidation: { backgroundColor: theme.colors.green, width: '45%', alignItems: 'center' },
     textStyle: { color: 'white', fontWeight: 'bold', textAlign: 'center' },
 });
 

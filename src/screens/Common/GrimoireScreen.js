@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Image, ImageBackground, ScrollView, Modal, TouchableOpacity } from "react-native"
+import { StyleSheet, Text, View, Image, ImageBackground, ScrollView, Modal, TouchableOpacity, } from "react-native"
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { useState, useEffect } from "react";
 import axiosInstance from '@utils/axiosInstance';
@@ -6,10 +6,11 @@ import TopHeader from "@components/TopHeader";
 import { Avatar } from '@components/Avatar';
 import { spells } from "@configs/spells";
 import { slugify } from '@utils/slugify';
-console.log(spells)
+import theme from '@theme';
+//console.log(spells)
 
 export default function GrimoireScreen({ navigation }) {
-   
+
     const [modalShowRacesVisible, setModalShowRacesVisible] = useState(false);
     const [modalShowSpellsVisible, setModalShowSpellsVisible] = useState(false);
     const [viewMode, setViewMode] = useState('races');
@@ -54,13 +55,13 @@ export default function GrimoireScreen({ navigation }) {
                                             <Text style={styles.textDescription}>{selectedRace.description}</Text>
                                             <Text style={styles.textDescription}>{selectedRace.tagline}</Text>
                                         </View>
-                                        <View style={styles.rightBot}>
+                                        {/*  <View style={styles.rightBot}>
                                             <Text style={styles.textTitleDescription}>Spells passifs :</Text>
                                             <View style={styles.passivSpell}>
                                                 <Text style={styles.textDescription}>{selectedRace.spells.map((spell) => spell.image).join(', ')}</Text>
                                                 <Text style={styles.textDescription}>{selectedRace.spells.map((spell) => spell.name).join(', ')}</Text>
                                             </View>
-                                        </View>
+                                        </View> */}
                                     </View>
                                 </View>
                             )}
@@ -109,7 +110,9 @@ export default function GrimoireScreen({ navigation }) {
                                 <View style={styles.spellsCard}>
                                     <View style={styles.left}>
                                         <Text style={styles.textName}>{selectedSpell.name}</Text>
-                                        <Image style={{width: 40, height: 40, tintColor:'red'}} source={spells[slugify(selectedSpell.name, true)]}/>
+                                        <View style={styles.cercle}>
+                                            <Image style={{ width: 40, height: 40, tintColor: theme.colors.darkBrown }} source={spells[slugify(data.name, true)]} />
+                                        </View>
                                     </View>
                                     <View style={styles.rightSpells}>
                                         <View>
@@ -139,7 +142,9 @@ export default function GrimoireScreen({ navigation }) {
                         setModalShowSpellsVisible(true);
                     }}>
                     <Text style={styles.textBtn}>{data.name}</Text>
-                    <Image style={{width: 40, height: 40}} source={spells[slugify(data.name, true)]}/>
+                    <View style={styles.cercle}>
+                        <Image style={{ width: 40, height: 40, tintColor: theme.colors.darkBrown }} source={spells[slugify(data.name, true)]} />
+                    </View>
                 </TouchableOpacity>
             </View>
         );
@@ -153,11 +158,11 @@ export default function GrimoireScreen({ navigation }) {
                     <TopHeader />
                     <Text style={styles.subTitle}>GRIMOIRE</Text>
                     <View style={styles.selectCategories}>
-                        <TouchableOpacity onPress={() => setViewMode('races')}>
-                            <Text style={[styles.subSubTitle, { color: viewMode === 'races' ? 'rgb(188, 118, 26)' : 'black' }]}>Races</Text>
+                        <TouchableOpacity onPress={() => setViewMode('races')} >
+                            <Text style={[styles.subSubTitle, { color: viewMode === 'races' ? 'rgb(188, 118, 26)' : 'black', borderBottomWidth: viewMode === 'spells' ? '0' : '2', fontWeight: viewMode === 'spells' ? '0' : '800' }]}>Races</Text>
                         </TouchableOpacity>
                         <TouchableOpacity onPress={() => setViewMode('spells')}>
-                            <Text style={[styles.subSubTitle, { color: viewMode === 'spells' ? 'rgb(188, 118, 26)' : 'black' }]}>Spells</Text>
+                            <Text style={[styles.subSubTitle, { color: viewMode === 'spells' ? 'rgb(188, 118, 26)' : 'black', borderBottomWidth: viewMode === 'spells' ? '2' : '0', fontWeight: viewMode === 'spells' ? '800' : '0' }]}>Spells</Text>
                         </TouchableOpacity>
                     </View>
                     <View style={styles.grimoireContentBox}>
@@ -175,12 +180,10 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
     },
     backgroundImage: {
         flex: 1,
-        width: '100%',
-        height: '100%',
         resizeMode: 'cover',
     },
 
@@ -203,7 +206,6 @@ const styles = StyleSheet.create({
     subSubTitle: {
         //color: 'rgb(188, 118, 26)',
         fontSize: 20,
-        fontWeight: 800,
     },
     //INFO AREA
     grimoireContentBox: {
@@ -221,16 +223,19 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap',
         justifyContent: 'space-evenly',
         gap: '2%',
+        paddingBottom: 135,
     },
     itemCard: {
         borderWidth: 1,
+        borderColor: theme.colors.lightBrown,
         borderRadius: 10,
         padding: 10,
         margin: 5,
         width: 150,
         height: 150,
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        backgroundColor: theme.colors.lightBrown02,
     },
 
     //MODALE
@@ -240,10 +245,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     modalView: {
-        margin: 20,
+        //margin: 20,
         backgroundColor: 'white',
         borderRadius: 20,
-        padding: 15,
+        padding: 10,
         alignItems: 'center',
         shadowColor: '#000',
         shadowOffset: {
@@ -291,8 +296,9 @@ const styles = StyleSheet.create({
     left: {
         width: '40%',
         alignItems: 'center',
-        paddingTop: '6%',
-        backgroundColor: 'rgb(74, 52, 57)',
+        paddingTop: '12%',
+        paddingLeft: '5%',
+        backgroundColor: 'rgb(239, 233, 225)',
         borderBottomLeftRadius: 45,
         borderTopLeftRadius: 45
     },
@@ -300,26 +306,36 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: 800,
         marginBottom: 25,
-        color: 'rgb(239, 233, 225)'
+        color: 'rgb(74, 52, 57)'
     },
     rightRaces: {
-        paddingTop: '6%',
+        paddingTop: '12%',
         width: '60%',
-        paddingLeft: '5%',
+        paddingLeft: '10%',
         paddingRight: '5%',
-        backgroundColor: 'rgb(188, 118, 26)',
+        backgroundColor: 'rgb(239, 233, 225)',
         borderBottomRightRadius: 45,
         borderTopRightRadius: 45,
         gap: '5%'
     },
     rightSpells: {
-        paddingTop: '6%',
+        paddingTop: '12%',
         width: '60%',
-        paddingLeft: '5%',
+        paddingLeft: '10%',
         paddingRight: '5%',
-        backgroundColor: 'rgb(188, 118, 26)',
+        backgroundColor: 'rgb(239, 233, 225)',
         borderBottomRightRadius: 45,
         borderTopRightRadius: 45,
+    },
+    cercle: {
+        width: 85,
+        height: 85,
+        borderRadius: 85 / 2,
+        backgroundColor: theme.colors.lightBrown02,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: theme.colors.lightBrown
     },
     passivSpell: {
         flexDirection: 'row'
@@ -328,9 +344,10 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: 800,
         marginBottom: 2,
-        color: 'rgb(239, 233, 225)'
+        color: 'rgb(74, 52, 57)',
+        marginBottom: 12
     },
     textDescription: {
-        color: 'rgb(239, 233, 225)'
+        color: 'rgb(74, 52, 57)'
     }
 })
