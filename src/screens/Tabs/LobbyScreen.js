@@ -84,7 +84,18 @@ export default function LobbyScreen({ navigation }) {
             navigation.navigate('Room', { roomId: roomToJoin.data.room._id });
         } catch (error) {
             if (!error.response.data.success)
-                console.log("Error with room creation =>", error.response.data.message);
+                console.log("Error with room joining =>", error.response.data.message);
+        } finally {
+            console.log('In finally =>');
+        }
+    }
+
+    const handleJoinRandomRoom = async () => {
+        try {
+            const roomToJoin = await axiosInstance.get(`/rooms/join-by-random`);
+            navigation.navigate('Room', { roomId: roomToJoin.data.room._id });
+        } catch (error) {
+            if (!error.response.data.success) console.error("Error with room joining =>", error.response.data.message);
         } finally {
             console.log('In finally =>');
         }
@@ -154,7 +165,7 @@ export default function LobbyScreen({ navigation }) {
         try {
             const socket = getSocket();
             if (socket) {
-                socket.disconnect(); // 🔥 Déconnecte du serveur WebSocket
+                socket.disconnect(); // Déconnecte du serveur WebSocket
             }
 
             dispatch(logout());
@@ -194,7 +205,7 @@ export default function LobbyScreen({ navigation }) {
                             <Text style={styles.textCreateBtn}>Join Room</Text>
                         </TouchableOpacity>
 
-                        <TouchableOpacity style={[styles.createRoomBtn, styles.button]} onPress={() => setModalCreateRoomVisible(true)}>
+                        <TouchableOpacity style={[styles.createRoomBtn, styles.button]} onPress={() => handleJoinRandomRoom()}>
                             <Text style={styles.textCreateBtn}>Hazard ROOM</Text>
                         </TouchableOpacity>
 

@@ -81,20 +81,22 @@ export default function PortalScreen({ navigation }) {
         <View style={styles.room} key={item._id}>
             <View style={styles.inRoomLeft}>
                 <Text style={styles.roomName}>{item.name}</Text>
-                <Text style={styles.roomTag}>
-                    {item.tags?.map((tag, i) => `#${tag.name}`).join(" ")}
-                </Text>
-                <Text style={styles.roomNumberOfParticipants}>{item.participants.length} participants</Text>
+
+                <TouchableOpacity style={styles.join} onPress={() => goToRoom(item._id)}>
+                    <Text style={styles.textButton}>Join</Text>
+                </TouchableOpacity>
             </View>
             <View style={styles.inRoomRight}>
                 <View style={styles.rightUsernameAndJoin}>
                     <Text style={styles.username}>Crée par {item.admin?.username}</Text>
-                    <TouchableOpacity style={styles.join} onPress={() => goToRoom(item._id)}>
-                        <Text style={styles.textButton}>Join</Text>
-                    </TouchableOpacity>
+                    <Text style={styles.roomNumberOfParticipants}>{item.participants.length} participant{item.participants.length > 1 && 's'}</Text>
                 </View>
+
+                <Text style={styles.roomTag}>
+                    {item.tags?.map((tag, i) => `#${tag.name}`).join(" ")}
+                </Text>
             </View>
-        </View>
+        </View >
     );
 
     return (
@@ -103,7 +105,7 @@ export default function PortalScreen({ navigation }) {
                 <SafeAreaView style={styles.container} edges={['top', 'left']}>
                     <TopHeader />
 
-                    <View style={styles.placeholder}>
+                    {/* <View style={styles.placeholder}>
                         <TextInput
                             placeholder="Enter a tag here..."
                             placeholderTextColor="gray"
@@ -114,9 +116,9 @@ export default function PortalScreen({ navigation }) {
                         <TouchableOpacity style={styles.bouton} onPress={() => setTag('')}>
                             <Text style={{ color: 'white', fontWeight: 'bold' }}>Search</Text>
                         </TouchableOpacity>
-                    </View>
+                    </View> */}
 
-                    <View style={styles.roomBox}>
+                    <View style={[styles.roomBox, { marginTop: 20 }]}>
                         <FlatList
                             data={rooms}
                             renderItem={renderRoom}
@@ -162,7 +164,7 @@ const styles = StyleSheet.create({
         flex: 1,
         //backgroundColor: 'blue',
         paddingHorizontal: 20,
-        paddingBottom: 50,
+        // paddingBottom: 50,
         justifyContent: 'top',
         alignItems: 'center',
         gap: '2%',
@@ -182,25 +184,28 @@ const styles = StyleSheet.create({
     },
     inRoomLeft: {
         flexDirection: 'column',
-        justifyContent: "space-around",
+        justifyContent: "space-between",
         //backgroundColor: 'blue'
         width: '50%',
     },
     roomName: {
-
+        fontSize: 18,
+        color: theme.colors.darkBrown,
+        fontWeight: 'bold',
     },
     roomTag: {
-
+        fontStyle: 'italic',
     },
     roomNumberOfParticipants: {
-
     },
     inRoomRight: {
-        flexDirection: 'row',
+        // flexDirection: 'row',
         //backgroundColor: 'orange',
-        width: '46%',
+        width: '50%',
         height: '100%',
-        justifyContent: 'flex-end',
+        alignItems: 'flex-end',
+        justifyContent: 'space-between',
+        // justifyContent: 'flex-end',
     },
     leftFavButtonContainer: {
         justifyContent: 'center',
@@ -214,11 +219,11 @@ const styles = StyleSheet.create({
 
         width: '80%',
         alignItems: 'flex-end',
-        justifyContent: 'space-around',
+        // justifyContent: 'space-around',
     },
     username: {
         //backgroundColor:'orange',
-        fontWeight: 'bold',
+        // fontWeight: 'bold',
     },
     join: {
         justifyContent: 'center',
