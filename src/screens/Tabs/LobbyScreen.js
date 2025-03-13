@@ -454,20 +454,22 @@ export default function LobbyScreen({ navigation }) {
                     </View>
 
 
-                    {/* <View style={[styles.character, { left: characterPosition.x - 20, top: characterPosition.y - 20, zIndex: 1001 }]}>
+                    <View style={[styles.character, { left: characterPosition.x - 20, top: characterPosition.y - 20, zIndex: 1001 }]}>
                         <Text style={styles.characterText}>{user.username}</Text>
                         <Image source={avatars[user.selected_character.avatar]} style={styles.characterImage} />
-                    </View> */}
+                    </View>
 
                     {Object.keys(players).map((playerId) => {
                         const player = players[playerId];
                         // console.log('🔥 Player =>', player);
-                        return (
-                            <View key={playerId} style={{ position: "absolute", top: player.y, left: player.x }}>
-                                <Text>{player.username}</Text>
-                                <Image source={avatars[player.avatar]} style={{ width: 50, height: 50 }} />
-                            </View>
-                        );
+                        if (playerId !== user._id) {
+                            return (
+                                <View key={playerId} style={{ position: "absolute", top: player.y, left: player.x }}>
+                                    <Text>{player.username}</Text>
+                                    <Image source={avatars[player.avatar]} style={{ width: 50, height: 50 }} />
+                                </View>
+                            );
+                        }
                     })}
 
                     <View style={styles.joystickContainer}>

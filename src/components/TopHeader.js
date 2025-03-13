@@ -22,7 +22,7 @@ const TopHeader = () => {
             <View style={styles.header}>
                 {/* LEFT SIDE */}
                 <View style={styles.headerButtons}>
-                    <TouchableOpacity onPress={() => navigation.navigate('Grimoire')} style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.lightBrown02, borderRadius: 100 }}>
+                    <TouchableOpacity onPress={() => navigation.navigate('Grimoire')}>
                         <Image source={require('@assets/grimoire.png')} style={[styles.headerIcon, { width: 22, height: 22, tintColor: theme.colors.darkBrown }]} />
                         {/* <MaterialCommunityIcons name="book-outline" size={28} color={theme.colors.darkBrown} /> */}
                     </TouchableOpacity>
@@ -37,7 +37,7 @@ const TopHeader = () => {
 
                 {/* RIGHT SIDE */}
                 <View style={styles.headerButtons}>
-                    <TouchableOpacity onPress={() => navigation.navigate('Profile')} style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.lightBrown02, borderRadius: 100 }}>
+                    <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
                         <Image source={require('@assets/profile.png')} style={[styles.headerIcon, { width: 22, height: 22, tintColor: theme.colors.darkBrown }]} />
                     </TouchableOpacity>
                 </View>
@@ -61,12 +61,12 @@ const styles = StyleSheet.create({
     },
     header: {
         width: '100%',
-        height: 60,
+        height: 40,
         alignItems: 'center',
         flexDirection: 'row',
         justifyContent: 'space-around',
-        // backgroundColor: theme.colors.lightBrown02,
-        // borderRadius: 100,
+        backgroundColor: theme.colors.lightBrown02,
+        borderRadius: 100,
         // alignItems: 'center',
         // paddingHorizontal: 30,
         // paddingVertical: 10,
