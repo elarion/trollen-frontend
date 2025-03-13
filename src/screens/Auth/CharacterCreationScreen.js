@@ -55,14 +55,17 @@ export default function CharactereCreationScreen({ navigation }) {
                     axiosInstance.get(`/races`),
                     axiosInstance.get(`/spells/67c6f3d337c666e9c7754125`),
                     axiosInstance.get(`/spells/67c7049375266cda5a3c15f0`),
-                    axiosInstance.get(`/spells/67c7067a75266cda5a3c15f6`)
+                    axiosInstance.get(`/spells/67c7067a75266cda5a3c15f6`),
+                    axiosInstance.get(`/spells/67c7067a75266cda5a3c15f6`),
+                    axiosInstance.get(`/spells/67c7067a75266cda5a3c15f6`), 
                 ]);
 
                 setRaces(racesRes.data.races);
                 setStartSpells({
                     spell1: spell1Res.data.spell,
                     spell2: spell2Res.data.spell,
-                    spell3: spell3Res.data.spell
+                    spell3: spell3Res.data.spell,
+                    spell3: spell3Res.data.spell,
                 });
             } catch (error) {
                 console.error("Erreur lors du chargement des données :", error);

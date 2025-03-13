@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import { View, Text, StyleSheet, TouchableOpacity, ImageBackground, Dimensions, PanResponder, Animated, Easing } from 'react-native';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
@@ -12,6 +12,7 @@ import TopHeader from '@components/TopHeader';
 import { avatars } from '@configs/avatars';
 import { logout } from '@store/authSlice';
 import { useDispatch, useSelector } from 'react-redux';
+import { useFocusEffect } from '@react-navigation/native';
 
 // Imports Axios
 import axiosInstance from '@utils/axiosInstance';
@@ -26,15 +27,25 @@ import { Image } from 'react-native';
 
 
 
-const CustomJoystick = ({ onMove }) => {
+const CustomJoystick = ({ onMove, disabled }) => {
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const maxDistance = 40; // Permet de limiter la distance de déplacement du joystick
 
+    // Réinitialiser la position lorsque le joystick est désactivé
+    useEffect(() => {
+        if (disabled) {
+            setPosition({ x: 0, y: 0 });
+            onMove({ angle: 0, distance: 0 });
+        }
+    }, [disabled, onMove]);
+
     const panResponder = useRef(
         PanResponder.create({
-            onStartShouldSetPanResponder: () => true,
-            onMoveShouldSetPanResponder: () => true,
+            onStartShouldSetPanResponder: () => !disabled, // Ne pas répondre si désactivé
+            onMoveShouldSetPanResponder: () => !disabled, // Ne pas répondre si désactivé
             onPanResponderMove: (_, gesture) => {
+                if (disabled) return; // Ne pas traiter si désactivé
+
                 let dx = gesture.dx;
                 let dy = gesture.dy;
                 const distance = Math.sqrt(dx * dx + dy * dy);
@@ -59,8 +70,15 @@ const CustomJoystick = ({ onMove }) => {
     ).current;
 
     return (
-        <View style={styles.joystickBase}>
-            <View {...panResponder.panHandlers} style={[styles.joystickStick, { transform: [{ translateX: position.x }, { translateY: position.y }] }]} />
+        <View style={[styles.joystickBase, disabled ? styles.joystickDisabled : null]}>
+            <View
+                {...panResponder.panHandlers}
+                style={[
+                    styles.joystickStick,
+                    { transform: [{ translateX: position.x }, { translateY: position.y }] },
+                    disabled ? styles.joystickStickDisabled : null
+                ]}
+            />
         </View>
     );
 };
@@ -79,6 +97,7 @@ export default function LobbyScreen({ navigation }) {
     const [modalCreatePartyVisible, setModalCreatePartyVisible] = useState(false);
     const [modalJoinPartyVisible, setModalJoinPartyVisible] = useState(false);
     const [modalCancelled, setModalCancelled] = useState(false);
+    const [isAnyModalOpen, setIsAnyModalOpen] = useState(false);
     const user = useSelector(state => state.auth.user);
     const joystickSpeed = 10;
     const [portals, setPortals] = useState([]);
@@ -86,7 +105,12 @@ export default function LobbyScreen({ navigation }) {
     const collisionRadius = 25;
     const [players, setPlayers] = useState({});
     const socket = useRef(null);
+    // Référence pour le throttling des émissions socket
+    const lastEmitTime = useRef(0);
+    const EMIT_INTERVAL = 100; // Émettre au maximum toutes les 100ms
 
+    // Références pour les animations des joueurs
+    const playerAnimatedValues = useRef({});
 
     const [activePortal, setActivePortal] = useState(null);
     const portalScales = useRef({
@@ -102,6 +126,20 @@ export default function LobbyScreen({ navigation }) {
         createParty: useRef(null),
         joinParty: useRef(null),
     };
+
+    // Réinitialiser l'état du joystick lorsque l'écran reprend le focus
+    useFocusEffect(
+        useCallback(() => {
+            // Réinitialiser les états quand on revient sur l'écran du lobby
+            setIsAnyModalOpen(false);
+            // setModalCancelled(false);
+            setJoystickData({ angle: 0, distance: 0 });
+
+            return () => {
+                // Cleanup si nécessaire
+            };
+        }, [])
+    );
 
     const updatePortalPositions = () => {
         const updatedPortals = [];
@@ -123,7 +161,8 @@ export default function LobbyScreen({ navigation }) {
         measurePortal(portalRefs.createRoom, 'portal-create-room', "Create Room", () => setModalCreateRoomVisible(true));
         measurePortal(portalRefs.joinRoom, 'portal-join-room', "Join Room", () => setModalJoinRoomVisible(true));
         measurePortal(portalRefs.createParty, 'portal-create-party', "Create Party", () => setModalCreatePartyVisible(true));
-        measurePortal(portalRefs.joinParty, 'portal-join-party', "Join Party", () => setModalJoinPartyVisible(true));
+        // measurePortal(portalRefs.joinParty, 'portal-join-party', "Join Party", () => setModalJoinPartyVisible(true));
+        measurePortal(portalRefs.joinParty, 'portal-join-party', "Join Party", () => handleJoinRandomRoom());
 
         if (updatedPortals.length > 0) {
             setPortals(updatedPortals);
@@ -162,19 +201,38 @@ export default function LobbyScreen({ navigation }) {
             if (!socket.current) return;
 
             // Récupérer les joueurs déjà connectés
-            socket.current.emit("requestPlayers", { avatar: user.selected_character.avatar });
+            socket.current.emit("requestPlayers", { avatar: user?.selected_character?.avatar });
 
             // Écouter les mises à jour de positions
             socket.current.on("playersPositions", (usersPositions) => {
-                console.log('🔥 Avatar =>', usersPositions);
+                // Pour chaque joueur, créer des valeurs d'animation si elles n'existent pas
+                Object.keys(usersPositions).forEach(playerId => {
+                    if (!playerAnimatedValues.current[playerId]) {
+                        playerAnimatedValues.current[playerId] = {
+                            x: new Animated.Value(usersPositions[playerId].x * width),
+                            y: new Animated.Value(usersPositions[playerId].y * height)
+                        };
+                    } else {
+                        // Animer vers la nouvelle position
+                        Animated.timing(playerAnimatedValues.current[playerId].x, {
+                            toValue: usersPositions[playerId].x * width,
+                            duration: 200,
+                            useNativeDriver: true
+                        }).start();
+
+                        Animated.timing(playerAnimatedValues.current[playerId].y, {
+                            toValue: usersPositions[playerId].y * height,
+                            duration: 200,
+                            useNativeDriver: true
+                        }).start();
+                    }
+                });
+
                 setPlayers(usersPositions);
-                // console.log('🔥 Players =>', players);
-                // console.log('🔥 Players =>', updatedPlayers);
             });
 
             return () => {
                 socket.current.disconnect();
-                // socket.current.off("playersPositions");
             };
         })();
     }, []);
@@ -210,6 +268,18 @@ export default function LobbyScreen({ navigation }) {
 
     useEffect(() => {
         const updatePosition = () => {
+            // Si une modale est ouverte, ne pas mettre à jour la position
+            if (isAnyModalOpen) {
+                animationRef.current = requestAnimationFrame(updatePosition);
+                return;
+            }
+
+            // Si la distance du joystick est 0, il n'y a pas de mouvement
+            if (joystickData.distance === 0) {
+                animationRef.current = requestAnimationFrame(updatePosition);
+                return;
+            }
+
             const joystickX = Math.cos(joystickData.angle * Math.PI / 180) * joystickData.distance * joystickSpeed / 100;
             const joystickY = Math.sin(joystickData.angle * Math.PI / 180) * joystickData.distance * joystickSpeed / 100;
 
@@ -219,11 +289,33 @@ export default function LobbyScreen({ navigation }) {
             newX = Math.max(25, Math.min(width - 25, newX));
             newY = Math.max(25, Math.min(height - 25, newY));
 
-            setCharacterPosition({ x: newX, y: newY });
+            // Vérifier si la position a réellement changé avant d'envoyer
+            const positionChanged =
+                Math.abs(newX - characterPosition.x) > 0.1 ||
+                Math.abs(newY - characterPosition.y) > 0.1;
+
+            if (positionChanged) {
+                setCharacterPosition({ x: newX, y: newY });
+
+                // Throttle des émissions socket
+                const now = Date.now();
+                if (socket.current && (now - lastEmitTime.current > EMIT_INTERVAL)) {
+                    lastEmitTime.current = now;
+
+                    // Convertir en positions relatives (pourcentage de l'écran)
+                    const relativeX = newX / width;
+                    const relativeY = newY / height;
+
+                    socket.current.emit("updatePosition", {
+                        x: relativeX,
+                        y: relativeY,
+                        avatar: user?.selected_character?.avatar
+                    });
+                }
+            }
 
             let foundPortal = false;
             let portalToActivate = null;
-
 
             portals.forEach(portal => {
                 if (checkCollision(newX, newY, portal.x, portal.y, collisionRadius * 1.5)) {
@@ -236,6 +328,10 @@ export default function LobbyScreen({ navigation }) {
                     }
 
                     if (!modalCancelled) {
+                        // Au lieu d'appeler directement portal.action()
+                        // on va arrêter le joystick puis appeler l'action
+                        setJoystickData({ angle: 0, distance: 0 });
+                        setIsAnyModalOpen(true);
                         portal.action();
                         setModalCancelled(true);
                     }
@@ -247,10 +343,6 @@ export default function LobbyScreen({ navigation }) {
                 setModalCancelled(false);
             }
 
-            if (socket.current) {
-                socket.current.emit("updatePosition", { x: newX, y: newY, avatar: user.selected_character.avatar });
-            }
-
             animationRef.current = requestAnimationFrame(updatePosition);
         };
 
@@ -260,7 +352,7 @@ export default function LobbyScreen({ navigation }) {
         return () => {
             cancelAnimationFrame(animationRef.current);
         };
-    }, [joystickData, portals, activePortal, modalCancelled]);
+    }, [joystickData, portals, modalCancelled, activePortal, characterPosition, isAnyModalOpen])
 
     const handleCreateRoom = async (roomData) => {
         try {
@@ -268,7 +360,7 @@ export default function LobbyScreen({ navigation }) {
                 room_socket_id: 'a',
                 name: roomData.roomname,
                 tags: roomData.tag,
-                settings: { max: roomData.capacityValue, is_safe: roomData.isSafe, is_: roomData.is_, password: roomData.password }
+                settings: { max: roomData.capacityValue, is_private: roomData.isPrivate, is_safe: roomData.isSafe, is_: roomData.is_, password: roomData.password }
             });
 
             const data = response.data;
@@ -314,6 +406,8 @@ export default function LobbyScreen({ navigation }) {
     }
 
     const handleCreateParty = async ({ partyName, game = "WordToWord" }) => {
+        Alert.alert('Coming soon!', 'be patient...');
+        return;
         try {
             if (partyName === '') return;
 
@@ -335,6 +429,8 @@ export default function LobbyScreen({ navigation }) {
     }
 
     const handleJoinParty = async ({ join_id, password }) => {
+        Alert.alert('Coming soon!', 'be patient...');
+        return;
         try {
             const response = await axiosInstance.put(`/parties/join-by-id`, { join_id, password });
 
@@ -373,9 +469,8 @@ export default function LobbyScreen({ navigation }) {
 
     const handleLogout = async () => {
         try {
-            const socket = getSocket();
-            if (socket) {
-                socket.disconnect(); // Déconnecte du serveur WebSocket
+            if (socket.current) {
+                socket.current.disconnect(); // Déconnecte du serveur WebSocket
             }
 
             dispatch(logout());
@@ -391,6 +486,22 @@ export default function LobbyScreen({ navigation }) {
         }
     };
 
+    // Fonction pour ouvrir une modale et stopper le joystick
+    const openModal = (modalSetter, value) => {
+        // Réinitialiser le joystick
+        setJoystickData({ angle: 0, distance: 0 });
+        // Marquer qu'une modale est ouverte
+        setIsAnyModalOpen(true);
+        // Ouvrir la modale
+        modalSetter(value);
+    };
+
+    // Fonction pour fermer une modale
+    const closeModal = (modalSetter, value) => {
+        setIsAnyModalOpen(false);
+        modalSetter(value);
+    };
+
     return (
         <ImageBackground source={require('@assets/background/background.png')} style={[styles.backgroundImage, { backgroundColor: 'transparent' }]}>
             <SafeAreaProvider>
@@ -403,9 +514,11 @@ export default function LobbyScreen({ navigation }) {
                             onLayout={updatePortalPositions}
                             style={{ transform: [{ scale: portalScales['portal-join-party'] }] }}
                         >
-                            <TouchableOpacity onPress={() => setModalJoinPartyVisible(true)}>
+                            {/* <TouchableOpacity onPress={() => openModal(setModalJoinPartyVisible, true)}> */}
+                            <TouchableOpacity onPress={() => handleJoinRandomRoom()}>
                                 <Image source={require('@assets/portals/portal-4.png')} style={styles.portalCenter} />
-                                <Text style={styles.portalText}>Join Party</Text>
+                                {/* <Text style={styles.portalText}>Join Party</Text> */}
+                                <Text style={styles.portalText}>Hazard Room</Text>
                             </TouchableOpacity>
                         </Animated.View>
                     </View>
@@ -415,7 +528,7 @@ export default function LobbyScreen({ navigation }) {
                             onLayout={updatePortalPositions}
                             style={{ transform: [{ scale: portalScales['portal-create-party'] }] }}
                         >
-                            <TouchableOpacity onPress={() => setModalCreatePartyVisible(true)}>
+                            <TouchableOpacity onPress={() => openModal(setModalCreatePartyVisible, true)}>
                                 <Image source={require('@assets/portals/portal-3.png')} style={styles.portalCenter} />
                                 <Text style={styles.portalText}>Create Party</Text>
                             </TouchableOpacity>
@@ -427,7 +540,7 @@ export default function LobbyScreen({ navigation }) {
                             onLayout={updatePortalPositions}
                             style={{ alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%', transform: [{ scale: portalScales['portal-create-room'] }], }}
                         >
-                            <TouchableOpacity onPress={() => setModalCreateRoomVisible(true)}>
+                            <TouchableOpacity onPress={() => openModal(setModalCreateRoomVisible, true)}>
                                 <Image source={require('@assets/portals/portal-5.png')} style={[styles.portalCenter, {
                                     // width: 220,
                                     // height: 220
@@ -435,7 +548,7 @@ export default function LobbyScreen({ navigation }) {
                             </TouchableOpacity>
                             <View style={styles.portalCreateRTextContainer
                             } >
-                                <Text style={styles.portalCreateRText} onPress={() => setModalCreateRoomVisible(true)}>Create Room</Text>
+                                <Text style={styles.portalCreateRText} onPress={() => openModal(setModalCreateRoomVisible, true)}>Create Room</Text>
                             </View>
 
                         </Animated.View>
@@ -446,7 +559,7 @@ export default function LobbyScreen({ navigation }) {
                             onLayout={updatePortalPositions}
                             style={{ transform: [{ scale: portalScales['portal-join-room'] }] }}
                         >
-                            <TouchableOpacity onPress={() => setModalJoinRoomVisible(true)}>
+                            <TouchableOpacity onPress={() => openModal(setModalJoinRoomVisible, true)}>
                                 <Image source={require('@assets/portals/portal-1.png')} style={styles.portalCenter} />
                                 <Text style={styles.portalText}>Join Room</Text>
                             </TouchableOpacity>
@@ -456,31 +569,70 @@ export default function LobbyScreen({ navigation }) {
 
                     <View style={[styles.character, { left: characterPosition.x - 20, top: characterPosition.y - 20, zIndex: 1001 }]}>
                         <Text style={styles.characterText}>{user.username}</Text>
-                        <Image source={avatars[user.selected_character.avatar]} style={styles.characterImage} />
+                        <Image source={avatars[user?.selected_character?.avatar]} style={styles.characterImage} />
                     </View>
 
                     {Object.keys(players).map((playerId) => {
                         const player = players[playerId];
-                        // console.log('🔥 Player =>', player);
+
                         if (playerId !== user._id) {
+                            // Initialiser les valeurs animées si nécessaire
+                            if (!playerAnimatedValues.current[playerId]) {
+                                const absoluteX = player.x * width;
+                                const absoluteY = player.y * height;
+                                playerAnimatedValues.current[playerId] = {
+                                    x: new Animated.Value(absoluteX),
+                                    y: new Animated.Value(absoluteY)
+                                };
+                            }
+
                             return (
-                                <View key={playerId} style={{ position: "absolute", top: player.y, left: player.x }}>
-                                    <Text>{player.username}</Text>
+                                <Animated.View
+                                    key={playerId}
+                                    style={{
+                                        position: "absolute",
+                                        transform: [
+                                            { translateX: playerAnimatedValues.current[playerId].x },
+                                            { translateY: playerAnimatedValues.current[playerId].y }
+                                        ],
+                                    }}
+                                >
+                                    <Text style={styles.characterText}>{player.username}</Text>
                                     <Image source={avatars[player.avatar]} style={{ width: 50, height: 50 }} />
-                                </View>
+                                </Animated.View>
                             );
                         }
                     })}
 
                     <View style={styles.joystickContainer}>
-                        <CustomJoystick onMove={setJoystickData} />
+                        <CustomJoystick onMove={setJoystickData} disabled={isAnyModalOpen} />
                     </View>
 
-                    <CreateRoomModal visible={modalCreateRoomVisible} onClose={() => setModalCreateRoomVisible(false)} onConfirm={handleCreateRoom} />
-                    <JoinRoomModal visible={modalJoinRoomVisible} onClose={() => setModalJoinRoomVisible(false)} onConfirm={handleJoinRoom} />
-                    <HazardPartyModal visible={modalHazardPartyVisible} onClose={() => setModalHazardPartyVisible(false)} onConfirm={handleHazardParty} />
-                    <CreatePartyModal visible={modalCreatePartyVisible} onClose={() => setModalCreatePartyVisible(false)} onConfirm={handleCreateParty} />
-                    <JoinPartyModal visible={modalJoinPartyVisible} onClose={() => setModalJoinPartyVisible(false)} onConfirm={handleJoinParty} />
+                    <CreateRoomModal
+                        visible={modalCreateRoomVisible}
+                        onClose={() => closeModal(setModalCreateRoomVisible, false)}
+                        onConfirm={handleCreateRoom}
+                    />
+                    <JoinRoomModal
+                        visible={modalJoinRoomVisible}
+                        onClose={() => closeModal(setModalJoinRoomVisible, false)}
+                        onConfirm={handleJoinRoom}
+                    />
+                    <HazardPartyModal
+                        visible={modalHazardPartyVisible}
+                        onClose={() => closeModal(setModalHazardPartyVisible, false)}
+                        onConfirm={handleHazardParty}
+                    />
+                    <CreatePartyModal
+                        visible={modalCreatePartyVisible}
+                        onClose={() => closeModal(setModalCreatePartyVisible, false)}
+                        onConfirm={handleCreateParty}
+                    />
+                    <JoinPartyModal
+                        visible={modalJoinPartyVisible}
+                        onClose={() => closeModal(setModalJoinPartyVisible, false)}
+                        onConfirm={handleJoinParty}
+                    />
                 </SafeAreaView>
             </SafeAreaProvider >
         </ImageBackground >
@@ -567,7 +719,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         borderRadius: 60,
-        zIndex: 1,
+        zIndex: 1002,
     },
     joystickBase: {
         width: 100,
@@ -614,5 +766,11 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(248, 238, 238, 0.8)',
         borderRadius: 4,
     },
-
+    joystickDisabled: {
+        opacity: 0.5,
+        backgroundColor: 'rgba(200,200,200,0.2)',
+    },
+    joystickStickDisabled: {
+        backgroundColor: '#888',
+    },
 });
