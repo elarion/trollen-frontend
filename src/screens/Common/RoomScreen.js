@@ -3,6 +3,8 @@ import { StyleSheet, Text, View, TouchableOpacity, Image, ImageBackground, Alert
 import { Modal, SlideAnimation, ModalContent } from 'react-native-modals'
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 
+// import { uid2 } from 'uid2';
+
 // Import Services
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { useSelector } from "react-redux";
@@ -19,6 +21,15 @@ import { getSocket } from "@services/socketService";
 import theme from '@theme';
 import { spells } from '@configs/spells';
 import { slugify } from '@utils/slugify';
+
+const randomString = (length = 10) => {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let result = "";
+    for (let i = 0; i < length; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+};
 
 export default function RoomScreen({ navigation, route }) {
     const [modalUserRoomVisible, setModalUserRoomVisible] = useState(false);
@@ -73,6 +84,14 @@ export default function RoomScreen({ navigation, route }) {
                 // setSpelled(true);
             });
 
+            socket.on("userJoined", (response) => {
+                setMessages(prev => [{ content: `${response.username} has joined the room!`, has_joined: true, is_info: true, _id: randomString() }, ...prev]);
+            });
+            socket.on("userLeft", (response) => {
+                console.log('userLeft =>', response);
+                setMessages(prev => [{ content: `${response.username} has left the room!`, has_left: true, is_info: true, _id: randomString() }, ...prev]);
+            });
+
             // Utile par exemple pour mettre a jour un statut utilisateur genre afk
             // const handleAppStateChange = (nextAppState) => {
             //     console.log('nextAppState =>', nextAppState);
@@ -107,6 +126,8 @@ export default function RoomScreen({ navigation, route }) {
                     });
                     socket.off("roomInfo");
                     socket.off("roomMessage");
+                    socket.off("userJoined");
+                    socket.off("userLeft");
                 }
             };
         }, [roomId])
@@ -142,11 +163,11 @@ export default function RoomScreen({ navigation, route }) {
     }
 
     const renderMessage = ({ item }) => {
-        const isMyMessage = item.user._id === user._id;
-        const hasBeenSpelled = item.spells.length > 0;
+        const isMyMessage = !item.is_info && item.user._id === user._id;
+        const hasBeenSpelled = !item.is_info && item.spells.length > 0;
         return (
             <>
-                <View style={[styles.messageContainer, isMyMessage ? styles.myMessage : styles.otherMessage, hasBeenSpelled && { borderWidth: 3, borderColor: theme.colors.red, overflow: 'visible' }]}>
+                {!item.is_info && (<View style={[styles.messageContainer, isMyMessage ? styles.myMessage : styles.otherMessage, hasBeenSpelled && { borderWidth: 3, borderColor: theme.colors.red, overflow: 'visible' }]}>
                     <Text style={[styles.messageSender, isMyMessage && { color: theme.colors.darkBrown }]}>{isMyMessage ? "Moi" : item.user.username}</Text>
                     <Text style={[styles.messageText, isMyMessage && { color: theme.colors.darkBrown }]}>{item.content}</Text>
                     {hasBeenSpelled && (
@@ -158,8 +179,13 @@ export default function RoomScreen({ navigation, route }) {
                             </View>
                         </>
                     )}
-                </View >
-
+                </View >)}
+                {(item.is_info && item.has_joined) && (
+                    <Text style={{ color: theme.colors.green, fontSize: 12, textAlign: 'center' }}>{item.content}</Text>
+                )}
+                {(item.is_info && item.has_left) && (
+                    <Text style={{ color: theme.colors.red, fontSize: 12, textAlign: 'center' }}>{item.content}</Text>
+                )}
             </>
         );
     };
