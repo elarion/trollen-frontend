@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Image, ImageBackground, ScrollView, Modal, TouchableOpacity } from "react-native"
+import { StyleSheet, Text, View, Image, ImageBackground, ScrollView, Modal, TouchableOpacity, } from "react-native"
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { useState, useEffect } from "react";
 import axiosInstance from '@utils/axiosInstance';
@@ -54,13 +54,13 @@ export default function GrimoireScreen({ navigation }) {
                                             <Text style={styles.textDescription}>{selectedRace.description}</Text>
                                             <Text style={styles.textDescription}>{selectedRace.tagline}</Text>
                                         </View>
-                                        <View style={styles.rightBot}>
+                                       {/*  <View style={styles.rightBot}>
                                             <Text style={styles.textTitleDescription}>Spells passifs :</Text>
                                             <View style={styles.passivSpell}>
                                                 <Text style={styles.textDescription}>{selectedRace.spells.map((spell) => spell.image).join(', ')}</Text>
                                                 <Text style={styles.textDescription}>{selectedRace.spells.map((spell) => spell.name).join(', ')}</Text>
                                             </View>
-                                        </View>
+                                        </View> */}
                                     </View>
                                 </View>
                             )}
@@ -109,7 +109,7 @@ export default function GrimoireScreen({ navigation }) {
                                 <View style={styles.spellsCard}>
                                     <View style={styles.left}>
                                         <Text style={styles.textName}>{selectedSpell.name}</Text>
-                                        <Image style={{width: 40, height: 40, tintColor:'red'}} source={spells[slugify(selectedSpell.name, true)]}/>
+                                        <Image style={{width: 40, height: 40 }} source={spells[slugify(selectedSpell.name, true)]}/>
                                     </View>
                                     <View style={styles.rightSpells}>
                                         <View>
@@ -175,12 +175,10 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
     },
     backgroundImage: {
         flex: 1,
-        width: '100%',
-        height: '100%',
         resizeMode: 'cover',
     },
 
@@ -221,6 +219,7 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap',
         justifyContent: 'space-evenly',
         gap: '2%',
+        paddingBottom: 135,
     },
     itemCard: {
         borderWidth: 1,
@@ -240,10 +239,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     modalView: {
-        margin: 20,
+        //margin: 20,
         backgroundColor: 'white',
         borderRadius: 20,
-        padding: 15,
+        padding: 10,
         alignItems: 'center',
         shadowColor: '#000',
         shadowOffset: {
@@ -291,8 +290,9 @@ const styles = StyleSheet.create({
     left: {
         width: '40%',
         alignItems: 'center',
-        paddingTop: '6%',
-        backgroundColor: 'rgb(74, 52, 57)',
+        paddingTop: '12%',
+        paddingLeft:'5%',
+        backgroundColor: 'rgb(239, 233, 225)',
         borderBottomLeftRadius: 45,
         borderTopLeftRadius: 45
     },
@@ -300,24 +300,24 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: 800,
         marginBottom: 25,
-        color: 'rgb(239, 233, 225)'
+        color: 'rgb(74, 52, 57)'
     },
     rightRaces: {
-        paddingTop: '6%',
+        paddingTop: '12%',
         width: '60%',
-        paddingLeft: '5%',
+        paddingLeft: '10%',
         paddingRight: '5%',
-        backgroundColor: 'rgb(188, 118, 26)',
+        backgroundColor: 'rgb(239, 233, 225)',
         borderBottomRightRadius: 45,
         borderTopRightRadius: 45,
         gap: '5%'
     },
     rightSpells: {
-        paddingTop: '6%',
+        paddingTop: '12%',
         width: '60%',
-        paddingLeft: '5%',
+        paddingLeft: '10%',
         paddingRight: '5%',
-        backgroundColor: 'rgb(188, 118, 26)',
+        backgroundColor: 'rgb(239, 233, 225)',
         borderBottomRightRadius: 45,
         borderTopRightRadius: 45,
     },
@@ -328,9 +328,10 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: 800,
         marginBottom: 2,
-        color: 'rgb(239, 233, 225)'
+        color: 'rgb(74, 52, 57)',
+        marginBottom:12
     },
     textDescription: {
-        color: 'rgb(239, 233, 225)'
+        color: 'rgb(74, 52, 57)'
     }
 })
