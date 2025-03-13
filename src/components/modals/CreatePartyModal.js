@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         alignItems: 'center',
         width: '90%',
-        maxHeight: '80%', // Empêche la modal de dépasser l'écran
+        maxHeight: '80%', 
     },
     modalViewCreateParty: {
         margin: 20,

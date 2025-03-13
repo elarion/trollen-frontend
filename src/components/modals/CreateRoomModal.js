@@ -105,7 +105,7 @@ const CreateRoomModal = ({ visible, onClose, onConfirm }) => {
 const styles = StyleSheet.create({
     centeredView: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' },
     modalView: {
-        backgroundColor: 'white',
+        backgroundColor: '#F0E9E0',
         borderRadius: 20,
         paddingVertical: 10,
         paddingHorizontal: 20,
@@ -122,8 +122,8 @@ const styles = StyleSheet.create({
     checkbox: { marginRight: 10 },
     btnModal: { flexDirection: 'row', justifyContent: 'space-between', width: '100%', marginTop: 20 },
     button: { borderRadius: 99, padding: 10 },
-    buttonClose: { backgroundColor: 'red', width: '45%', alignItems: 'center' },
-    buttonValidation: { backgroundColor: 'green', width: '45%', alignItems: 'center' },
+    buttonClose: { backgroundColor: '#F65959', width: '45%', alignItems: 'center' },
+    buttonValidation: { backgroundColor: '#899E6A', width: '45%', alignItems: 'center' },
     textStyle: { color: 'white', fontWeight: 'bold', textAlign: 'center' },
 });
 
