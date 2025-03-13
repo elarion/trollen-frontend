@@ -8,6 +8,8 @@ import {
     ImageBackground, Platform, ActivityIndicator, ScrollView
 } from "react-native";
 import { Avatar } from '@components/Avatar';
+import {slugify} from '@utils/slugify';
+import {spells} from '@configs/spells'
 
 /** Imports SecureStore */
 import * as SecureStore from 'expo-secure-store';
@@ -32,7 +34,7 @@ export default function CharactereCreationScreen({ navigation }) {
     // États pour stocker les données
     const [races, setRaces] = useState([]);
     const [raceIndex, setRaceIndex] = useState(0);
-    const [spells, setSpells] = useState({});
+    const [startSpells, setStartSpells] = useState({});
     const [genreIndex, setGenreIndex] = useState(0);
     const [error, setError] = useState(null);
 
@@ -57,7 +59,7 @@ export default function CharactereCreationScreen({ navigation }) {
                 ]);
 
                 setRaces(racesRes.data.races);
-                setSpells({
+                setStartSpells({
                     spell1: spell1Res.data.spell,
                     spell2: spell2Res.data.spell,
                     spell3: spell3Res.data.spell
@@ -157,7 +159,9 @@ export default function CharactereCreationScreen({ navigation }) {
                                         <Text style={styles.passifSpellText}>Passive Spell</Text>
                                         <View style={styles.passifSpellTitle}>
                                             <View style={styles.shield}>
-                                                <FontAwesome name='shield' size={20} color='rgb(239, 233, 225)' />
+                                            <Image style={{ width: 40, height: 40, tintColor: theme.colors.darkBrown }} source={spells[slugify(races[raceIndex]?.spells[0]?.name, true)]} />
+
+
                                             </View>
                                             <Text style={styles.spellTitle}>{races[raceIndex]?.spells[0]?.name}</Text>
                                         </View>
@@ -169,10 +173,10 @@ export default function CharactereCreationScreen({ navigation }) {
                                     <View style={styles.actifSpellBox}>
                                         <Text style={styles.actifSpellText}>Active Spells</Text>
                                         <View style={styles.actifSpell}>
-                                            {[spells.spell1, spells.spell2, spells.spell3].map((spell, index) => (
+                                            {[startSpells.spell1, startSpells.spell2, startSpells.spell3].map((spell, index) => (
                                                 <View key={index} style={styles.spell}>
                                                     <View style={styles.fire}>
-                                                        <FontAwesome name='fire' size={20} color='rgb(239, 233, 225)' />
+                                                    <Image style={{ width: 40, height: 40, tintColor: theme.colors.darkBrown }} source={spells[slugify(spell?.name, true)]} />
                                                     </View>
                                                     {/* <Image style={styles.spellImg} source={spell?.image} /> */}
                                                     <Text style={styles.spellText}>{spell?.name}</Text>
@@ -232,7 +236,7 @@ const styles = StyleSheet.create({
     passifSpellBox: { paddingBottom: 30, paddingTop: 20, marginBottom: 20, backgroundColor: 'rgb(121, 102, 91)', width: '100%', alignItems: 'center' },
     passifSpellTitle: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, position: 'relative', width: '100%' },
     passifSpellText: { color: theme.colors.veryLightBrown, fontSize: 18, marginBottom: 10, fontWeight: 800 },
-    shield: { position: 'absolute', left: 15, top: -5, backgroundColor: theme.colors.blue, borderRadius: 99, width: 30, height: 30, justifyContent: 'center', alignItems: 'center' },
+    shield: { position: 'absolute', left: 15, top: -30, backgroundColor: theme.colors.blue, borderRadius: 60/2, width: 60, height: 60, justifyContent: 'center', alignItems: 'center' },
     passifSpellDescription: { textAlign: 'center', paddingHorizontal: 10 },
     spellTitle: { color: theme.colors.veryLightBrown, textAlign: 'center', marginBottom: 20, fontSize: 16, fontWeight: 800 },
     spellText: { color: theme.colors.veryLightBrown, textAlign: 'center', fontWeight: 800 },
@@ -240,9 +244,9 @@ const styles = StyleSheet.create({
     /* ACTIF SPELL TEXT*/
     actifSpellBox: { width: '100%', alignItems: 'center', marginBottom: 10 },
     actifSpellText: { color: theme.colors.veryLightBrown, fontSize: 18, marginBottom: 10, fontWeight: 800 },
-    actifSpell: { flexDirection: 'row', justifyContent: 'center', gap: 10, flexWrap: 'wrap' },
-    spell: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', backgroundColor: theme.colors.darkBrown, height: 40, paddingRight: 20, paddingLeft: 50, borderRadius: 99 },
-    fire: { position: 'absolute', left: 0, top: 0, backgroundColor: theme.colors.red, borderRadius: 99, width: 40, height: 40, justifyContent: 'center', alignItems: 'center' },
+    actifSpell: {  justifyContent: 'center', gap: 10, flexWrap: 'wrap' },
+    spell: {  width: 250, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.colors.darkBrown, height: 60, paddingRight: 20, paddingLeft: 50, borderRadius: 99 },
+    fire: { position: 'absolute', left: 0, top: 0, backgroundColor: theme.colors.red, borderRadius: 99, width: 60, height: 60, justifyContent: 'center', alignItems: 'center' },
 
     /* GENRE CHOICE BOX*/
     genreChoise: {
