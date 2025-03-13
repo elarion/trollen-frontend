@@ -233,7 +233,9 @@ export default function ProfileScreen({ navigation }) {
                             <View style={styles.spellsCard}>
                                 <View style={styles.left}>
                                     <Text style={styles.textName}>{selectedSpell.name}</Text>
-                                    <Image style={{width: 40, height: 40, tintColor:'red'}} source={spells[slugify(selectedSpell.name, true)]}/>
+                                    <View style={styles.cercle}>
+                                        <Image style={{width: 40, height: 40, tintColor:theme.colors.darkBrown}} source={spells[slugify(selectedSpell.name, true)]}/>
+                                    </View>
                                 </View>
                                 <View style={styles.rightSpells}>
                                     <View>
@@ -452,10 +454,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     modalView: {
-        margin: 20,
+        //margin: 20,
         backgroundColor: 'white',
         borderRadius: 20,
-        padding: 15,
+        padding: 10,
         alignItems: 'center',
         shadowColor: '#000',
         shadowOffset: {
@@ -503,8 +505,9 @@ const styles = StyleSheet.create({
     left: {
         width: '40%',
         alignItems: 'center',
-        paddingTop: '6%',
-        backgroundColor: 'rgb(74, 52, 57)',
+        paddingTop: '12%',
+        paddingLeft: '5%',
+        backgroundColor: 'rgb(239, 233, 225)',
         borderBottomLeftRadius: 45,
         borderTopLeftRadius: 45
     },
@@ -512,26 +515,36 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: 800,
         marginBottom: 25,
-        color: 'rgb(239, 233, 225)'
+        color: 'rgb(74, 52, 57)'
     },
     rightRaces: {
-        paddingTop: '6%',
+        paddingTop: '12%',
         width: '60%',
-        paddingLeft: '5%',
+        paddingLeft: '10%',
         paddingRight: '5%',
-        backgroundColor: 'rgb(188, 118, 26)',
+        backgroundColor: 'rgb(239, 233, 225)',
         borderBottomRightRadius: 45,
         borderTopRightRadius: 45,
         gap: '5%'
     },
     rightSpells: {
-        paddingTop: '6%',
+        paddingTop: '12%',
         width: '60%',
-        paddingLeft: '5%',
+        paddingLeft: '10%',
         paddingRight: '5%',
-        backgroundColor: 'rgb(188, 118, 26)',
+        backgroundColor: 'rgb(239, 233, 225)',
         borderBottomRightRadius: 45,
         borderTopRightRadius: 45,
+    },
+    cercle: {
+        width: 85,
+        height: 85,
+        borderRadius: 85 / 2,
+        backgroundColor: theme.colors.lightBrown02,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: theme.colors.lightBrown
     },
     passivSpell: {
         flexDirection: 'row'
@@ -540,9 +553,10 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: 800,
         marginBottom: 2,
-        color: 'rgb(239, 233, 225)'
+        color: 'rgb(74, 52, 57)',
+        marginBottom: 12
     },
     textDescription: {
-        color: 'rgb(239, 233, 225)'
+        color: 'rgb(74, 52, 57)'
     }
 })
