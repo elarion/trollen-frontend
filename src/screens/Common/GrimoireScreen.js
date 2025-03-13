@@ -52,7 +52,7 @@ export default function GrimoireScreen({ navigation }) {
                                     <View style={styles.rightRaces}>
                                         <View style={styles.rightTop}>
                                             <Text style={styles.textTitleDescription}>Description :</Text>
-                                            <Text style={styles.textDescription}>{selectedRace.description}</Text>
+                                            {/* <Text style={styles.textDescription}>{selectedRace.description}</Text> */}
                                             <Text style={styles.textDescription}>{selectedRace.tagline}</Text>
                                         </View>
                                         {/*  <View style={styles.rightBot}>
@@ -72,7 +72,7 @@ export default function GrimoireScreen({ navigation }) {
                                         setModalShowRacesVisible(false);
                                         setSelectedRace(null);
                                     }}>
-                                    <Text style={styles.textStyle}>Retour</Text>
+                                    <Text style={styles.textStyle}>Back</Text>
                                 </TouchableOpacity>
                             </View>
                         </View>
@@ -129,7 +129,7 @@ export default function GrimoireScreen({ navigation }) {
                                         setModalShowSpellsVisible(false);
                                         setSelectedSpell(null);
                                     }}>
-                                    <Text style={styles.textStyle}>Retour</Text>
+                                    <Text style={styles.textStyle}>Back</Text>
                                 </TouchableOpacity>
                             </View>
                         </View>

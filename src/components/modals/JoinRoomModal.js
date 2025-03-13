@@ -25,19 +25,19 @@ const JoinRoomModal = ({ visible, onClose, onConfirm }) => {
                     <View style={styles.inputSection}>
                         <Text>Room name</Text>
                         <TextInput autoCapitalize="none" style={styles.input} placeholder="Room name" onChangeText={value => setRoomname(value)} value={roomname} />
-                        <Text>Password (optionnel)</Text>
+                        <Text>Password (optional)</Text>
                         <TextInput autoCapitalize="none" style={styles.input} placeholder="Password" onChangeText={value => setPassword(value)} value={password} secureTextEntry={true} />
                     </View>
                     <View style={styles.btnModalJoinRoom}>
                         <Pressable
                             style={[styles.button, styles.buttonClose]}
                             onPress={onClose}>
-                            <Text style={styles.textStyle}>cancel</Text>
+                            <Text style={styles.textStyle}>Cancel</Text>
                         </Pressable>
                         <Pressable
                             style={[styles.button, styles.buttonValidation]}
                             onPress={() => onConfirm({ roomname, password })}>
-                            <Text style={styles.textStyle}>join</Text>
+                            <Text style={styles.textStyle}>Join</Text>
                         </Pressable>
                     </View>
                 </View>

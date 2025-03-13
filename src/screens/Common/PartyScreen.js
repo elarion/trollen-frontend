@@ -43,7 +43,7 @@ export default function RoomScreen({ navigation, route }) {
                                 {partyInfo.admin && <Text style={styles.creatorRoomName}>{partyInfo.admin.username}</Text>}
                                 <Text style={styles.roomName}>{partyInfo.name}</Text>
                                 <Text style={styles.numberOfParticipants}>
-                                    {partyInfo.participants?.length} participant{partyInfo.participants?.length > 1 && `s`}
+                                    {partyInfo.participants?.length} Troll{partyInfo.participants?.length > 1 && `s`}
                                 </Text>
                             </View>
                             <TouchableOpacity style={styles.playerList}>
@@ -92,7 +92,7 @@ export default function RoomScreen({ navigation, route }) {
                                     <TouchableOpacity style={styles.spell} />
                                 </View>
                                 <TouchableOpacity style={styles.closeButton} onPress={() => setModalSpellVisible(false)}>
-                                    <Text style={styles.closeButtonText}>Retour</Text>
+                                    <Text style={styles.closeButtonText}>Back</Text>
                                 </TouchableOpacity>
                             </View>
                         </Modal>

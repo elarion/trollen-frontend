@@ -88,8 +88,8 @@ export default function PortalScreen({ navigation }) {
             </View>
             <View style={styles.inRoomRight}>
                 <View style={styles.rightUsernameAndJoin}>
-                    <Text style={styles.username}>Crée par {item.admin?.username}</Text>
-                    <Text style={styles.roomNumberOfParticipants}>{item.participants.length} participant{item.participants.length > 1 && 's'}</Text>
+                    <Text style={styles.username}>Created by {item.admin?.username}</Text>
+                    <Text style={styles.roomNumberOfParticipants}>{item.participants.length} Troll{item.participants.length > 1 && 's'}</Text>
                 </View>
 
                 <Text style={styles.roomTag}>

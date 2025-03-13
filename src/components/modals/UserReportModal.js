@@ -52,7 +52,7 @@ const UserReportModal = ({ visible, onClose, userToReport, onReport }) => {
             <View style={[styles.modalOverlay, { backgroundColor: 'rgba(0, 0, 0, 0.5)' }]}>
                 <View style={styles.modalContainer}>
 
-                    <Text style={styles.title}>Signaler {userToReport?.user?.username}</Text>
+                    <Text style={styles.title}>Report {userToReport?.user?.username}</Text>
 
                     <Dropdown
                         style={[styles.capacityDropdown, countIsFocus && { borderColor: 'blue' }]}
@@ -95,11 +95,11 @@ const UserReportModal = ({ visible, onClose, userToReport, onReport }) => {
 
                     <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center', justifyContent: 'center', width: '100%' }}>
                         <TouchableOpacity onPress={handleReport}>
-                            <Text style={styles.buttonSignal}>Signaler</Text>
+                            <Text style={styles.buttonSignal}>Report</Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity onPress={onClose}>
-                            <Text style={styles.button}>Annuler</Text>
+                            <Text style={styles.button}>Cancel</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
