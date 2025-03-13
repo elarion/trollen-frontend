@@ -2,7 +2,7 @@ export const spells = {
     'bbgaiement': require('@assets/spells/microphone.png'),
     'franklin': require('@assets/spells/franklin.png'),
     'patatechaude': require('@assets/spells/potato.png'),
-    'nalrev': require('@assets/spells/nalrev.png'),
+    'nalrev': require('@assets/spells/za.png'),
     'megaraman': require('@assets/spells/megaraman.png'),
     'ssooooossa': require('@assets/spells/snake.png'),
     'coupdcal': require('@assets/spells/pirate.png'),
@@ -11,5 +11,5 @@ export const spells = {
     'languefourchue': require('@assets/spells/anti_ss.png'),
     'antireflet': require('@assets/spells/broken-mirror.png'),
     'zconome': require('@assets/spells/peeler.png'),
-    'nonte': require('@assets/spells/nonte.png'), 
+    'nonte': require('@assets/spells/az.png'), 
     };
