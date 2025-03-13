@@ -6,10 +6,11 @@ import TopHeader from "@components/TopHeader";
 import { Avatar } from '@components/Avatar';
 import { spells } from "@configs/spells";
 import { slugify } from '@utils/slugify';
-console.log(spells)
+import theme from '@theme';
+//console.log(spells)
 
 export default function GrimoireScreen({ navigation }) {
-   
+
     const [modalShowRacesVisible, setModalShowRacesVisible] = useState(false);
     const [modalShowSpellsVisible, setModalShowSpellsVisible] = useState(false);
     const [viewMode, setViewMode] = useState('races');
@@ -54,7 +55,7 @@ export default function GrimoireScreen({ navigation }) {
                                             <Text style={styles.textDescription}>{selectedRace.description}</Text>
                                             <Text style={styles.textDescription}>{selectedRace.tagline}</Text>
                                         </View>
-                                       {/*  <View style={styles.rightBot}>
+                                        {/*  <View style={styles.rightBot}>
                                             <Text style={styles.textTitleDescription}>Spells passifs :</Text>
                                             <View style={styles.passivSpell}>
                                                 <Text style={styles.textDescription}>{selectedRace.spells.map((spell) => spell.image).join(', ')}</Text>
@@ -109,7 +110,9 @@ export default function GrimoireScreen({ navigation }) {
                                 <View style={styles.spellsCard}>
                                     <View style={styles.left}>
                                         <Text style={styles.textName}>{selectedSpell.name}</Text>
-                                        <Image style={{width: 40, height: 40 }} source={spells[slugify(selectedSpell.name, true)]}/>
+                                        <View style={styles.cercle}>
+                                            <Image style={{ width: 40, height: 40, tintColor: theme.colors.darkBrown }} source={spells[slugify(data.name, true)]} />
+                                        </View>
                                     </View>
                                     <View style={styles.rightSpells}>
                                         <View>
@@ -139,7 +142,9 @@ export default function GrimoireScreen({ navigation }) {
                         setModalShowSpellsVisible(true);
                     }}>
                     <Text style={styles.textBtn}>{data.name}</Text>
-                    <Image style={{width: 40, height: 40}} source={spells[slugify(data.name, true)]}/>
+                    <View style={styles.cercle}>
+                        <Image style={{ width: 40, height: 40, tintColor: theme.colors.darkBrown }} source={spells[slugify(data.name, true)]} />
+                    </View>
                 </TouchableOpacity>
             </View>
         );
@@ -223,13 +228,15 @@ const styles = StyleSheet.create({
     },
     itemCard: {
         borderWidth: 1,
+        borderColor: theme.colors.lightBrown,
         borderRadius: 10,
         padding: 10,
         margin: 5,
         width: 150,
         height: 150,
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        backgroundColor: theme.colors.lightBrown02,
     },
 
     //MODALE
@@ -291,7 +298,7 @@ const styles = StyleSheet.create({
         width: '40%',
         alignItems: 'center',
         paddingTop: '12%',
-        paddingLeft:'5%',
+        paddingLeft: '5%',
         backgroundColor: 'rgb(239, 233, 225)',
         borderBottomLeftRadius: 45,
         borderTopLeftRadius: 45
@@ -321,6 +328,16 @@ const styles = StyleSheet.create({
         borderBottomRightRadius: 45,
         borderTopRightRadius: 45,
     },
+    cercle: {
+        width: 85,
+        height: 85,
+        borderRadius: 85 / 2,
+        backgroundColor: theme.colors.lightBrown02,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: theme.colors.lightBrown
+    },
     passivSpell: {
         flexDirection: 'row'
     },
@@ -329,7 +346,7 @@ const styles = StyleSheet.create({
         fontWeight: 800,
         marginBottom: 2,
         color: 'rgb(74, 52, 57)',
-        marginBottom:12
+        marginBottom: 12
     },
     textDescription: {
         color: 'rgb(74, 52, 57)'
