@@ -171,7 +171,7 @@ export default function FriendsScreen() {
                                     </Text>
                                 </View>
                             )}
-                            {selectedTab === 'received' && <View style={styles.indicator} />}
+                            {selectedTab === 'received' && <View style={styles.indicator} />}  
                         </TouchableOpacity>
 
                         <TouchableOpacity
