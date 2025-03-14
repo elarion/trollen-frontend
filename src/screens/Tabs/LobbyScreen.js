@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import * as SecureStore from 'expo-secure-store';
-import { View, Text, StyleSheet, TouchableOpacity, ImageBackground, Dimensions, PanResponder, Animated, Easing } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ImageBackground, Dimensions, Alert, PanResponder, Animated, Easing } from 'react-native';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import CreateRoomModal from '@components/modals/CreateRoomModal';
 import JoinRoomModal from '@components/modals/JoinRoomModal';
@@ -88,7 +88,14 @@ const socket = getSocket();
 
 export default function LobbyScreen({ navigation }) {
     const dispatch = useDispatch();
-    const [characterPosition, setCharacterPosition] = useState({ x: width / 2, y: height / 1.3 });
+    // Position relative initiale (en pourcentage de la taille de l'écran)
+    const [relativePosition, setRelativePosition] = useState({ x: 0.5, y: 0.7 });
+    // Position absolue calculée à partir de la position relative
+    const [characterPosition, setCharacterPosition] = useState({
+        x: relativePosition.x * width,
+        y: relativePosition.y * height
+    });
+    const [screenDimensions, setScreenDimensions] = useState({ width, height });
     const [joystickData, setJoystickData] = useState({ angle: 0, distance: 0 });
     const animationRef = useRef(null);
     const [modalCreateRoomVisible, setModalCreateRoomVisible] = useState(false);
@@ -98,7 +105,7 @@ export default function LobbyScreen({ navigation }) {
     const [modalJoinPartyVisible, setModalJoinPartyVisible] = useState(false);
     const [modalCancelled, setModalCancelled] = useState(false);
     const [isAnyModalOpen, setIsAnyModalOpen] = useState(false);
-    const user = useSelector(state => state.auth.user);
+    const { user } = useSelector(state => state.auth);
     const joystickSpeed = 10;
     const [portals, setPortals] = useState([]);
     const portalSize = 50;
@@ -127,12 +134,56 @@ export default function LobbyScreen({ navigation }) {
         joinParty: useRef(null),
     };
 
+    // Fonction pour mettre à jour les positions absolues quand les dimensions changent
+    const updateAbsolutePositions = useCallback(() => {
+        const { width, height } = screenDimensions;
+        setCharacterPosition({
+            x: relativePosition.x * width,
+            y: relativePosition.y * height
+        });
+
+        // Mettre à jour les positions des autres joueurs
+        Object.keys(playerAnimatedValues.current).forEach(playerId => {
+            if (players[playerId]) {
+                Animated.timing(playerAnimatedValues.current[playerId].x, {
+                    toValue: players[playerId].x * width,
+                    duration: 200,
+                    useNativeDriver: true
+                }).start();
+
+                Animated.timing(playerAnimatedValues.current[playerId].y, {
+                    toValue: players[playerId].y * height,
+                    duration: 200,
+                    useNativeDriver: true
+                }).start();
+            }
+        });
+    }, [relativePosition, screenDimensions, players]);
+
+    // Gérer les changements de dimensions d'écran (rotation, redimensionnement)
+    useEffect(() => {
+        const handleDimensionsChange = ({ window }) => {
+            setScreenDimensions({ width: window.width, height: window.height });
+        };
+
+        const dimensionsHandler = Dimensions.addEventListener('change', handleDimensionsChange);
+
+        return () => {
+            dimensionsHandler.remove();
+        };
+    }, []);
+
+    // Mettre à jour les positions absolues quand les dimensions changent
+    useEffect(() => {
+        updateAbsolutePositions();
+    }, [screenDimensions, updateAbsolutePositions]);
+
     // Réinitialiser l'état du joystick lorsque l'écran reprend le focus
     useFocusEffect(
         useCallback(() => {
             // Réinitialiser les états quand on revient sur l'écran du lobby
             setIsAnyModalOpen(false);
-            // setModalCancelled(false);
+            setModalCancelled(false);
             setJoystickData({ angle: 0, distance: 0 });
 
             return () => {
@@ -160,7 +211,8 @@ export default function LobbyScreen({ navigation }) {
 
         measurePortal(portalRefs.createRoom, 'portal-create-room', "Create Room", () => setModalCreateRoomVisible(true));
         measurePortal(portalRefs.joinRoom, 'portal-join-room', "Join Room", () => setModalJoinRoomVisible(true));
-        measurePortal(portalRefs.createParty, 'portal-create-party', "Create Party", () => setModalCreatePartyVisible(true));
+        // measurePortal(portalRefs.createParty, 'portal-create-party', "Create Party", () => setModalCreatePartyVisible(true));
+        measurePortal(portalRefs.createParty, 'portal-create-party', "Create Party", () => Alert.alert('Coming soon!', 'be patient...'));
         // measurePortal(portalRefs.joinParty, 'portal-join-party', "Join Party", () => setModalJoinPartyVisible(true));
         measurePortal(portalRefs.joinParty, 'portal-join-party', "Join Party", () => handleJoinRandomRoom());
 
@@ -201,7 +253,7 @@ export default function LobbyScreen({ navigation }) {
             if (!socket.current) return;
 
             // Récupérer les joueurs déjà connectés
-            socket.current.emit("requestPlayers", { avatar: user?.selected_character?.avatar });
+            socket.current.emit("requestPlayers", { username: user?.username, avatar: user?.selected_character?.avatar });
 
             // Écouter les mises à jour de positions
             socket.current.on("playersPositions", (usersPositions) => {
@@ -280,14 +332,18 @@ export default function LobbyScreen({ navigation }) {
                 return;
             }
 
+            const { width, height } = screenDimensions;
             const joystickX = Math.cos(joystickData.angle * Math.PI / 180) * joystickData.distance * joystickSpeed / 100;
             const joystickY = Math.sin(joystickData.angle * Math.PI / 180) * joystickData.distance * joystickSpeed / 100;
 
+            // Les nouvelles positions absolues
             let newX = characterPosition.x + joystickX;
             let newY = characterPosition.y + joystickY;
 
-            newX = Math.max(25, Math.min(width - 25, newX));
-            newY = Math.max(25, Math.min(height - 25, newY));
+            // Limites en pourcentage de l'écran (5% des bords)
+            const boundaryPercent = 0.05;
+            newX = Math.max(width * boundaryPercent, Math.min(width * (1 - boundaryPercent), newX));
+            newY = Math.max(height * boundaryPercent, Math.min(height * (1 - boundaryPercent), newY));
 
             // Vérifier si la position a réellement changé avant d'envoyer
             const positionChanged =
@@ -295,20 +351,23 @@ export default function LobbyScreen({ navigation }) {
                 Math.abs(newY - characterPosition.y) > 0.1;
 
             if (positionChanged) {
+                // Mettre à jour la position absolue
                 setCharacterPosition({ x: newX, y: newY });
+
+                // Mettre à jour la position relative
+                const newRelativeX = newX / width;
+                const newRelativeY = newY / height;
+                setRelativePosition({ x: newRelativeX, y: newRelativeY });
 
                 // Throttle des émissions socket
                 const now = Date.now();
                 if (socket.current && (now - lastEmitTime.current > EMIT_INTERVAL)) {
                     lastEmitTime.current = now;
 
-                    // Convertir en positions relatives (pourcentage de l'écran)
-                    const relativeX = newX / width;
-                    const relativeY = newY / height;
-
                     socket.current.emit("updatePosition", {
-                        x: relativeX,
-                        y: relativeY,
+                        x: newRelativeX,
+                        y: newRelativeY,
+                        username: user?.username,
                         avatar: user?.selected_character?.avatar
                     });
                 }
@@ -328,10 +387,14 @@ export default function LobbyScreen({ navigation }) {
                     }
 
                     if (!modalCancelled) {
+                        console.log('portal.action()', portal.id);
                         // Au lieu d'appeler directement portal.action()
                         // on va arrêter le joystick puis appeler l'action
+                        if (portal.id !== 'portal-create-party' && portal.id !== 'portal-join-party') {
+                            setIsAnyModalOpen(true);
+                        }
+
                         setJoystickData({ angle: 0, distance: 0 });
-                        setIsAnyModalOpen(true);
                         portal.action();
                         setModalCancelled(true);
                     }
@@ -352,7 +415,7 @@ export default function LobbyScreen({ navigation }) {
         return () => {
             cancelAnimationFrame(animationRef.current);
         };
-    }, [joystickData, portals, modalCancelled, activePortal, characterPosition, isAnyModalOpen])
+    }, [joystickData, portals, modalCancelled, activePortal, characterPosition, isAnyModalOpen, screenDimensions])
 
     const handleCreateRoom = async (roomData) => {
         try {
@@ -406,8 +469,6 @@ export default function LobbyScreen({ navigation }) {
     }
 
     const handleCreateParty = async ({ partyName, game = "WordToWord" }) => {
-        Alert.alert('Coming soon!', 'be patient...');
-        return;
         try {
             if (partyName === '') return;
 
@@ -486,6 +547,8 @@ export default function LobbyScreen({ navigation }) {
         }
     };
 
+    // handleLogout();
+
     // Fonction pour ouvrir une modale et stopper le joystick
     const openModal = (modalSetter, value) => {
         // Réinitialiser le joystick
@@ -528,7 +591,9 @@ export default function LobbyScreen({ navigation }) {
                             onLayout={updatePortalPositions}
                             style={{ transform: [{ scale: portalScales['portal-create-party'] }] }}
                         >
-                            <TouchableOpacity onPress={() => openModal(setModalCreatePartyVisible, true)}>
+
+                            <TouchableOpacity onPress={() => Alert.alert('Coming soon!', 'be patient...')}>
+                                {/* <TouchableOpacity onPress={() => openModal(setModalCreatePartyVisible, true)}> */}
                                 <Image source={require('@assets/portals/portal-3.png')} style={styles.portalCenter} />
                                 <Text style={styles.portalText}>Create Party</Text>
                             </TouchableOpacity>
@@ -591,6 +656,7 @@ export default function LobbyScreen({ navigation }) {
                                     key={playerId}
                                     style={{
                                         position: "absolute",
+                                        zIndex: 1002,
                                         transform: [
                                             { translateX: playerAnimatedValues.current[playerId].x },
                                             { translateY: playerAnimatedValues.current[playerId].y }

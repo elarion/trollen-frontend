@@ -61,7 +61,7 @@ const UserReportModal = ({ visible, onClose, userToReport, onReport }) => {
                         maxHeight={200}
                         labelField="label"
                         valueField="value"
-                        placeholder={!countIsFocus ? 'Choisir un motif' : '...'}
+                        placeholder={!countIsFocus ? 'Choose a reason' : '...'}
                         value={capacityValue}
                         onFocus={() => setCountIsFocus(true)}
                         onBlur={() => setCountIsFocus(false)}
@@ -82,10 +82,10 @@ const UserReportModal = ({ visible, onClose, userToReport, onReport }) => {
                     />
 
                     <View style={{ width: '100%', alignItems: 'center' }}>
-                        <Text style={{ marginBottom: 10 }}>Description (facultatif):</Text>
+                        <Text style={{ marginBottom: 10 }}>Description (optional):</Text>
                         <TextInput
                             style={styles.description}
-                            placeholder="Décrivez brièvement le problème"
+                            placeholder="Describe briefly the problem"
                             onChangeText={setDescription}
                             value={description}
                         />
