@@ -72,9 +72,8 @@ export default function ProfileScreen({ navigation }) {
             // dispatch(setUpdatingUsername(updatingUsername))
 
             const response = await axiosInstance.put(`/users/modify-profile`, { username })
-
-            const { user } = response.data;
-            dispatch(setUserName(user.username))
+            console.log('response update profile', response.data.user.username)
+            dispatch(setUserName(response.data.user.username))
 
         } catch (error) {
 
@@ -146,7 +145,8 @@ export default function ProfileScreen({ navigation }) {
                                 <Text style={styles.subTitle}>PROFILE</Text>
                                 <View style={styles.titleRight}>
                                     <TouchableOpacity style={styles.logOutButton} onPress={() => handleLogout()}>
-                                        <FontAwesome name='sign-out-alt' size={25} color='rgb(188, 118, 26)' />
+                                        <Text style={styles.logOutText}>Log Out</Text>
+                                        <FontAwesome name='sign-out-alt' size={25} color='#F65959' style={styles.logOutIcon} />
                                     </TouchableOpacity>
                                 </View>
                             </View>
@@ -180,8 +180,12 @@ export default function ProfileScreen({ navigation }) {
                                     {/*<Text>{characterData.race?.description}</Text>*/}
                                     <Text>{characterData.race?.tagline}</Text>
                                 </View>
+
+                                {/* Barre de séparation */}
+                                <View style={{ height: 1, width: 300, alignSelf: 'center', backgroundColor: theme.colors.lightBrown, marginVertical: 10 }} />
+
                                 <View style={styles.middle2}>
-                                    <Text style={styles.subtitle}>Active spells :</Text>
+                                    <Text style={styles.subtitle}>Active spells</Text>
                                     <View style={styles.activeSpellsContainer}>
                                         <FlatList
                                             contentContainerStyle={{ flexDirection: 'row', gap: 10, marginBottom: 10 }} // du style
@@ -198,7 +202,7 @@ export default function ProfileScreen({ navigation }) {
                                     </View>
                                 </View>
                                 <View style={styles.bot}>
-                                    <Text style={styles.subtitle}>Unlocked Spell:</Text>
+                                    <Text style={styles.subtitle}>Spells to unlock</Text>
                                     <View style={styles.unlockedSpellsContainer}>
                                         <FlatList
                                             contentContainerStyle={{ flexDirection: 'row', gap: 10 }} // du style
@@ -268,7 +272,7 @@ export default function ProfileScreen({ navigation }) {
                     </View>
                 </View>
             </Modal>
-        </GestureHandlerRootView>
+        </GestureHandlerRootView >
     )
 }
 
@@ -297,7 +301,7 @@ const styles = StyleSheet.create({
         width: '30%',
     },
     subTitle: {
-        color: 'rgb(188, 118, 26)',
+        color: theme.colors.darkBrown,
         fontSize: 20,
         fontWeight: 800,
         textAlign: 'center',
@@ -314,16 +318,21 @@ const styles = StyleSheet.create({
         //backgroundColor: 'pink',
     },
     logOutButton: {
-        height: 30,//'30%',//65px
-        width: 30,//'18%',//65px
-        borderRadius: 30 / 2,
         flexDirection: 'row',
-        //backgroundColor: 'rgb(246, 89, 89)',
-        //marginBottom: '8.5%', //30px
-        justifyContent: 'center',
         alignItems: 'center',
-        //marginTop: '2%'
-
+        height: 30,
+        width: 'auto',
+        borderRadius: 15,
+        paddingHorizontal: 10,
+    },
+    logOutText: {
+        color: '#F65959',
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginRight: 5,
+    },
+    logOutIcon: {
+        marginLeft: 5,
     },
     profileBox: {
         //marginTop: '5%',
@@ -387,7 +396,6 @@ const styles = StyleSheet.create({
         //marginTop: '2%'
     },*/
     middle1: {
-        height: '20%',
         width: '100%',
         padding: 15,
         borderRadius: 25,

@@ -53,7 +53,7 @@ const formatTypingUsers = (typers, currentUserId) => {
     } else if (filteredTypers.length === 1) {
         return `${filteredTypers[0].username} is writing...`;
     } else if (filteredTypers.length === 2) {
-        return `${filteredTypers[0].username} et ${filteredTypers[1].username} are writing...`;
+        return `${filteredTypers[0].username} and ${filteredTypers[1].username} are writing...`;
     } else {
         const others = filteredTypers.length - 2;
         return `${filteredTypers[0].username}, ${filteredTypers[1].username} ${others === 1 ? 'and 1 other person are' : `and ${others} other people are`} writing...`;
@@ -400,7 +400,10 @@ export default function RoomScreen({ navigation, route }) {
                                     </Text> */}
                                 </View>
 
-                                <TouchableOpacity style={styles.playerList} onPress={() => setModalUserRoomVisible(true)}>
+                                <TouchableOpacity style={styles.playerList} onPress={() => {
+                                    setModalUserRoomVisible(true)
+                                    Keyboard.dismiss();
+                                }}>
                                     <FontAwesome name='users' size={20} color={theme.colors.darkBrown} />
                                     {/* Number of participants in the room */}
                                     <View style={{ fontSize: 10, position: 'absolute', top: -5, right: -5, backgroundColor: theme.colors.green, height: 20, width: 20, borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}><Text style={{ fontWeight: 'bold', fontSize: 10, color: theme.colors.white }}>{roomInfo.participants?.length > 99 ? '99+' : roomInfo.participants?.length}</Text></View>
