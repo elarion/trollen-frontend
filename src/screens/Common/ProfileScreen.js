@@ -145,7 +145,8 @@ export default function ProfileScreen({ navigation }) {
                             <Text style={styles.subTitle}>PROFILE</Text>
                             <View style={styles.titleRight}>
                                 <TouchableOpacity style={styles.logOutButton} onPress={() => handleLogout()}>
-                                    <FontAwesome name='sign-out-alt' size={25} color='rgb(188, 118, 26)' />
+                                    <Text style={styles.logOutText}>Log Out</Text>
+                                    <FontAwesome name='sign-out-alt' size={25} color='#F65959' style={styles.logOutIcon} />
                                 </TouchableOpacity>
                             </View>
                         </View>
@@ -175,32 +176,34 @@ export default function ProfileScreen({ navigation }) {
                                 </View>
                             </View>
                             <View style={styles.middle1}>
-                                <Text style={styles.subtitle}>Class description :</Text>
-                                {/*<Text>{characterData.race?.description}</Text>*/}
+                                <Text style={[styles.subtitle, styles.sectionTitle]}>Class description</Text>
+                                <View style={styles.halfBar} />
                                 <Text>{characterData.race?.tagline}</Text>
                             </View>
                             <View style={styles.middle2}>
-                                <Text style={styles.subtitle}>Active spells :</Text>
+                                <Text style={[styles.subtitle, styles.sectionTitle]}>Active spells</Text>
+                                <View style={styles.halfBar} />
                                 <View style={styles.activeSpellsContainer}>
                                     {user.selected_character.spells.filter(spells => spells.spell.category === 'active').map((spell, index) => (
                                         <TouchableOpacity key={spell._id} onPress={() => handleModal(spell.spell)} style={styles.spell}>
                                             <Image style={[styles.spellImage, { tintColor: theme.colors.darkBrown }]} source={spells[slugify(spell.spell.name, true)]} />
                                         </TouchableOpacity>
-                                    ))}</View>
+                                    ))}
+                                </View>
                             </View>
                             <View style={styles.bot}>
-                                <Text style={styles.subtitle}>Unlocked Spell:</Text>
+                                <Text style={[styles.subtitle, styles.sectionTitle]}>Unlocked Spell</Text>
+                                <View style={styles.halfBar} />
                                 <View style={styles.unlockedSpellsContainer}>
                                     <FlatList
-                                        contentContainerStyle={{ flexDirection: 'row', gap: 10, marginBottom: 10 }} // du style
-                                        horizontal={true} // pour que les items soient alignés horizontalement
-                                        data={unlockedSpell} // les données à afficher
-                                        keyExtractor={(item) => item._id} // la clé unique pour chaque item
-                                        renderItem={({ item }) => ( // la fonction qui rend l'item
+                                        contentContainerStyle={{ flexDirection: 'row', gap: 10, marginBottom: 10 }}
+                                        horizontal={true}
+                                        data={unlockedSpell}
+                                        keyExtractor={(item) => item._id}
+                                        renderItem={({ item }) => (
                                             <View style={styles.inputSection}>
                                                 <TouchableOpacity key={item._id} onPress={() => handleModal(item)} style={styles.spell}>
                                                     <Image style={[styles.spellImage, { tintColor: theme.colors.darkBrown }]} source={spells[slugify(item.name, true)]} />
-                                                    {console.log('ITEEEEM' + item)}
                                                 </TouchableOpacity>
                                             </View>
                                         )}
@@ -234,7 +237,7 @@ export default function ProfileScreen({ navigation }) {
                                 <View style={styles.left}>
                                     <Text style={styles.textName}>{selectedSpell.name}</Text>
                                     <View style={styles.cercle}>
-                                        <Image style={{width: 40, height: 40, tintColor:theme.colors.darkBrown}} source={spells[slugify(selectedSpell.name, true)]}/>
+                                        <Image style={{ width: 40, height: 40, tintColor: theme.colors.darkBrown }} source={spells[slugify(selectedSpell.name, true)]} />
                                     </View>
                                 </View>
                                 <View style={styles.rightSpells}>
@@ -287,7 +290,7 @@ const styles = StyleSheet.create({
         width: '30%',
     },
     subTitle: {
-        color: 'rgb(188, 118, 26)',
+        color: '#55453F',
         fontSize: 20,
         fontWeight: 800,
         textAlign: 'center',
@@ -558,5 +561,34 @@ const styles = StyleSheet.create({
     },
     textDescription: {
         color: 'rgb(74, 52, 57)'
-    }
+    },
+    logOutButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        height: 30,
+        width: 'auto',
+        borderRadius: 15,
+        paddingHorizontal: 10,
+    },
+    logOutText: {
+        color: '#F65959',
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginRight: 5,
+    },
+    logOutIcon: {
+        marginLeft: 5,
+    },
+    sectionTitle: {
+        textAlign: 'center',
+        width: '100%',
+        marginBottom: 10,
+    },
+    halfBar: {
+        height: 1,
+        width: '70%',
+        backgroundColor: 'rgb(188, 118, 26)',
+        alignSelf: 'center',
+        marginBottom: 12,
+    },
 })
