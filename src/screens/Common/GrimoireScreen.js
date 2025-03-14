@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
 
     //GRIMOIRE TEXT STYLE
     subTitle: {
-        color: '#55453F',
+        color: '#',
         fontSize: 20,
         fontWeight: 800,
         textAlign: 'center',

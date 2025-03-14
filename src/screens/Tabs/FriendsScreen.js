@@ -149,30 +149,30 @@ export default function FriendsScreen() {
                         </TouchableOpacity>
 
                         <TouchableOpacity
-    onPress={() => setSelectedTab('received')}
-    style={styles.tabButton}
->
-    <Text style={[styles.tabText, selectedTab === 'received' && styles.activeTabText]}>Received</Text>
-    {receivedFriendsList.filter(data => data.status === 'pending').length > 0 && (
-        <View style={{ 
-            fontSize: 10, 
-            position: 'absolute', 
-            top: -1, 
-            right: -16, 
-            backgroundColor: '#7391C9', 
-            height: 20, 
-            width: 20, 
-            borderRadius: 10, 
-            alignItems: 'center', 
-            justifyContent: 'center' 
-        }}>
-            <Text style={{ fontWeight: 'bold', fontSize: 10, color: 'white' }}>
-                {receivedFriendsList.filter(data => data.status === 'pending').length > 99 ? '99+' : receivedFriendsList.filter(data => data.status === 'pending').length}
-            </Text>
-        </View>
-    )}
-    {selectedTab === 'received' && <View style={styles.indicator} />}
-</TouchableOpacity>
+                            onPress={() => setSelectedTab('received')}
+                            style={styles.tabButton}
+                        >
+                            <Text style={[styles.tabText, selectedTab === 'received' && styles.activeTabText]}>Received</Text>
+                            {receivedFriendsList.filter(data => data.status === 'pending').length > 0 && (
+                                <View style={{
+                                    fontSize: 10,
+                                    position: 'absolute',
+                                    top: -1,
+                                    right: -16,
+                                    backgroundColor: '#7391C9',
+                                    height: 20,
+                                    width: 20,
+                                    borderRadius: 10,
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                }}>
+                                    <Text style={{ fontWeight: 'bold', fontSize: 10, color: 'white' }}>
+                                        {receivedFriendsList.filter(data => data.status === 'pending').length > 99 ? '99+' : receivedFriendsList.filter(data => data.status === 'pending').length}
+                                    </Text>
+                                </View>
+                            )}
+                            {selectedTab === 'received' && <View style={styles.indicator} />}
+                        </TouchableOpacity>
 
                         <TouchableOpacity
                             onPress={() => setSelectedTab('pending')}
@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
     textUsername: {
         fontSize: 15,
         fontWeight: 800,
-        color : '#55453F',
+        color: '#55453F',
         fontWeight: '600',
     },
     status: {
@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
         borderRadius: 50,
 
     },
-  
+
     pendingSendedFriendsCardBox: {
         flexDirection: 'row',
         marginBottom: 15,
@@ -288,9 +288,9 @@ const styles = StyleSheet.create({
         width: '95%',
         backgroundColor: 'rgba(255, 255, 255, 0.4)'
     },
-    tabs: { 
-        flexDirection: 'row', 
-        justifyContent: 'space-around', 
+    tabs: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
         padding: 10,
     },
     tabButton: {
