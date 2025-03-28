@@ -8,8 +8,8 @@ import {
     ImageBackground, Platform, ActivityIndicator, ScrollView
 } from "react-native";
 import { Avatar } from '@components/Avatar';
-import {slugify} from '@utils/slugify';
-import {spells} from '@configs/spells'
+import { slugify } from '@utils/slugify';
+import { spells } from '@configs/spells'
 
 /** Imports SecureStore */
 import * as SecureStore from 'expo-secure-store';
@@ -51,18 +51,22 @@ export default function CharactereCreationScreen({ navigation }) {
             try {
                 // Promise.all pour les requêtes en parallèle
                 // Faire un fetch global pour les données
-                const [racesRes, spell1Res, spell2Res, spell3Res] = await Promise.all([
+                const [racesRes, spell1Res, spell2Res, spell3Res, spell4Res, spell5Res] = await Promise.all([
                     axiosInstance.get(`/races`),
                     axiosInstance.get(`/spells/67c6f3d337c666e9c7754125`),
                     axiosInstance.get(`/spells/67c7049375266cda5a3c15f0`),
-                    axiosInstance.get(`/spells/67c7067a75266cda5a3c15f6`)
+                    axiosInstance.get(`/spells/67c7067a75266cda5a3c15f6`),
+                    axiosInstance.get(`/spells/67c707c775266cda5a3c1602`),
+                    axiosInstance.get(`/spells/67c7089a75266cda5a3c1608`),
                 ]);
 
                 setRaces(racesRes.data.races);
                 setStartSpells({
                     spell1: spell1Res.data.spell,
                     spell2: spell2Res.data.spell,
-                    spell3: spell3Res.data.spell
+                    spell3: spell3Res.data.spell,
+                    spell4: spell4Res.data.spell,
+                    spell5: spell5Res.data.spell,
                 });
             } catch (error) {
                 console.error("Erreur lors du chargement des données :", error);
@@ -126,13 +130,13 @@ export default function CharactereCreationScreen({ navigation }) {
                             <View style={styles.characterChoice}>
                                 <View style={styles.raceAndClasseChoice}>
                                     <TouchableOpacity style={styles.leftBtn} onPress={() => changeRace(-1)}>
-                                        <FontAwesome name='chevron-left' size={30} color='rgb(239, 233, 225)' />
+                                        <FontAwesome name='chevron-left' size={30} color={theme.colors.darkBrown} />
                                     </TouchableOpacity>
                                     <View style={styles.middle}>
                                         <Text style={styles.textRaces}>{races[raceIndex]?.name}</Text>
                                     </View>
                                     <TouchableOpacity style={styles.rightBtn} onPress={() => changeRace(1)}>
-                                        <FontAwesome name='chevron-right' size={30} color='rgb(239, 233, 225)' />
+                                        <FontAwesome name='chevron-right' size={30} color={theme.colors.darkBrown} />
                                     </TouchableOpacity>
                                 </View>
                                 <View style={styles.raceDescription}>
@@ -146,11 +150,11 @@ export default function CharactereCreationScreen({ navigation }) {
                                 {/* CHOIX DU GENRE */}
                                 <View style={[styles.genreChoise, { alignSelf: 'center' }]}>
                                     <TouchableOpacity style={styles.leftBtnGenre} onPress={() => changeGenre(-1)}>
-                                        <FontAwesome name='chevron-left' size={20} color='rgb(239, 233, 225)' />
+                                        <FontAwesome name='chevron-left' size={20} color={theme.colors.blue} />
                                     </TouchableOpacity>
                                     <Text style={styles.textGenreChoice}>{genres[genreIndex]}</Text>
                                     <TouchableOpacity style={styles.rightBtnGenre} onPress={() => changeGenre(1)}>
-                                        <FontAwesome name='chevron-right' size={20} color='rgb(239, 233, 225)' />
+                                        <FontAwesome name='chevron-right' size={20} color={theme.colors.blue} />
                                     </TouchableOpacity>
                                 </View>
 
@@ -159,7 +163,7 @@ export default function CharactereCreationScreen({ navigation }) {
                                         <Text style={styles.passifSpellText}>Passive Spell</Text>
                                         <View style={styles.passifSpellTitle}>
                                             <View style={styles.shield}>
-                                            <Image style={{ width: 40, height: 40, tintColor: theme.colors.darkBrown }} source={spells[slugify(races[raceIndex]?.spells[0]?.name, true)]} />
+                                                <Image style={{ width: 40, height: 40, tintColor: theme.colors.darkBrown }} source={spells[slugify(races[raceIndex]?.spells[0]?.name, true)]} />
 
 
                                             </View>
@@ -173,10 +177,10 @@ export default function CharactereCreationScreen({ navigation }) {
                                     <View style={styles.actifSpellBox}>
                                         <Text style={styles.actifSpellText}>Active Spells</Text>
                                         <View style={styles.actifSpell}>
-                                            {[startSpells.spell1, startSpells.spell2, startSpells.spell3].map((spell, index) => (
+                                            {[startSpells.spell1, startSpells.spell2, startSpells.spell3, startSpells.spell4, startSpells.spell5].map((spell, index) => (
                                                 <View key={index} style={styles.spell}>
                                                     <View style={styles.fire}>
-                                                    <Image style={{ width: 40, height: 40, tintColor: theme.colors.darkBrown }} source={spells[slugify(spell?.name, true)]} />
+                                                        <Image style={{ width: 40, height: 40, tintColor: theme.colors.darkBrown }} source={spells[slugify(spell?.name, true)]} />
                                                     </View>
                                                     {/* <Image style={styles.spellImg} source={spell?.image} /> */}
                                                     <Text style={styles.spellText}>{spell?.name}</Text>
@@ -220,33 +224,33 @@ const styles = StyleSheet.create({
 
 
     /* CHARACTER CHOICE */
-    characterChoice: { backgroundColor: theme.colors.lightBrown, width: '100%', borderRadius: 35, paddingVertical: 20, marginBottom: 20 },
+    characterChoice: { width: '100%', borderRadius: 35, paddingVertical: 20, marginBottom: 20 },
     raceAndClasseChoice: { alignItems: 'center', justifyContent: 'center', position: 'relative', width: '100%', marginBottom: 10 },
     middle: { alignItems: 'center', justifyContent: 'center' },
     leftBtn: { position: 'absolute', left: 20 },
     rightBtn: { position: 'absolute', right: 20 },
     textRaces: { color: theme.colors.darkBrown, fontSize: 20, fontWeight: 800 },
     raceDescription: { alignItems: 'center', marginBottom: 20 },
-    textRaceDescription: { color: theme.colors.darkBrown, fontSize: 16, fontWeight: 800 },
+    textRaceDescription: { color: theme.colors.darkBrown, textAlign: 'center', paddingHorizontal: 30, marginTop: 10, fontSize: 16, fontWeight: 800 },
 
     /* BIG SPELL BOX*/
     spells: { alignItems: 'center', width: '100%', alignSelf: 'center', },
 
     /* PASSIF SPELL BOX*/
-    passifSpellBox: { paddingBottom: 30, paddingTop: 20, marginBottom: 20, backgroundColor: 'rgb(121, 102, 91)', width: '100%', alignItems: 'center' },
-    passifSpellTitle: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, position: 'relative', width: '100%' },
+    passifSpellBox: { paddingBottom: 30, paddingTop: 20, marginBottom: 20, backgroundColor: theme.colors.lightBrown, borderRadius: 30, width: '100%', alignItems: 'center' },
+    passifSpellTitle: { color: theme.colors.veryLightBrown, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, position: 'relative', width: '100%' },
     passifSpellText: { color: theme.colors.veryLightBrown, fontSize: 18, marginBottom: 10, fontWeight: 800 },
-    shield: { position: 'absolute', left: 15, top: -30, backgroundColor: theme.colors.blue, borderRadius: 60/2, width: 60, height: 60, justifyContent: 'center', alignItems: 'center' },
+    shield: { position: 'absolute', left: 15, top: -30, backgroundColor: theme.colors.blue, borderRadius: 60 / 2, width: 60, height: 60, justifyContent: 'center', alignItems: 'center' },
     passifSpellDescription: { textAlign: 'center', paddingHorizontal: 10 },
     spellTitle: { color: theme.colors.veryLightBrown, textAlign: 'center', marginBottom: 20, fontSize: 16, fontWeight: 800 },
     spellText: { color: theme.colors.veryLightBrown, textAlign: 'center', fontWeight: 800 },
 
     /* ACTIF SPELL TEXT*/
     actifSpellBox: { width: '100%', alignItems: 'center', marginBottom: 10 },
-    actifSpellText: { color: theme.colors.veryLightBrown, fontSize: 18, marginBottom: 10, fontWeight: 800 },
-    actifSpell: {  justifyContent: 'center', gap: 10, flexWrap: 'wrap' },
-    spell: {  width: 250, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.colors.darkBrown, height: 60, paddingRight: 20, paddingLeft: 50, borderRadius: 99 },
-    fire: { position: 'absolute', left: 0, top: 0, backgroundColor: theme.colors.red, borderRadius: 99, width: 60, height: 60, justifyContent: 'center', alignItems: 'center' },
+    actifSpellText: { color: theme.colors.darkBrown, fontSize: 18, marginBottom: 20, fontWeight: 800 },
+    actifSpell: { justifyContent: 'center', gap: 10, flexWrap: 'wrap' },
+    spell: { width: 250, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.colors.darkBrown, height: 60, paddingRight: 20, paddingLeft: 50, borderRadius: 99 },
+    fire: { position: 'absolute', left: 0, top: 0, backgroundColor: theme.colors.lightBrown, borderRadius: 99, width: 60, height: 60, justifyContent: 'center', alignItems: 'center' },
 
     /* GENRE CHOICE BOX*/
     genreChoise: {
@@ -256,13 +260,13 @@ const styles = StyleSheet.create({
         width: 200,
         justifyContent: 'space-around',
         alignItems: 'center',
-        backgroundColor: 'rgb(121, 144, 197)',
+        // backgroundColor: theme.colors.blue,
         borderRadius: 40,
         marginBottom: 20
     },
-    textGenreChoice: { color: theme.colors.veryLightBrown, fontSize: 16, fontWeight: 800 },
-    leftBtnGenre: { position: 'absolute', left: 10 },
-    rightBtnGenre: { position: 'absolute', right: 10 },
+    textGenreChoice: { color: theme.colors.blue, fontSize: 16, fontWeight: 800 },
+    leftBtnGenre: { position: 'absolute', left: 20, color: theme.colors.blue },
+    rightBtnGenre: { position: 'absolute', right: 20, color: theme.colors.blue },
     /* AVATAR CHOICE BOX*/
     avatarChoise: { width: '100%', justifyContent: 'center', alignItems: 'center' },
 
