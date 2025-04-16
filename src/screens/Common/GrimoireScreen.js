@@ -52,7 +52,7 @@ export default function GrimoireScreen({ navigation }) {
                                     <View style={styles.rightRaces}>
                                         <View style={styles.rightTop}>
                                             <Text style={styles.textTitleDescription}>Description :</Text>
-                                            <Text style={styles.textDescription}>{selectedRace.description}</Text>
+                                            {/* <Text style={styles.textDescription}>{selectedRace.description}</Text> */}
                                             <Text style={styles.textDescription}>{selectedRace.tagline}</Text>
                                         </View>
                                         {/*  <View style={styles.rightBot}>
@@ -72,7 +72,7 @@ export default function GrimoireScreen({ navigation }) {
                                         setModalShowRacesVisible(false);
                                         setSelectedRace(null);
                                     }}>
-                                    <Text style={styles.textStyle}>Retour</Text>
+                                    <Text style={styles.textStyle}>Back</Text>
                                 </TouchableOpacity>
                             </View>
                         </View>
@@ -129,7 +129,7 @@ export default function GrimoireScreen({ navigation }) {
                                         setModalShowSpellsVisible(false);
                                         setSelectedSpell(null);
                                     }}>
-                                    <Text style={styles.textStyle}>Retour</Text>
+                                    <Text style={styles.textStyle}>Back</Text>
                                 </TouchableOpacity>
                             </View>
                         </View>
@@ -159,10 +159,10 @@ export default function GrimoireScreen({ navigation }) {
                     <Text style={styles.subTitle}>GRIMOIRE</Text>
                     <View style={styles.selectCategories}>
                         <TouchableOpacity onPress={() => setViewMode('races')} >
-                            <Text style={[styles.subSubTitle, { color: viewMode === 'races' ? 'rgb(188, 118, 26)' : 'black', borderBottomWidth: viewMode === 'spells' ? '0' : '2', fontWeight: viewMode === 'spells' ? '0' : '800' }]}>Races</Text>
+                            <Text style={[styles.subSubTitle, { color: viewMode === 'races' ? theme.colors.lightBrown : theme.colors.darkBrown, borderBottomWidth: viewMode === 'spells' ? 0 : 2, fontWeight: viewMode === 'spells' ? '0' : '800' }]}>Races</Text>
                         </TouchableOpacity>
                         <TouchableOpacity onPress={() => setViewMode('spells')}>
-                            <Text style={[styles.subSubTitle, { color: viewMode === 'spells' ? 'rgb(188, 118, 26)' : 'black', borderBottomWidth: viewMode === 'spells' ? '2' : '0', fontWeight: viewMode === 'spells' ? '800' : '0' }]}>Spells</Text>
+                            <Text style={[styles.subSubTitle, { color: viewMode === 'spells' ? theme.colors.lightBrown : theme.colors.darkBrown, borderBottomWidth: viewMode === 'spells' ? 2 : 0, fontWeight: viewMode === 'spells' ? '800' : '0' }]}>Spells</Text>
                         </TouchableOpacity>
                     </View>
                     <View style={styles.grimoireContentBox}>
@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
 
     //GRIMOIRE TEXT STYLE
     subTitle: {
-        color: 'rgb(188, 118, 26)',
+        color: theme.colors.darkBrown,
         fontSize: 20,
         fontWeight: 800,
         textAlign: 'center',
@@ -204,7 +204,8 @@ const styles = StyleSheet.create({
         marginBottom: '5%'
     },
     subSubTitle: {
-        //color: 'rgb(188, 118, 26)',
+        //color: 'rgb(188, 118, 26)'
+        // fontWeight: '800',
         fontSize: 20,
     },
     //INFO AREA

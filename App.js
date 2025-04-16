@@ -187,9 +187,9 @@ import { store, persistor } from '@configs/redux';
 import RootNavigator from '@navigation/RootNavigator';
 import { ModalPortal } from 'react-native-modals';
 
-// import { LogBox } from 'react-native';
-// LogBox.ignoreLogs(['Warning: ...']);
-// LogBox.ignoreAllLogs();
+import { LogBox } from 'react-native';
+LogBox.ignoreLogs(['Warning: ...']);
+LogBox.ignoreAllLogs();
 
 export default function App() {
 	return (

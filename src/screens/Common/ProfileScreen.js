@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Image, TouchableOpacity, ImageBackground, TextInput } from "react-native"
+import { StyleSheet, Text, View, Image, TouchableOpacity, ImageBackground, ScrollView, Modal, TextInput } from "react-native"
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { useState, useEffect, useReducer } from "react";
 import { useSelector, useDispatch } from 'react-redux';
@@ -9,12 +9,19 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome5';
 
 import { logout } from "@store/authSlice";
 import * as SecureStore from 'expo-secure-store';
-import { setUser } from "../../store/authSlice";
+import { setUserName } from "../../store/authSlice";
+
+import theme from '@theme';
+import { spells } from '@configs/spells';
+import { slugify } from '@utils/slugify';
+
+import { FlatList, GestureHandlerRootView } from "react-native-gesture-handler";
+
 
 export default function ProfileScreen({ navigation }) {
     const { user } = useSelector((state) => state.auth)
     const [username, setUsername] = useState(user.username);
-    console.log('user', user)
+    // console.log('user', user)
 
     const initialState = {
         username: '',
@@ -30,6 +37,16 @@ export default function ProfileScreen({ navigation }) {
             setCharacterData(response.data.character)
         })();
     }, [user])
+
+    const [spellList, setSpellList] = useState([])
+    //console.log('spells : ', spellList)
+
+    useEffect(() => {
+        (async () => {
+            const response = await axiosInstance.get(`/spells`)
+            setSpellList(response.data.spells)
+        })();
+    }, [])
 
     //Logout
     const handleLogout = async () => {
@@ -55,9 +72,8 @@ export default function ProfileScreen({ navigation }) {
             // dispatch(setUpdatingUsername(updatingUsername))
 
             const response = await axiosInstance.put(`/users/modify-profile`, { username })
-
-            const { user } = response.data;
-            dispatch(setUser({ user }))
+            console.log('response update profile', response.data.user.username)
+            dispatch(setUserName(response.data.user.username))
 
         } catch (error) {
 
@@ -65,62 +81,198 @@ export default function ProfileScreen({ navigation }) {
         }
     }
 
+    //Image des spells
+    /* const [spells, setSpells] = useState([])
+     useEffect(() => {
+         (async () => {
+ 
+             try {
+                 // Promise.all pour les requêtes en parallèle
+                 // Faire un fetch global pour les données
+                 const [spell1Res, spell2Res, spell3Res] = await Promise.all([
+ 
+                     axiosInstance.get(`/spells/67c6f3d337c666e9c7754125`),
+                     axiosInstance.get(`/spells/67c7049375266cda5a3c15f0`),
+                     axiosInstance.get(`/spells/67c7067a75266cda5a3c15f6`)
+                 ]);
+ 
+                 setSpells([
+                     { spell1: spell1Res.data.spell },
+                     { spell2: spell2Res.data.spell },
+                     { spell3: spell3Res.data.spell }
+                 ]);
+             } catch (error) {
+                 console.error("Erreur lors du chargement des données :", error);
+             }
+         })();
+     }, []);
+ */
+    /*const spellButton = spells.map((data, i) => {
+        <TouchableOpacity>
+
+        </TouchableOpacity>
+    })*/
+
+    const [modalShowSpellsVisible, setModalShowSpellsVisible] = useState(false);
+
+
+    const [selectedSpell, setSelectedSpell] = useState(null);
+    console.log('ACTIIIIIIIIIIIIIIIIIIIVE:', selectedSpell)
+
+
+
+    const handleModal = (data) => {
+        setModalShowSpellsVisible(true);
+        setSelectedSpell(data)
+    }
+    const activeSpell = spellList.filter(spells => spells.category === 'active')
+    const basicSpell = user.selected_character.spells.filter(e => e.spell.category === 'active')
+    //console.log('basicSpell :', basicSpell)
+    const unlockedSpell = activeSpell.filter(spell => !basicSpell.some(e => e.spell.name === spell.name))
+
+
+    //console.log('BOOOOOOOOOH', unlockedSpell)
+    //{user.selected_character.spells.filter(spells => spells.spell.category === 'active').map((spell, index) => (
     return (
-        <ImageBackground source={require('@assets/background/background.png')} style={styles.backgroundImage}>
-            <SafeAreaProvider>
-                <SafeAreaView style={styles.container} edges={['left', 'top']}>
-                    <TopHeader />
-                    <View style={styles.title}>
-                        <View style={styles.titleLeft}></View>
-                        <Text style={styles.subTitle}>PROFILE</Text>
-                        <View style={styles.titleRight}>
-                            <TouchableOpacity style={styles.logOutButton} onPress={() => handleLogout()}>
-                                <FontAwesome name='sign-out-alt' size={25} color='rgb(188, 118, 26)' />
+        <GestureHandlerRootView>
+            <ImageBackground source={require('@assets/background/background.png')} style={styles.backgroundImage}>
+                <SafeAreaProvider>
+                    <SafeAreaView style={styles.container} edges={['left', 'top']}>
+                        <TopHeader />
+                        <ScrollView vertical={true} horizontal={false} contentContainerStyle={{ width: '100%', flexGrow: 1 }}>
+                            <View style={styles.title}>
+                                <View style={styles.titleLeft}></View>
+                                <Text style={styles.subTitle}>PROFILE</Text>
+                                <View style={styles.titleRight}>
+                                    <TouchableOpacity style={styles.logOutButton} onPress={() => handleLogout()}>
+                                        <Text style={styles.logOutText}>Log Out</Text>
+                                        <FontAwesome name='sign-out-alt' size={25} color='#F65959' style={styles.logOutIcon} />
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+
+                            <View style={styles.profileBox}>
+                                <View style={styles.top}>
+                                    <View style={styles.topLeft}>
+                                        <Avatar avatar={characterData?.race?.avatar ?? 'defaultAvatar'} />
+                                    </View>
+                                    <View style={styles.topRight}>
+                                        <View style={styles.usernameButton}>
+                                            <TouchableOpacity style={styles.renameButton} onPress={() => updateUsername()}>
+                                                {/*<Text style={styles.renameTextButton}>Rename</Text>*/}
+                                                <FontAwesome name='feather-alt' style={{ transform: [{ rotateY: '180deg' }] }} size={18} color='rgb(85,69,63)' />
+                                            </TouchableOpacity>
+                                        </View>
+                                        <View style={styles.username}>
+                                            <TextInput
+                                                style={styles.subtitle}
+                                                value={username}
+                                                onChangeText={setUsername}
+                                            >
+                                            </TextInput>
+                                            <Text style={styles.subtitle}>{characterData.race?.name}</Text>
+                                            <Text style={styles.subtitle} >LEVEL 1</Text>
+                                        </View>
+                                    </View>
+                                </View>
+                                <View style={styles.middle1}>
+                                    <Text style={styles.subtitle}>Class description :</Text>
+                                    {/*<Text>{characterData.race?.description}</Text>*/}
+                                    <Text>{characterData.race?.tagline}</Text>
+                                </View>
+
+                                {/* Barre de séparation */}
+                                <View style={{ height: 1, width: 300, alignSelf: 'center', backgroundColor: theme.colors.lightBrown, marginVertical: 10 }} />
+
+                                <View style={styles.middle2}>
+                                    <Text style={styles.subtitle}>Active spells</Text>
+                                    <View style={styles.activeSpellsContainer}>
+                                        <FlatList
+                                            contentContainerStyle={{ flexDirection: 'row', gap: 10, marginBottom: 10 }} // du style
+                                            horizontal={true} // pour que les items soient alignés horizontalement
+                                            data={user.selected_character.spells.filter(spells => spells.spell.category === 'active')} // les données à afficher
+                                            keyExtractor={(item) => item._id} // la clé unique pour chaque item
+                                            renderItem={({ item }) => ( // la fonction qui rend l'item
+                                                <View style={styles.inputSection}>
+                                                    <TouchableOpacity key={item._id} onPress={() => handleModal(item.spell)} style={styles.spell}>
+                                                        <Image style={[styles.spellImage, { tintColor: theme.colors.darkBrown }]} source={spells[slugify(item.spell.name, true)]} />
+                                                    </TouchableOpacity>
+                                                </View>
+                                            )} />
+                                    </View>
+                                </View>
+                                <View style={styles.bot}>
+                                    <Text style={styles.subtitle}>Spells to unlock</Text>
+                                    <View style={styles.unlockedSpellsContainer}>
+                                        <FlatList
+                                            contentContainerStyle={{ flexDirection: 'row', gap: 10 }} // du style
+                                            horizontal={true} // pour que les items soient alignés horizontalement
+                                            data={unlockedSpell} // les données à afficher
+                                            keyExtractor={(item) => item._id} // la clé unique pour chaque item
+                                            renderItem={({ item }) => ( // la fonction qui rend l'item
+                                                <View style={styles.inputSection}>
+                                                    <TouchableOpacity key={item._id} onPress={() => handleModal(item)} style={styles.spell}>
+                                                        <Image style={[styles.spellImage, { tintColor: theme.colors.darkBrown }]} source={spells[slugify(item.name, true)]} />
+                                                        {console.log('ITEEEEM' + item)}
+                                                    </TouchableOpacity>
+                                                </View>
+                                            )}
+                                        //columnWrapperStyle={{ gap: 10 }} // pour que les items aient un espace (peut etre pas utile en horizontal)
+                                        />
+                                        {/*user.selected_character.spells.filter(spells => spells.spell.category === 'active').map((spell, index) => (
+                                    <TouchableOpacity key={spell._id} onPress={() => handleSpell(spell)} style={styles.spell}>
+                                        <Image style={[styles.spellImage, { tintColor: theme.colors.darkBrown }]} source={spells[slugify(spell.spell.name, true)]} />
+                                    </TouchableOpacity>
+                                ))*/}
+                                    </View>
+
+                                </View>
+                            </View>
+                        </ScrollView>
+                    </SafeAreaView>
+                </SafeAreaProvider>
+            </ImageBackground>
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalShowSpellsVisible} //&& selectedSpell?._id === data._id}
+                onRequestClose={() => {
+                    Alert.alert('Modal has been closed.');
+                    setModalShowSpellsVisible(false);
+                    setSelectedSpell(null);
+                }}>
+                <View style={styles.centeredView}>
+                    <View style={styles.modalView}>
+                        {selectedSpell && (
+                            <View style={styles.spellsCard}>
+                                <View style={styles.left}>
+                                    <Text style={styles.textName}>{selectedSpell.name}</Text>
+                                    <View style={styles.cercle}>
+                                        <Image style={{ width: 40, height: 40, tintColor: theme.colors.darkBrown }} source={spells[slugify(selectedSpell.name, true)]} />
+                                    </View>
+                                </View>
+                                <View style={styles.rightSpells}>
+                                    <View>
+                                        <Text style={styles.textTitleDescription}>Description :</Text>
+                                        <Text style={styles.textDescription}>{selectedSpell.description}</Text>
+                                    </View>
+                                </View>
+                            </View>
+                        )}
+                        <View style={styles.btnModal}>
+                            <TouchableOpacity
+                                style={[styles.button, styles.buttonClose]}
+                                onPress={() => {
+                                    setModalShowSpellsVisible(false);
+                                    setSelectedSpell(null);
+                                }}>
+                                <Text style={styles.textStyle}>Back</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
-
-                    <View style={styles.profileBox}>
-                        <View style={styles.top}>
-                            <View style={styles.topLeft}>
-                                <Avatar avatar={characterData?.race?.avatar ?? 'defaultAvatar'} />
-                            </View>
-                            <View style={styles.topRight}>
-                                <View style={styles.usernameButton}>
-                                    <TouchableOpacity style={styles.renameButton} onPress={() => updateUsername()}>
-                                        {/*<Text style={styles.renameTextButton}>Rename</Text>*/}
-                                        <FontAwesome name='feather-alt' style={{ transform: [{ rotateY: '180deg' }] }} size={18} color='rgb(85,69,63)' />
-                                    </TouchableOpacity>
-                                </View>
-                                <View style={styles.username}>
-                                    <TextInput
-                                        style={styles.subtitle}
-                                        value={username}
-                                        onChangeText={setUsername}
-                                    >
-                                    </TextInput>
-                                    <Text style={styles.subtitle}>{characterData.race?.name}</Text>
-                                    <Text style={styles.subtitle} >LEVEL:</Text>
-                                </View>
-                            </View>
-                        </View>
-                        <View style={styles.middle1}>
-                            <Text style={styles.subtitle}>Classe description :</Text>
-                            <Text>{characterData.race?.description}</Text>
-                            <Text>{characterData.race?.tagline}</Text>
-                        </View>
-                        <View style={styles.middle2}>
-                            <Text style={styles.subtitle}>Actif spells :</Text>
-                            <Text>{characterData.race?.description}</Text>
-                        </View>
-                        <View style={styles.bot}>
-                            <Text style={styles.subtitle}>Unlocked Spell:</Text>
-
-                        </View>
-                    </View>
-                </SafeAreaView>
-            </SafeAreaProvider>
-        </ImageBackground>
+                </View>
+            </Modal>
+        </GestureHandlerRootView >
     )
 }
 
@@ -142,14 +294,14 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         //backgroundColor: 'red',
         //width: '30%',
-        marginTop:'5%',
+        marginTop: '5%',
         alignItems: 'center',
     },
     titleLeft: {
         width: '30%',
     },
     subTitle: {
-        color: 'rgb(188, 118, 26)',
+        color: theme.colors.darkBrown,
         fontSize: 20,
         fontWeight: 800,
         textAlign: 'center',
@@ -166,15 +318,21 @@ const styles = StyleSheet.create({
         //backgroundColor: 'pink',
     },
     logOutButton: {
-        height: 30,//'30%',//65px
-        width: 30,//'18%',//65px
-        borderRadius: 30 / 2,
-        //backgroundColor: 'rgb(246, 89, 89)',
-        //marginBottom: '8.5%', //30px
-        justifyContent: 'center',
+        flexDirection: 'row',
         alignItems: 'center',
-        //marginTop: '2%'
-
+        height: 30,
+        width: 'auto',
+        borderRadius: 15,
+        paddingHorizontal: 10,
+    },
+    logOutText: {
+        color: '#F65959',
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginRight: 5,
+    },
+    logOutIcon: {
+        marginLeft: 5,
     },
     profileBox: {
         //marginTop: '5%',
@@ -238,7 +396,6 @@ const styles = StyleSheet.create({
         //marginTop: '2%'
     },*/
     middle1: {
-        height: '20%',
         width: '100%',
         padding: 15,
         borderRadius: 25,
@@ -246,23 +403,179 @@ const styles = StyleSheet.create({
         alignItems: 'flex-start',
     },
     middle2: {
-        height: '23%',
+        height: 120,
         width: '100%',
         padding: 15,
         borderRadius: 25,
         //backgroundColor: 'rgb(239, 233, 225)',
-        alignItems: 'flex-start',
+        //backgroundColor: 'green',
+        alignItems: 'flex-center',
     },
     bot: {
-        height: '27%',
+        height: 120,
         width: '100%',
         padding: 15,
-        flexDirection: 'row',
+
         borderRadius: 25,
         //backgroundColor: 'rgb(239, 233, 225)',
         alignItems: 'flex-start',
+        //backgroundColor : 'purple',
     },
     subtitle: {
         fontWeight: 800,
+    },
+    spellImageMessage: {
+        width: 20,
+        height: 20,
+    },
+    activeSpellsContainer: {
+        flexDirection: 'row',
+        gap: 20,
+        // marginTop: 20,
+
+    },
+    spell: {
+        width: 70,
+        height: 70,
+        borderRadius: 70 / 2,
+        backgroundColor: theme.colors.lightBrown02,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: theme.colors.lightBrown
+    },
+    spellImage: {
+        width: 40,
+        height: 40,
+        //backgroundColor: 'red',
+        //borderRadius : 25/2,
+    },
+    inputSection: {
+        width: 70,
+        height: 70,
+        borderRadius: 70 / 2,
+        backgroundColor: theme.colors.lightBrown02,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: theme.colors.lightBrown,
+        marginTop: 12,
+    },
+    unlockedSpellsContainer: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        // backgroundColor : 'pink',
+    },
+    ///////////
+    centeredView: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalView: {
+        //margin: 20,
+        backgroundColor: 'white',
+        borderRadius: 20,
+        padding: 10,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+        width: '95%',
+        height: '40%'
+    },
+    button: {
+        borderRadius: 20,
+        padding: 10,
+        elevation: 2,
+    },
+    //BOUTON RETOUR MODALE
+    btnModal: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        marginTop: '7%',
+        width: '100%'
+    },
+    buttonClose: {
+        backgroundColor: 'rgb(74, 52, 57)',
+        width: '45%',
+        alignItems: 'center',
+    },
+    textStyle: {
+        color: 'white'
+    },
+    // RACES AND SPELLS CARDS
+    racesCard: {
+        flexDirection: 'row',
+        height: '75%',
+        width: '100%',
+        marginBottom: '1%',
+        borderRadius: 45
+    },
+    spellsCard: {
+        flexDirection: 'row',
+        height: '75%',
+    },
+    left: {
+        width: '40%',
+        alignItems: 'center',
+        paddingTop: '12%',
+        paddingLeft: '5%',
+        backgroundColor: 'rgb(239, 233, 225)',
+        borderBottomLeftRadius: 45,
+        borderTopLeftRadius: 45
+    },
+    textName: {
+        fontSize: 20,
+        fontWeight: 800,
+        marginBottom: 25,
+        color: 'rgb(74, 52, 57)'
+    },
+    rightRaces: {
+        paddingTop: '12%',
+        width: '60%',
+        paddingLeft: '10%',
+        paddingRight: '5%',
+        backgroundColor: 'rgb(239, 233, 225)',
+        borderBottomRightRadius: 45,
+        borderTopRightRadius: 45,
+        gap: '5%'
+    },
+    rightSpells: {
+        paddingTop: '12%',
+        width: '60%',
+        paddingLeft: '10%',
+        paddingRight: '5%',
+        backgroundColor: 'rgb(239, 233, 225)',
+        borderBottomRightRadius: 45,
+        borderTopRightRadius: 45,
+    },
+    cercle: {
+        width: 85,
+        height: 85,
+        borderRadius: 85 / 2,
+        backgroundColor: theme.colors.lightBrown02,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: theme.colors.lightBrown
+    },
+    passivSpell: {
+        flexDirection: 'row'
+    },
+    textTitleDescription: {
+        fontSize: 20,
+        fontWeight: 800,
+        marginBottom: 2,
+        color: 'rgb(74, 52, 57)',
+        marginBottom: 12
+    },
+    textDescription: {
+        color: 'rgb(74, 52, 57)'
     }
 })

@@ -81,7 +81,7 @@ const UsersModal = ({ modalUserRoomVisible, setModalUserRoomVisible, participant
                 <TouchableOpacity onPress={() => setModalUserRoomVisible(false)} style={[styles.closeButton, { position: 'absolute', top: 20, right: 20, zIndex: 1000 }]}>
                     <FontAwesome name="times" size={24} color={theme.colors.darkBrown} />
                 </TouchableOpacity>
-                <Text style={styles.modalTitle}>{participants.length} members</Text>
+                <Text style={styles.modalTitle}>{participants.length} Trolls</Text>
 
 
                 <FlatList
@@ -106,7 +106,7 @@ const UsersModal = ({ modalUserRoomVisible, setModalUserRoomVisible, participant
                         )
                     )}
                     contentContainerStyle={styles.flatListContainer}
-                    ListEmptyComponent={<Text style={styles.emptyText}>No users in this room</Text>}
+                    ListEmptyComponent={<Text style={styles.emptyText}>No user in this Room</Text>}
                 />
             </View>
             {

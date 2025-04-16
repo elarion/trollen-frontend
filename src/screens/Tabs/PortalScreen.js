@@ -11,7 +11,7 @@ import axiosInstance from '@utils/axiosInstance';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 // Imports Hooks
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 // Imports Theme
 import theme from '@theme';
@@ -23,6 +23,8 @@ export default function PortalScreen({ navigation }) {
     const [loading, setLoading] = useState(false); // État de chargement
     const [hasMore, setHasMore] = useState(true); // Savoir s'il y a encore des données
     const [tag, setTag] = useState(''); // Recherche par tag
+
+    const socket = useRef(getSocket())
 
     // Charger les rooms par page
     // Utilisation de usecallback pour éviter les appels en boucle
@@ -59,15 +61,18 @@ export default function PortalScreen({ navigation }) {
 
     // Charger la première page au montage
     useEffect(() => {
-        const socket = getSocket();
-        socket.on("newRoom", (newRoom) => {
-            setRooms(prevRooms => [newRoom.room, ...prevRooms]);
-        });
+        if (socket.current) {
+            socket.current.on("newRoom", (newRoom) => {
+                setRooms(prevRooms => [newRoom.room, ...prevRooms]);
+            });
+        }
 
         fetchRooms();
 
         return () => {
-            socket.off("newRoom");
+            if (socket.current) {
+                socket.current.off("newRoom");
+            }
         };
     }, []);
 
@@ -88,8 +93,8 @@ export default function PortalScreen({ navigation }) {
             </View>
             <View style={styles.inRoomRight}>
                 <View style={styles.rightUsernameAndJoin}>
-                    <Text style={styles.username}>Crée par {item.admin?.username}</Text>
-                    <Text style={styles.roomNumberOfParticipants}>{item.participants.length} participant{item.participants.length > 1 && 's'}</Text>
+                    <Text>Created by</Text><Text numberOfLines={1} style={styles.username}>{item.admin?.username}</Text>
+                    <Text style={styles.roomNumberOfParticipants}>{item.participants.length} Troll{item.participants.length > 1 && 's'}</Text>
                 </View>
 
                 <Text style={styles.roomTag}>
@@ -195,6 +200,7 @@ const styles = StyleSheet.create({
     },
     roomTag: {
         fontStyle: 'italic',
+        textAlign: 'right',
     },
     roomNumberOfParticipants: {
     },
@@ -223,7 +229,7 @@ const styles = StyleSheet.create({
     },
     username: {
         //backgroundColor:'orange',
-        // fontWeight: 'bold',
+        fontWeight: 'bold',
     },
     join: {
         justifyContent: 'center',

@@ -56,13 +56,13 @@ const CreateRoomModal = ({ visible, onClose, onConfirm }) => {
                         style={[styles.button, styles.buttonCloseCreateParty]}
                         onPress={() => onClose(false)}
                     >
-                        <Text style={styles.textStyleCreateParty}>Retour</Text>
+                        <Text style={styles.textStyleCreateParty}>Back</Text>
                     </Pressable>
                     <Pressable
                         style={[styles.button, styles.buttonValidationCreateParty]}
                         onPress={() => onConfirm({ partyName, game })}
                     >
-                        <Text style={styles.textStyleCreateParty}>Valider</Text>
+                        <Text style={styles.textStyleCreateParty}>Validate</Text>
                     </Pressable>
                 </View>
             </View>

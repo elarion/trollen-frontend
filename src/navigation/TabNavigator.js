@@ -69,7 +69,7 @@ export default function TabNavigator({ navigation }) {
                                 style={{
                                     width: 30, // Ajuste la taille selon tes besoins
                                     height: 30,
-                                    tintColor: focused ? theme.colors.darkBrown : theme.colors.lightBrown, // Optionnel : change la couleur si besoin
+                                    tintColor: focused ? theme.colors.lightBrown : theme.colors.darkBrown, // Optionnel : change la couleur si besoin
                                 }}
                                 resizeMode="cover"
                             />

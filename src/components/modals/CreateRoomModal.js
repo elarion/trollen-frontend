@@ -50,7 +50,7 @@ const CreateRoomModal = ({ visible, onClose, onConfirm }) => {
                             <Text>Tags</Text>
                             <TextInput style={styles.input} placeholder="Tag1,Tag2,Tag3" onChangeText={setTag} value={tag} />
 
-                            <Text>Password (Optionnel)</Text>
+                            <Text>Password (optional)</Text>
                             <TextInput style={styles.input} placeholder="Password" onChangeText={setPassword} value={password} secureTextEntry={true} />
 
                             <Text>Capacity</Text>

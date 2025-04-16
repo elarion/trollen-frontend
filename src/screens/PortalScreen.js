@@ -64,7 +64,7 @@ export default function PortalScreen({ navigation }) {
                 <Text style={styles.roomTag}>
                     {item.tags?.map((tag, i) => `#${tag.name}`).join(" ")}
                 </Text>
-                <Text style={styles.roomNumberOfParticipants}>{item.participants.length} participants</Text>
+                <Text style={styles.roomNumberOfParticipants}>{item.participants.length} Trolls</Text>
             </View>
             <View style={styles.inRoomRight}>
                 <View style={styles.rightUsernameAndJoin}>

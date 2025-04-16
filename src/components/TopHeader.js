@@ -49,7 +49,7 @@ const TopHeader = () => {
 const styles = StyleSheet.create({
     headerContainer: {
         width: '100%',
-        height: 60,
+        height: 70,
         // position: 'absolute',
         paddingHorizontal: 20,
         top: 0,
